@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI &amp; Agents — Junie</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-32x32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-192x192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<style>
+  :root{
+    --paper: #FBFAF6; --paper-alt: #F1EFE7; --ink: #0A0A0A; --ink-soft: #55584E; --ink-faint: #8A8D80;
+    --rule: rgba(10,10,10,0.14); --rule-soft: rgba(10,10,10,0.07);
+    --signal: #F2664A; --signal-soft: rgba(242,102,74,0.12);
+    --vital: #0F9E92; --vital-soft: rgba(15,158,146,0.12);
+    --amber: #C98A2C; --amber-soft: rgba(201,138,44,0.12);
+    --down: #9C2B44; --down-soft: rgba(156,43,68,0.1);
+    --serif: 'Fraunces', Georgia, serif; --mono: 'IBM Plex Mono', ui-monospace, monospace; --sans: 'Inter', -apple-system, sans-serif;
+    --max: 1180px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 32px;}
+  @media (max-width:640px){ .wrap{padding:0 18px;} }
+  h1,h2,h3{font-family:var(--serif); font-weight:600; margin:0; letter-spacing:-0.01em;}
+  p{margin:0;}
+  button{font-family:inherit;}
+  code{font-family:var(--mono); background:var(--paper-alt); padding:2px 6px; border-radius:4px; font-size:0.92em;}
+
+  header.appnav{border-bottom:1px solid var(--rule); background:var(--paper);}
+  .appnav-inner{max-width:var(--max); margin:0 auto; padding:16px 32px; display:flex; align-items:center; justify-content:space-between; gap:24px;}
+  @media (max-width:640px){ .appnav-inner{padding:14px 18px;} }
+  .logo{display:flex; align-items:center; gap:10px; font-family:var(--serif); font-weight:700; font-size:19px; text-decoration:none; color:var(--signal); flex:none;}
+  .logo-mark{width:30px; height:30px; border-radius:8px; background:var(--ink); display:flex; align-items:center; justify-content:center; flex:none;}
+  .logo-mark svg{width:17px; height:17px;}
+  .logo-mark{animation: heartbeat 1.7s ease-in-out infinite;}
+  @keyframes heartbeat{0%,100%{transform:scale(1);} 12%{transform:scale(1.16);} 24%{transform:scale(1);} 36%{transform:scale(1.1);} 48%{transform:scale(1);}}
+  @media (prefers-reduced-motion: reduce){ .logo-mark{animation:none;} }
+  .applinks{display:flex; align-items:center; gap:26px; flex:1; padding-left:20px;}
+  .applinks a{font-family:var(--sans); font-size:14.5px; color:var(--ink-soft); text-decoration:none;}
+  .applinks a.active{color:var(--ink); font-weight:600;}
+  .applinks a:hover{color:var(--ink);}
+  @media (max-width:900px){ .applinks{display:none;} }
+  .account{display:flex; align-items:center; gap:14px; flex:none;}
+  .avatar{width:34px; height:34px; border-radius:50%; background:var(--signal-soft); color:var(--signal); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:700; font-size:13px;}
+  .logout{font-family:var(--mono); font-size:12.5px; color:var(--ink-faint); text-decoration:none;}
+  .logout:hover{color:var(--ink);}
+
+  .eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--signal); display:flex; align-items:center; gap:8px; margin-bottom:14px;}
+  .eyebrow::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--signal); display:inline-block;}
+  .hero{padding:44px 0 8px;}
+  .hero h1{font-size:clamp(28px,3.6vw,40px);}
+  .hero p.sub{color:var(--ink-soft); font-size:15px; max-width:640px; margin-top:8px;}
+
+  section{padding:26px 0;}
+  .panel{border:1px solid var(--rule); border-radius:14px; padding:24px; background:var(--paper); box-shadow:0 1px 2px rgba(10,10,10,0.04), 0 8px 24px -12px rgba(10,10,10,0.08); margin-bottom:20px;}
+  .section-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px;}
+  .section-head h2{font-size:18px;}
+  .panel-sub{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint);}
+
+  .url-row{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+  .url-box{
+    flex:1; min-width:260px; font-family:var(--mono); font-size:13px; padding:12px 16px; border-radius:8px;
+    background:var(--paper-alt); border:1px solid var(--rule); overflow-x:auto; white-space:nowrap;
+  }
+  .copy-btn{
+    border:1px solid var(--ink); border-radius:8px; background:none; color:var(--ink); font-family:var(--sans);
+    font-weight:600; font-size:13px; padding:10px 16px; cursor:pointer; flex:none;
+  }
+  .copy-btn:hover{background:var(--paper-alt);}
+
+  .config-block{
+    font-family:var(--mono); font-size:12.5px; background:var(--ink); color:#E8E6DD; border-radius:10px;
+    padding:18px 20px; overflow-x:auto; white-space:pre; line-height:1.55; margin-top:14px;
+  }
+
+  .tool-list{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
+  .tool-item{display:flex; gap:12px; padding:12px 14px; background:var(--paper-alt); border-radius:10px;}
+  .tool-item b{font-family:var(--mono); font-size:12.5px; flex:none; min-width:130px;}
+  .tool-item span{font-size:13px; color:var(--ink-soft);}
+
+  .token-form{display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;}
+  .token-form input{
+    flex:1; min-width:200px; border:1px solid var(--rule); border-radius:8px; padding:10px 13px;
+    font-family:var(--sans); font-size:13.5px; background:var(--paper-alt); color:var(--ink);
+  }
+  .token-form button{
+    border:none; border-radius:8px; background:var(--ink); color:#fff; font-family:var(--sans);
+    font-weight:600; font-size:13px; padding:10px 18px; cursor:pointer; flex:none;
+  }
+
+  .new-token-reveal{
+    background:var(--vital-soft); border:1px solid var(--vital); border-radius:10px; padding:16px 18px; margin-bottom:16px;
+  }
+  .new-token-reveal .label{font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--vital); margin-bottom:8px;}
+  .new-token-reveal .value{font-family:var(--mono); font-size:13px; word-break:break-all;}
+  .new-token-reveal .warn{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); margin-top:8px;}
+
+  .token-row{
+    display:flex; align-items:center; gap:14px; padding:12px 14px; border-radius:10px; background:var(--paper-alt);
+    margin-bottom:8px; flex-wrap:wrap;
+  }
+  .token-row .name{font-weight:600; font-size:13.5px;}
+  .token-row .meta{font-family:var(--mono); font-size:11px; color:var(--ink-faint); flex:1;}
+  .token-row .revoke{
+    font-family:var(--mono); font-size:11px; color:var(--ink-faint); background:none; border:none;
+    cursor:pointer; text-decoration:underline; flex:none;
+  }
+  .token-row .revoke:hover{color:var(--down);}
+  .token-row.revoked{opacity:0.5;}
+  .empty-note{font-family:var(--mono); font-size:12.5px; color:var(--ink-faint);}
+
+  footer{border-top:1px solid var(--rule); padding:30px 0; background:var(--paper-alt); text-align:center; margin-top:20px;}
+  footer p{font-family:var(--mono); font-size:12px; color:var(--ink-faint);}
+</style>
+</head>
+<body>
+
+<header class="appnav">
+  <div class="appnav-inner">
+    <a href="dashboard.html" class="logo">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M2 12h4l2-7 4 14 3-9 2 5h5" stroke="var(--signal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Junie
+    </a>
+    <nav class="applinks">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="health-audit.html">Health Audit</a>
+      <a href="dashboard.html#goals">Goals</a>
+      <a href="dashboard.html#alerts">Alerts</a>
+      <a href="sources.html">Sources</a>
+      <a href="ai-agents.html" class="active">AI &amp; Agents</a>
+    </nav>
+    <div class="account">
+      <span class="avatar" id="userAvatar">··</span>
+      <a href="index.html" class="logout" onclick="logOut(event)">Log out</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <p class="eyebrow">AI &amp; agents</p>
+  <h1>Let an AI agent read your health data — on request, nothing standing.</h1>
+  <p class="sub">This is a real MCP (Model Context Protocol) server. Any MCP-compatible client — Claude Code, Claude Desktop, or others — can connect with a personal token and query your connected sources, logs, and computed score. Read-only. Revoke a token any time and it stops working immediately.</p>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="panel">
+      <div class="section-head"><h2>Your MCP URL</h2></div>
+      <div class="url-row">
+        <div class="url-box" id="mcpUrlBox">https://sakfofbohkndoeiqlndo.supabase.co/functions/v1/mcp</div>
+        <button class="copy-btn" id="copyUrlBtn">Copy</button>
+      </div>
+
+      <p class="panel-sub" style="margin-top:16px;">Example config for Claude Code / Claude Desktop's <code>mcpServers</code> setting — replace <code>YOUR_TOKEN</code> with a token generated below:</p>
+      <div class="config-block">{
+  "mcpServers": {
+    "junie-health": {
+      "url": "https://sakfofbohkndoeiqlndo.supabase.co/functions/v1/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN"
+      }
+    }
+  }
+}</div>
+
+      <p class="panel-sub" style="margin-top:16px;">What it can do — read-only, three tools:</p>
+      <div class="tool-list">
+        <div class="tool-item"><b>list_metrics</b><span>Lists which metric types you actually have synced, grouped by source.</span></div>
+        <div class="tool-item"><b>query_metrics</b><span>Pulls raw values for specific metrics over a date range.</span></div>
+        <div class="tool-item"><b>get_health_score</b><span>Computes your real score breakdown — same methodology as the Health Audit page, not a separate number.</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-head"><h2>Personal access tokens</h2></div>
+      <form class="token-form" id="tokenForm">
+        <input type="text" id="tokenName" placeholder="What's this for? (e.g. Claude Code on my laptop)">
+        <button type="submit">Generate token</button>
+      </form>
+      <div id="newTokenReveal"></div>
+      <div id="tokenList"><p class="empty-note">Loading…</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Junie Health, Inc. · the MCP server above is real and live — tokens are hashed at rest, never stored in plain text</p>
+</footer>
+
+<script>
+  let currentUser = null;
+
+  async function sha256Hex(input){
+    const data = new TextEncoder().encode(input);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    return [...new Uint8Array(hashBuffer)].map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  function randomToken(){
+    const bytes = crypto.getRandomValues(new Uint8Array(24));
+    return 'junie_' + [...bytes].map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  (async () => {
+    const session = await requireAuth();
+    if (!session) return;
+    currentUser = session.user;
+
+    const { data: profile } = await supabaseClient.from('profiles').select('name').eq('user_id', currentUser.id).maybeSingle();
+    const fullName = (profile && profile.name) ? profile.name : '';
+    document.getElementById('userAvatar').textContent = fullName
+      ? fullName.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase()
+      : currentUser.email.slice(0,2).toUpperCase();
+
+    await loadTokens();
+  })();
+
+  document.getElementById('copyUrlBtn').addEventListener('click', () => {
+    navigator.clipboard.writeText(document.getElementById('mcpUrlBox').textContent.trim());
+    const btn = document.getElementById('copyUrlBtn');
+    const original = btn.textContent;
+    btn.textContent = 'Copied';
+    setTimeout(() => btn.textContent = original, 1500);
+  });
+
+  async function loadTokens(){
+    const list = document.getElementById('tokenList');
+    const { data: tokens } = await supabaseClient
+      .from('api_tokens')
+      .select('id, name, token_prefix, created_at, last_used_at, revoked')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+
+    if (!tokens || !tokens.length){
+      list.innerHTML = `<p class="empty-note">No tokens yet — generate one above to connect an MCP client.</p>`;
+      return;
+    }
+
+    list.innerHTML = tokens.map(t => `
+      <div class="token-row ${t.revoked ? 'revoked' : ''}">
+        <span class="name">${t.name}</span>
+        <span class="meta">${t.token_prefix}… · created ${new Date(t.created_at).toLocaleDateString()}${t.last_used_at ? ' · last used ' + new Date(t.last_used_at).toLocaleDateString() : ' · never used'}${t.revoked ? ' · REVOKED' : ''}</span>
+        ${t.revoked ? '' : `<button class="revoke" data-revoke="${t.id}">Revoke</button>`}
+      </div>
+    `).join('');
+
+    list.querySelectorAll('[data-revoke]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Revoke this token? Any client using it will stop working immediately.')) return;
+        await supabaseClient.from('api_tokens').update({ revoked: true }).eq('id', btn.dataset.revoke);
+        loadTokens();
+      });
+    });
+  }
+
+  document.getElementById('tokenForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nameInput = document.getElementById('tokenName');
+    const name = nameInput.value.trim() || 'Junie MCP token';
+
+    const token = randomToken();
+    const tokenHash = await sha256Hex(token);
+    const tokenPrefix = token.slice(0, 14);
+
+    const { error } = await supabaseClient.from('api_tokens').insert([{
+      user_id: currentUser.id, name, token_prefix: tokenPrefix, token_hash: tokenHash,
+    }]);
+
+    if (error){ alert('Could not create token: ' + error.message); return; }
+
+    document.getElementById('newTokenReveal').innerHTML = `
+      <div class="new-token-reveal">
+        <div class="label">Your new token — copy it now</div>
+        <div class="value">${token}</div>
+        <p class="warn">This is shown once. It's stored on our end only as a one-way hash, so if you lose it you'll need to generate a new one.</p>
+      </div>
+    `;
+    nameInput.value = '';
+    loadTokens();
+  });
+</script>
+
+</body>
+</html>
