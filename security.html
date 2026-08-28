@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security — Junie</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-32x32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-192x192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #FBFAF6; --paper-alt: #F1EFE7; --ink: #0A0A0A; --ink-soft: #55584E; --ink-faint: #8A8D80;
+    --rule: rgba(10,10,10,0.14); --rule-soft: rgba(10,10,10,0.07);
+    --signal: #F2664A; --signal-soft: rgba(242,102,74,0.12);
+    --vital: #0F9E92; --vital-soft: rgba(15,158,146,0.12);
+    --amber: #C98A2C; --amber-soft: rgba(201,138,44,0.12);
+    --negative:#0A0A0A; --negative-paper:#F5F6F0;
+    --serif: 'Fraunces', Georgia, serif; --mono: 'IBM Plex Mono', ui-monospace, monospace; --sans: 'Inter', -apple-system, sans-serif;
+    --max: 820px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.65; -webkit-font-smoothing:antialiased;}
+  a{color:var(--signal);}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 40px;}
+  @media (max-width:640px){ .wrap{padding:0 20px;} }
+  h1,h2,h3{font-family:var(--serif); font-weight:600; margin:0; letter-spacing:-0.01em; color:var(--ink);}
+  p{margin:0;}
+
+  header.nav{position:sticky; top:0; z-index:50; background:rgba(251,250,246,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--rule);}
+  .nav-inner{max-width:1320px; margin:0 auto; padding:20px 40px; display:flex; align-items:center; justify-content:space-between; gap:24px;}
+  @media (max-width:640px){ .nav-inner{padding:16px 20px;} }
+  .logo{display:flex; align-items:center; gap:11px; font-family:var(--serif); font-weight:700; font-size:21px; text-decoration:none; color:var(--signal);}
+  .logo-mark{width:32px; height:32px; border-radius:8px; background:var(--ink); display:flex; align-items:center; justify-content:center; flex:none;}
+  .logo-mark svg{width:18px; height:18px;}
+  .logo-mark{animation: heartbeat 1.7s ease-in-out infinite;}
+  @keyframes heartbeat{0%,100%{transform:scale(1);} 12%{transform:scale(1.16);} 24%{transform:scale(1);} 36%{transform:scale(1.1);} 48%{transform:scale(1);}}
+  @media (prefers-reduced-motion: reduce){ .logo-mark{animation:none;} }
+  .back-link{font-family:var(--sans); font-size:14.5px; color:var(--ink-soft); text-decoration:none;}
+  .back-link:hover{color:var(--ink);}
+
+  .hero{padding:56px 0 8px;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--vital);
+    display:flex; align-items:center; gap:8px; margin-bottom:14px;
+  }
+  .eyebrow::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--vital); display:inline-block;}
+  .hero h1{font-size:clamp(30px,3.8vw,42px); margin-bottom:14px;}
+  .hero p.lede{color:var(--ink-soft); font-size:16.5px; max-width:600px;}
+
+  .status-strip{
+    display:flex; gap:24px; flex-wrap:wrap; margin:28px 0 8px; padding:18px 20px;
+    border:1px solid var(--vital); background:var(--vital-soft); border-radius:8px;
+  }
+  .status-item{display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12.5px; color:var(--ink-soft);}
+  .status-dot{width:7px; height:7px; border-radius:50%; background:var(--vital); flex:none;}
+
+  .doc{padding:36px 0 100px;}
+  .doc h2{font-size:20px; margin:40px 0 14px; border-top:1px solid var(--rule); padding-top:32px;}
+  .doc h2:first-of-type{border-top:none; padding-top:0; margin-top:0;}
+  .doc p{color:var(--ink-soft); font-size:15px; margin-bottom:14px;}
+  .doc ul{color:var(--ink-soft); font-size:15px; padding-left:20px; margin:0 0 14px;}
+  .doc li{margin-bottom:8px;}
+  .doc strong{color:var(--ink);}
+
+  .roadmap-note{
+    display:flex; gap:12px; align-items:flex-start; border:1px solid var(--amber); background:var(--amber-soft);
+    border-radius:8px; padding:16px 18px; margin:16px 0; font-size:14px; color:var(--ink-soft);
+  }
+  .roadmap-note .mark{font-family:var(--mono); color:var(--amber); font-weight:700; flex:none;}
+
+  .disclosure-box{
+    border:2px solid var(--ink); border-radius:8px; padding:24px; margin-top:16px;
+  }
+  .disclosure-box h3{font-size:16px; margin-bottom:10px;}
+  .disclosure-box code{
+    display:block; background:var(--paper-alt); border-radius:6px; padding:12px 14px;
+    font-family:var(--mono); font-size:13px; margin-top:10px;
+  }
+
+  footer{border-top:1px solid var(--rule); padding:36px 0; background:var(--paper-alt); text-align:center;}
+  footer p{font-family:var(--mono); font-size:12px; color:var(--ink-faint);}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M2 12h4l2-7 4 14 3-9 2 5h5" stroke="var(--signal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Junie
+    </a>
+    <a href="index.html" class="back-link">← Back to Junie</a>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <p class="eyebrow">Security</p>
+  <h1>How Junie actually protects your data.</h1>
+  <p class="lede">Not legal boilerplate — the real technical and operational details, for the people who want to check before they connect a ring or a lab result.</p>
+
+  <div class="status-strip">
+    <div class="status-item"><span class="status-dot"></span>Encrypted in transit &amp; at rest</div>
+    <div class="status-item"><span class="status-dot"></span>Row-level security on every table</div>
+    <div class="status-item"><span class="status-dot"></span>Per-account data isolation</div>
+  </div>
+</div>
+
+<div class="wrap doc">
+  <h2>Infrastructure</h2>
+  <p>Junie runs on Supabase (Postgres) for data storage and authentication, and Netlify for hosting and content delivery. Both are SOC 2-audited infrastructure providers in their own right — we build on top of vetted platforms rather than running our own servers.</p>
+  <ul>
+    <li><strong>Encryption in transit:</strong> every connection between your browser and Junie is HTTPS/TLS. There is no unencrypted path anywhere in the stack.</li>
+    <li><strong>Encryption at rest:</strong> your data is encrypted on disk at the database layer, standard for Supabase-hosted Postgres.</li>
+    <li><strong>Data isolation:</strong> every table that holds personal data enforces Row Level Security — the database itself refuses to return another user's rows, even if a query were somehow malformed. This isn't just an application-layer check; it's enforced at the database.</li>
+  </ul>
+
+  <h2>Access control</h2>
+  <p>Junie staff do not have standing access to individual user health data as part of normal operation. Database access for engineering purposes is scoped, logged, and used only for debugging specific, reported issues — not general browsing.</p>
+  <ul>
+    <li>Source connections (Oura, Garmin, labs, etc.) are read-only. Junie cannot post a workout, change a device setting, or take any action on your account with a connected provider.</li>
+    <li>Disconnecting a source removes its data immediately — no retained shadow copy.</li>
+    <li>Account deletion removes every row tied to your account within the same request; we don't keep a copy afterward except where law requires (e.g., billing records for tax purposes).</li>
+  </ul>
+
+  <h2>What we don't do</h2>
+  <ul>
+    <li>We do not sell health data, to anyone, ever.</li>
+    <li>We do not use your data to train Junie's own systems or hand it to a model provider to train theirs.</li>
+    <li>We do not share data with advertisers or data brokers.</li>
+  </ul>
+
+  <div class="roadmap-note">
+    <span class="mark">i</span>
+    <span><strong>Where we are on formal certification:</strong> Junie is early-stage and does not yet hold a SOC 2 report or HIPAA certification. We're built on SOC 2-audited infrastructure (Supabase, Netlify) from day one specifically so a future audit has a solid foundation. If a formal SOC 2 report matters for your use case (e.g., a clinic or employer), <a href="mailto:security@junie.health">tell us</a> — that's a real input into when we pursue it.</span>
+  </div>
+
+  <h2>Responsible disclosure</h2>
+  <div class="disclosure-box">
+    <h3>Found a security issue?</h3>
+    <p>We take reports seriously and will respond promptly. Please don't test against other users' real accounts or attempt to access data that isn't yours — report it instead.</p>
+    <code>security@junie.health</code>
+    <p style="margin-top:14px; margin-bottom:0;">Include what you found, steps to reproduce, and what you think the impact is. We'll confirm receipt and follow up as we investigate.</p>
+  </div>
+
+  <h2>Questions</h2>
+  <p>For anything not covered here, see the <a href="privacy.html">Privacy Policy</a> and <a href="consumer-health-data-policy.html">Consumer Health Data Privacy Policy</a> for the legal specifics, or reach out at <a href="mailto:security@junie.health">security@junie.health</a>.</p>
+</div>
+
+<footer>
+  <p>© 2026 Junie Health, Inc. · this page describes current practice and will be updated as infrastructure evolves</p>
+</footer>
+
+</body>
+</html>

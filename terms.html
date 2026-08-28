@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service — Junie</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-32x32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-192x192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #FBFAF6; --paper-alt: #F1EFE7; --ink: #0A0A0A; --ink-soft: #55584E; --ink-faint: #8A8D80;
+    --rule: rgba(10,10,10,0.14); --rule-soft: rgba(10,10,10,0.07);
+    --signal: #F2664A; --signal-soft: rgba(242,102,74,0.12);
+    --amber: #C98A2C; --amber-soft: rgba(201,138,44,0.12);
+    --serif: 'Fraunces', Georgia, serif; --mono: 'IBM Plex Mono', ui-monospace, monospace; --sans: 'Inter', -apple-system, sans-serif;
+    --max: 780px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.65; -webkit-font-smoothing:antialiased;}
+  a{color:var(--signal);}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 40px;}
+  @media (max-width:640px){ .wrap{padding:0 20px;} }
+  h1,h2,h3{font-family:var(--serif); font-weight:600; margin:0; letter-spacing:-0.01em; color:var(--ink);}
+  p{margin:0;}
+
+  header.nav{position:sticky; top:0; z-index:50; background:rgba(251,250,246,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--rule);}
+  .nav-inner{max-width:1320px; margin:0 auto; padding:20px 40px; display:flex; align-items:center; justify-content:space-between; gap:24px;}
+  @media (max-width:640px){ .nav-inner{padding:16px 20px;} }
+  .logo{display:flex; align-items:center; gap:11px; font-family:var(--serif); font-weight:700; font-size:21px; text-decoration:none; color:var(--signal);}
+  .logo-mark{width:32px; height:32px; border-radius:8px; background:var(--ink); display:flex; align-items:center; justify-content:center; flex:none;}
+  .logo-mark svg{width:18px; height:18px;}
+  .logo-mark{animation: heartbeat 1.7s ease-in-out infinite;}
+  @keyframes heartbeat{
+    0%, 100% { transform: scale(1); }
+    12% { transform: scale(1.16); }
+    24% { transform: scale(1); }
+    36% { transform: scale(1.1); }
+    48% { transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .logo-mark{animation: none;}
+  }
+
+  .back-link{font-family:var(--sans); font-size:14.5px; color:var(--ink-soft); text-decoration:none;}
+  .back-link:hover{color:var(--ink);}
+
+  .hero{padding:56px 0 8px;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--signal);
+    display:flex; align-items:center; gap:8px; margin-bottom:14px;
+  }
+  .eyebrow::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--signal); display:inline-block;}
+  .hero h1{font-size:clamp(30px,3.8vw,42px); margin-bottom:10px;}
+  .updated{font-family:var(--mono); font-size:12.5px; color:var(--ink-faint);}
+
+  .disclaimer-box{
+    display:flex; gap:12px; align-items:flex-start;
+    background:var(--amber-soft); border:1px solid var(--amber); border-radius:6px;
+    padding:16px 18px; margin:28px 0 0; font-size:14px; color:var(--ink-soft);
+  }
+  .disclaimer-box strong{color:var(--ink);}
+  .disclaimer-mark{font-family:var(--mono); color:var(--amber); font-weight:700; flex:none;}
+
+  .doc{padding:40px 0 100px;}
+  .doc h2{font-size:20px; margin:40px 0 14px; padding-top:8px; border-top:1px solid var(--rule); padding-top:32px;}
+  .doc h2:first-child{border-top:none; padding-top:0;}
+  .doc p{color:var(--ink-soft); font-size:15px; margin-bottom:14px;}
+  .doc ul, .doc ol{color:var(--ink-soft); font-size:15px; padding-left:20px; margin:0 0 14px;}
+  .doc li{margin-bottom:8px;}
+  .doc strong{color:var(--ink);}
+  .placeholder{background:var(--signal-soft); color:#B8401F; padding:1px 6px; border-radius:3px; font-family:var(--mono); font-size:0.88em;}
+
+  footer{border-top:1px solid var(--rule); padding:36px 0; background:var(--paper-alt); text-align:center;}
+  footer p{font-family:var(--mono); font-size:12px; color:var(--ink-faint);}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M2 12h4l2-7 4 14 3-9 2 5h5" stroke="var(--signal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Junie
+    </a>
+    <a href="index.html" class="back-link">← Back to Junie</a>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <p class="eyebrow">Legal</p>
+  <h1>Terms of Service</h1>
+  <p class="updated">Last updated: <span class="placeholder">[DATE]</span> · Effective for all accounts created after this date</p>
+
+  <div class="disclaimer-box">
+    <span class="disclaimer-mark">!</span>
+    <span><strong>This is a starting template, not legal advice.</strong> It was drafted to give you a reasonable, complete structure — but it has not been reviewed by a lawyer, doesn't reflect your actual business entity or jurisdiction, and shouldn't be relied on once you're taking real payments or handling real health data. Have a licensed attorney review and customize this before you launch.</span>
+  </div>
+</div>
+
+<div class="wrap doc">
+  <h2>1. Agreement to terms</h2>
+  <p>These Terms of Service ("Terms") are a binding agreement between you and <span class="placeholder">[Junie Health, Inc.]</span> ("Junie," "we," "us"), governing your access to and use of the Junie website, application, and MCP server (together, the "Service"). By creating an account or using the Service, you agree to these Terms. If you don't agree, don't use the Service.</p>
+
+  <h2>2. What the Service is</h2>
+  <p>Junie connects health and fitness data sources you authorize (rings, watches, CGMs, labs, gym logs, and similar) into a single feed that AI assistants you choose (such as Claude or ChatGPT) can read from, via the Model Context Protocol (MCP), in order to answer questions about your own data.</p>
+  <p><strong>Junie is not a healthcare provider.</strong> We don't practice medicine, provide medical advice, or diagnose, treat, cure, or prevent any disease or condition. Nothing in the Service is a substitute for professional medical advice, diagnosis, or treatment. Always talk to a qualified healthcare provider with questions about a medical condition, and never disregard professional medical advice or delay seeking it because of something an AI assistant told you using Junie data.</p>
+
+  <h2>3. AI-generated answers</h2>
+  <p>Answers you receive through Claude, ChatGPT, or any other AI assistant connected to Junie are generated by that third-party AI model, not by Junie. We provide the underlying data; we don't control, review, or guarantee the accuracy of what the AI says about it. AI-generated answers can be incomplete, out of date, or wrong. You're responsible for using judgment about anything you act on.</p>
+
+  <h2>4. Eligibility and accounts</h2>
+  <ul>
+    <li>You must be at least 18 years old (or the age of majority in your jurisdiction) to create an account.</li>
+    <li>You're responsible for keeping your login credentials and connected-source authorizations secure, and for all activity under your account.</li>
+    <li>You must provide accurate information when creating an account and connecting sources.</li>
+  </ul>
+
+  <h2>5. Connected sources</h2>
+  <p>When you connect a third-party source (a ring, watch, lab provider, etc.), you authorize that provider to share your data with Junie, typically via OAuth. Junie accesses connected sources on a <strong>read-only</strong> basis and does not take actions on your accounts with those providers. We are not responsible for the accuracy, availability, or practices of third-party sources — if a provider's data is wrong, delayed, or unavailable, that's outside our control.</p>
+
+  <h2>6. Subscriptions and billing</h2>
+  <ul>
+    <li><strong>Free plan:</strong> one connected source, seven days of history, no payment required.</li>
+    <li><strong>Pro plan:</strong> billed annually at the price shown at checkout, auto-renewing until canceled. You can cancel anytime; cancellation takes effect at the end of the current billing period.</li>
+    <li>Prices may change for future billing periods with notice. Except where required by law, payments are non-refundable.</li>
+    <li>Payments are processed by a third-party payment processor (e.g., Stripe). Junie does not store your full card number.</li>
+  </ul>
+
+  <h2>7. Acceptable use</h2>
+  <p>You agree not to:</p>
+  <ul>
+    <li>Use the Service for any unlawful purpose, or to violate any third-party source's terms of service;</li>
+    <li>Attempt to access another user's account or data without authorization;</li>
+    <li>Reverse-engineer, scrape, or attempt to extract the underlying models or systems Junie relies on beyond normal use of the MCP interface;</li>
+    <li>Use the Service to impersonate any person or entity, or to build a competing product using data obtained through your access.</li>
+  </ul>
+
+  <h2>8. Data and privacy</h2>
+  <p>Our <a href="privacy.html">Privacy Policy</a> and, for consumer health data specifically, our <a href="consumer-health-data-policy.html">Consumer Health Data Privacy Policy</a>, describe what we collect, why, and your rights. They're part of these Terms by reference.</p>
+
+  <h2>9. Intellectual property</h2>
+  <p>Junie and its logos, design, and original content are owned by <span class="placeholder">[Junie Health, Inc.]</span>. Your connected health data remains yours — using the Service doesn't transfer ownership of your data to us, and we don't use it to train any model.</p>
+
+  <h2>10. Disclaimers</h2>
+  <p>THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE," WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. WE DON'T WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, ERROR-FREE, OR THAT ANY AI-GENERATED ANSWER WILL BE ACCURATE.</p>
+
+  <h2>11. Limitation of liability</h2>
+  <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, CORPUS AND ITS OFFICERS, EMPLOYEES, AND AGENTS WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF DATA, ARISING FROM YOUR USE OF THE SERVICE. OUR TOTAL LIABILITY FOR ANY CLAIM RELATING TO THE SERVICE WILL NOT EXCEED THE AMOUNT YOU PAID US IN THE 12 MONTHS BEFORE THE CLAIM AROSE.</p>
+
+  <h2>12. Termination</h2>
+  <p>You may stop using the Service and delete your account at any time. We may suspend or terminate accounts that violate these Terms, with notice where practical. On termination, your data is deleted per our Privacy Policy.</p>
+
+  <h2>13. Governing law</h2>
+  <p>These Terms are governed by the laws of <span class="placeholder">[STATE/JURISDICTION]</span>, without regard to conflict-of-law principles, except where local consumer-protection law requires otherwise.</p>
+
+  <h2>14. Changes to these Terms</h2>
+  <p>We may update these Terms from time to time. We'll post the updated version here with a new "Last updated" date, and for material changes, notify you by email or in-product notice.</p>
+
+  <h2>15. Contact</h2>
+  <p>Questions about these Terms: <span class="placeholder">[legal@yourdomain.com]</span></p>
+</div>
+
+<footer>
+  <p>© 2026 Junie Health, Inc. · template document — have an attorney review before relying on it</p>
+</footer>
+
+</body>
+</html>

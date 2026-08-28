@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Changelog — Junie</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-32x32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-192x192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #FBFAF6; --paper-alt: #F1EFE7; --ink: #0A0A0A; --ink-soft: #55584E; --ink-faint: #8A8D80;
+    --rule: rgba(10,10,10,0.14); --rule-soft: rgba(10,10,10,0.07);
+    --signal: #F2664A; --signal-soft: rgba(242,102,74,0.12);
+    --vital: #0F9E92; --vital-soft: rgba(15,158,146,0.12);
+    --amber: #C98A2C; --amber-soft: rgba(201,138,44,0.12);
+    --down: #9C2B44; --down-soft: rgba(199,54,31,0.1);
+    --serif: 'Fraunces', Georgia, serif; --mono: 'IBM Plex Mono', ui-monospace, monospace; --sans: 'Inter', -apple-system, sans-serif;
+    --max: 900px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 40px;}
+  @media (max-width:640px){ .wrap{padding:0 20px;} }
+  h1,h2,h3{font-family:var(--serif); font-weight:600; margin:0; letter-spacing:-0.01em;}
+  p{margin:0;}
+
+  header.nav{position:sticky; top:0; z-index:50; background:rgba(251,250,246,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--rule);}
+  .nav-inner{max-width:1320px; margin:0 auto; padding:20px 40px; display:flex; align-items:center; justify-content:space-between; gap:24px;}
+  @media (max-width:640px){ .nav-inner{padding:16px 20px;} }
+  .logo{display:flex; align-items:center; gap:11px; font-family:var(--serif); font-weight:700; font-size:21px; text-decoration:none; color:var(--signal);}
+  .logo-mark{width:32px; height:32px; border-radius:8px; background:var(--ink); display:flex; align-items:center; justify-content:center; flex:none;}
+  .logo-mark svg{width:18px; height:18px;}
+  .logo-mark{animation: heartbeat 1.7s ease-in-out infinite;}
+  @keyframes heartbeat{
+    0%, 100% { transform: scale(1); }
+    12% { transform: scale(1.16); }
+    24% { transform: scale(1); }
+    36% { transform: scale(1.1); }
+    48% { transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .logo-mark{animation: none;}
+  }
+
+  .back-link{font-family:var(--sans); font-size:14.5px; color:var(--ink-soft); text-decoration:none;}
+  .back-link:hover{color:var(--ink);}
+
+  .hero{padding:60px 0 40px;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--signal);
+    display:flex; align-items:center; gap:8px; margin-bottom:16px;
+  }
+  .eyebrow::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--signal); display:inline-block;}
+  .hero h1{font-size:clamp(32px,4.2vw,46px); margin-bottom:14px;}
+  .hero p{color:var(--ink-soft); font-size:16.5px; max-width:560px;}
+
+  .log{padding:20px 0 100px;}
+  .entry{
+    display:grid; grid-template-columns:130px 1fr; gap:28px;
+    padding:32px 0; border-top:1px solid var(--rule);
+  }
+  @media (max-width:640px){ .entry{grid-template-columns:1fr; gap:8px;} }
+  .entry:last-child{border-bottom:1px solid var(--rule);}
+  .entry-date{font-family:var(--mono); font-size:12.5px; color:var(--ink-faint); padding-top:3px;}
+  .entry-body h3{font-size:19px; margin-bottom:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .entry-body p{color:var(--ink-soft); font-size:15px; max-width:600px;}
+  .tag{
+    font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:0.06em;
+    padding:3px 9px; border-radius:20px; font-weight:600;
+  }
+  .tag.new{color:var(--signal); background:var(--signal-soft);}
+  .tag.improved{color:var(--vital); background:var(--vital-soft);}
+  .tag.fixed{color:var(--amber); background:var(--amber-soft);}
+
+  footer{border-top:1px solid var(--rule); padding:36px 0; background:var(--paper-alt); text-align:center;}
+  footer p{font-family:var(--mono); font-size:12px; color:var(--ink-faint);}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M2 12h4l2-7 4 14 3-9 2 5h5" stroke="var(--signal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Junie
+    </a>
+    <a href="index.html" class="back-link">← Back to Junie</a>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <p class="eyebrow">Changelog</p>
+  <h1>What's shipped, as it ships.</h1>
+  <p>Every real change to Junie, newest first. Have a request? <a href="roadmap.html" style="color:var(--signal); text-decoration:underline;">See the roadmap and vote on what's next.</a></p>
+</div>
+
+<div class="wrap log">
+  <div class="entry">
+    <div class="entry-date">This week</div>
+    <div class="entry-body">
+      <h3>Labs &amp; bloodwork <span class="tag new">New</span></h3>
+      <p>Connect LabCorp, Quest Diagnostics, or Function Health directly. Results now factor into every answer alongside your wearable data — no more "soon."</p>
+    </div>
+  </div>
+  <div class="entry">
+    <div class="entry-date">This week</div>
+    <div class="entry-body">
+      <h3>Family &amp; caregiver sharing <span class="tag new">New</span></h3>
+      <p>Give up to 4 people permissioned access to your account, or theirs to you. Set a critical threshold and Junie can notify a second person automatically.</p>
+    </div>
+  </div>
+  <div class="entry">
+    <div class="entry-date">Last week</div>
+    <div class="entry-body">
+      <h3>Clinician &amp; coach report links <span class="tag new">New</span></h3>
+      <p>Generate a scoped, read-only link for a specific date range and hand it to your doctor or trainer — no chat transcript, no full account access.</p>
+    </div>
+  </div>
+  <div class="entry">
+    <div class="entry-date">Last week</div>
+    <div class="entry-body">
+      <h3>Nutrition logging <span class="tag new">New</span></h3>
+      <p>MyFitnessPal and Cronometer are now connectable sources, so food shows up in the same answers as sleep, training, and recovery.</p>
+    </div>
+  </div>
+  <div class="entry">
+    <div class="entry-date">2 weeks ago</div>
+    <div class="entry-body">
+      <h3>Daily digest, zero setup <span class="tag new">New</span></h3>
+      <p>Turn on a morning recap and get a plain-language summary in your inbox. No agent to configure, no separate tool to learn — it just works.</p>
+    </div>
+  </div>
+  <div class="entry">
+    <div class="entry-date">2 weeks ago</div>
+    <div class="entry-body">
+      <h3>International device support <span class="tag improved">Improved</span></h3>
+      <p>Fitbit and Coros are now fully live. Amazfit, Xiaomi Mi Band, and Huawei Health are in beta for accounts outside the US.</p>
+    </div>
+  </div>
+  <div class="entry">
+    <div class="entry-date">3 weeks ago</div>
+    <div class="entry-body">
+      <h3>Full historical backfill on connect <span class="tag improved">Improved</span></h3>
+      <p>New sources now pull your complete available history on day one, not just data going forward. Reconnect an existing source to backfill it too.</p>
+    </div>
+  </div>
+  <div class="entry">
+    <div class="entry-date">3 weeks ago</div>
+    <div class="entry-body">
+      <h3>Per-source failure alerts <span class="tag fixed">Fixed</span></h3>
+      <p>When a source stops syncing, Junie now names exactly which one instead of a generic "something's wrong" warning.</p>
+    </div>
+  </div>
+  <div class="entry">
+    <div class="entry-date">Last month</div>
+    <div class="entry-body">
+      <h3>Personal API <span class="tag new">New</span></h3>
+      <p>Pull your data as JSON for your own dashboard, spreadsheet sync, or model. Included with Pro — see the developer docs for authentication and rate limits.</p>
+    </div>
+  </div>
+  <div class="entry">
+    <div class="entry-date">Last month</div>
+    <div class="entry-body">
+      <h3>Junie launches <span class="tag new">New</span></h3>
+      <p>Connect your rings, watches, CGMs, and gym logs into one private feed any AI can read from — Claude, ChatGPT, or anything that speaks MCP.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 Junie Health, Inc. · demo changelog page</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Caregiver &amp; Clinician Portal — Junie</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-32x32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-192x192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<style>
+  :root{
+    --paper: #FBFAF6; --paper-alt: #F1EFE7; --ink: #0A0A0A; --ink-soft: #55584E; --ink-faint: #8A8D80;
+    --rule: rgba(10,10,10,0.14); --rule-soft: rgba(10,10,10,0.07);
+    --signal: #F2664A; --signal-soft: rgba(242,102,74,0.12);
+    --vital: #0F9E92; --vital-soft: rgba(15,158,146,0.12);
+    --amber: #C98A2C; --amber-soft: rgba(201,138,44,0.12);
+    --down: #9C2B44; --down-soft: rgba(156,43,68,0.1);
+    --negative:#0A0A0A; --negative-paper:#F5F6F0;
+    --serif: 'Fraunces', Georgia, serif; --mono: 'IBM Plex Mono', ui-monospace, monospace; --sans: 'Inter', -apple-system, sans-serif;
+    --max: 1180px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 32px;}
+  @media (max-width:640px){ .wrap{padding:0 18px;} }
+  h1,h2,h3{font-family:var(--serif); font-weight:600; margin:0; letter-spacing:-0.01em;}
+  p{margin:0;}
+  button{font-family:inherit;}
+
+  header.appnav{border-bottom:1px solid var(--rule);}
+  .appnav-inner{max-width:var(--max); margin:0 auto; padding:16px 32px; display:flex; align-items:center; justify-content:space-between; gap:24px;}
+  .logo{display:flex; align-items:center; gap:10px; font-family:var(--serif); font-weight:700; font-size:19px; text-decoration:none; color:var(--signal); flex:none;}
+  .logo-mark{width:30px; height:30px; border-radius:8px; background:var(--ink); display:flex; align-items:center; justify-content:center; flex:none;}
+  .logo-mark svg{width:17px; height:17px;}
+  .logo-mark{animation: heartbeat 1.7s ease-in-out infinite;}
+  @keyframes heartbeat{0%,100%{transform:scale(1);} 12%{transform:scale(1.16);} 24%{transform:scale(1);} 36%{transform:scale(1.1);} 48%{transform:scale(1);}}
+  @media (prefers-reduced-motion: reduce){ .logo-mark{animation:none;} }
+  .logout{font-family:var(--mono); font-size:12.5px; color:var(--ink-faint); text-decoration:none;}
+  .logout:hover{color:var(--ink);}
+
+  .eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--vital); display:flex; align-items:center; gap:8px; margin-bottom:14px;}
+  .eyebrow::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--vital); display:inline-block;}
+  .hero{padding:44px 0 8px;}
+  .hero h1{font-size:clamp(28px,3.6vw,38px); margin-bottom:10px;}
+  .hero p.sub{color:var(--ink-soft); font-size:15px; max-width:600px;}
+
+  section{padding:28px 0;}
+  .section-head{margin-bottom:18px;}
+  .section-head h2{font-size:18px;}
+
+  /* people tabs */
+  .people-row{display:flex; gap:14px; flex-wrap:wrap;}
+  .person-card{
+    display:flex; align-items:center; gap:12px; border:1px solid var(--rule); border-radius:10px;
+    padding:14px 18px; cursor:pointer; background:var(--paper); min-width:220px;
+  }
+  .person-card.active{border-color:var(--vital); background:var(--vital-soft);}
+  .person-avatar{width:38px; height:38px; border-radius:50%; background:var(--paper-alt); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:700; font-size:13px; flex:none;}
+  .person-card.active .person-avatar{background:var(--vital); color:#fff;}
+  .person-name{font-size:14.5px; font-weight:600;}
+  .person-rel{font-family:var(--mono); font-size:11px; color:var(--ink-faint);}
+  .person-status{width:8px; height:8px; border-radius:50%; margin-left:auto; flex:none;}
+
+  .detail-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:20px; margin-top:24px;}
+  @media (max-width:900px){ .detail-grid{grid-template-columns:1fr;} }
+  .panel{border:1px solid var(--rule); border-radius:12px; padding:22px; background:var(--paper);}
+
+  .metric-row{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px;}
+  .metric-card{border:1px solid var(--rule); border-radius:8px; padding:14px;}
+  .metric-card .label{font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-faint); margin-bottom:6px;}
+  .metric-card .value{font-family:var(--serif); font-size:22px;}
+  .metric-card .delta{font-family:var(--mono); font-size:11px; margin-top:4px;}
+  .metric-card .delta.down{color:var(--down);}
+  .metric-card .delta.up{color:var(--amber);}
+  .metric-card .delta.ok{color:var(--vital);}
+
+  .trend-label{font-family:var(--mono); font-size:10.5px; letter-spacing:0.06em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:10px; display:flex; justify-content:space-between;}
+  .trend-chart{width:100%; height:70px; display:block;}
+  .trend-chart .fill{fill:var(--down-soft);}
+  .trend-chart .line{fill:none; stroke:var(--down); stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
+  .trend-chart .end-dot{fill:var(--down);}
+
+  .alert-item{border-left:3px solid var(--down); background:var(--down-soft); border-radius:6px; padding:14px 16px; margin-bottom:12px;}
+  .alert-item.warn{border-color:var(--amber); background:var(--amber-soft);}
+  .alert-item.good{border-color:var(--vital); background:var(--vital-soft);}
+  .alert-item h4{font-size:14px; margin-bottom:4px;}
+  .alert-item p{color:var(--ink-soft); font-size:13px;}
+  .alert-item .when{font-family:var(--mono); font-size:10.5px; color:var(--ink-faint); margin-top:6px; display:block;}
+
+  .threshold-row{display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--rule-soft); font-size:13.5px;}
+  .threshold-row:last-child{border-bottom:none;}
+  .threshold-row .cond{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint);}
+
+  /* privacy panel */
+  .privacy-panel{background:var(--negative); color:var(--negative-paper); border-radius:12px; padding:28px;}
+  .privacy-panel h3{font-size:17px; margin-bottom:12px; font-family:var(--serif);}
+  .privacy-panel ul{margin:0; padding-left:18px; color:#C7D2C9; font-size:13.5px;}
+  .privacy-panel li{margin-bottom:8px;}
+
+  footer{border-top:1px solid var(--rule); padding:30px 0; background:var(--paper-alt); text-align:center; margin-top:20px;}
+  footer p{font-family:var(--mono); font-size:12px; color:var(--ink-faint);}
+</style>
+</head>
+<body>
+
+<header class="appnav">
+  <div class="appnav-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M2 12h4l2-7 4 14 3-9 2 5h5" stroke="var(--signal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Junie
+    </a>
+    <a href="index.html" class="logout" onclick="logOut(event)">Log out</a>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <p class="eyebrow">Caregiver &amp; clinician portal</p>
+  <h1>People you monitor.</h1>
+  <p class="sub">Everyone below has explicitly shared access with you. You see the metrics and alerts they've chosen to share — never their raw chat history with their own AI.</p>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="people-row" id="peopleRow">
+      <div class="person-card active" data-person="linda">
+        <span class="person-avatar">LR</span>
+        <div><div class="person-name">Linda R.</div><div class="person-rel">Mother</div></div>
+        <span class="person-status" style="background:var(--down);"></span>
+      </div>
+      <div class="person-card" data-person="robert">
+        <span class="person-avatar">RR</span>
+        <div><div class="person-name">Robert R.</div><div class="person-rel">Father</div></div>
+        <span class="person-status" style="background:var(--vital);"></span>
+      </div>
+      <div class="person-card" data-person="sam">
+        <span class="person-avatar">SP</span>
+        <div><div class="person-name">Sam P.</div><div class="person-rel">Patient</div></div>
+        <span class="person-status" style="background:var(--vital);"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap detail-grid">
+    <div>
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="section-head"><h2 id="detailName">Linda R. — last synced 2 hours ago</h2></div>
+        <div class="metric-row" id="metricRow">
+          <div class="metric-card"><div class="label">Sleep score</div><div class="value">61</div><div class="delta down">↓ 12% vs 4wk avg</div></div>
+          <div class="metric-card"><div class="label">Resting HR</div><div class="value">78bpm</div><div class="delta up">↑ 9 vs baseline</div></div>
+          <div class="metric-card"><div class="label">Daily steps</div><div class="value">2,140</div><div class="delta down">↓ 31% vs 4wk avg</div></div>
+        </div>
+        <div class="trend-label"><span id="trendLabel">Sleep score · last 21 days</span><span>score</span></div>
+        <svg class="trend-chart" viewBox="0 0 600 70" preserveAspectRatio="none">
+          <path class="fill" id="trendFill" d="M0 18 L60 20 L120 16 L180 24 L240 22 L300 30 L360 28 L420 36 L480 40 L540 46 L598 52 L598 70 L0 70 Z"></path>
+          <path class="line" id="trendLine" d="M0 18 L60 20 L120 16 L180 24 L240 22 L300 30 L360 28 L420 36 L480 40 L540 46 L598 52"></path>
+          <circle class="end-dot" id="trendDot" cx="598" cy="52" r="4"></circle>
+        </svg>
+      </div>
+
+      <div class="panel">
+        <div class="section-head"><h2>Recent alerts</h2></div>
+        <div id="alertsBlock">
+          <div class="alert-item">
+            <h4>Sleep score trending down</h4>
+            <p>Down 12% over the last 3 weeks, with resting heart rate up 9bpm over the same window — worth a check-in.</p>
+            <span class="when">2 days ago</span>
+          </div>
+          <div class="alert-item warn">
+            <h4>Daily steps well below usual</h4>
+            <p>Averaging 2,140 steps/day this week vs a 4-week average of 3,100 — a meaningful drop in activity.</p>
+            <span class="when">5 days ago</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel" style="margin-bottom:20px;">
+        <div class="section-head"><h2>Alert thresholds</h2></div>
+        <div id="thresholdBlock">
+          <div class="threshold-row"><span>Sleep score</span><span class="cond">drops &gt; 10% vs baseline</span></div>
+          <div class="threshold-row"><span>Resting HR</span><span class="cond">rises &gt; 8bpm vs baseline</span></div>
+          <div class="threshold-row"><span>Daily steps</span><span class="cond">drops &gt; 25% vs baseline</span></div>
+        </div>
+      </div>
+
+      <div class="privacy-panel">
+        <h3>What you can and can't see</h3>
+        <ul>
+          <li>Only the metrics and date ranges each person has explicitly shared.</li>
+          <li>Never their raw questions to Claude, ChatGPT, or any other assistant.</li>
+          <li>Access can be revoked by them at any time, instantly.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Junie Health, Inc. · demo portal — all names and data shown are samples</p>
+</footer>
+
+<script>
+  requireAuth();
+
+  const data = {
+    linda: {
+      title: "Linda R. — last synced 2 hours ago",
+      metrics: [
+        {label:'Sleep score', value:'61', delta:'↓ 12% vs 4wk avg', cls:'down'},
+        {label:'Resting HR', value:'78bpm', delta:'↑ 9 vs baseline', cls:'up'},
+        {label:'Daily steps', value:'2,140', delta:'↓ 31% vs 4wk avg', cls:'down'}
+      ],
+      alerts: [
+        {cls:'', h:'Sleep score trending down', p:'Down 12% over the last 3 weeks, with resting heart rate up 9bpm over the same window — worth a check-in.', when:'2 days ago'},
+        {cls:'warn', h:'Daily steps well below usual', p:'Averaging 2,140 steps/day this week vs a 4-week average of 3,100 — a meaningful drop in activity.', when:'5 days ago'}
+      ],
+      thresholds: [
+        ['Sleep score', 'drops > 10% vs baseline'],
+        ['Resting HR', 'rises > 8bpm vs baseline'],
+        ['Daily steps', 'drops > 25% vs baseline']
+      ],
+      trendLabel: 'Sleep score · last 21 days',
+      trendColor: 'declining',
+      trendPath: "M0 18 L60 20 L120 16 L180 24 L240 22 L300 30 L360 28 L420 36 L480 40 L540 46 L598 52"
+    },
+    robert: {
+      title: "Robert R. — last synced 40 minutes ago",
+      metrics: [
+        {label:'Sleep score', value:'84', delta:'↑ 3% vs 4wk avg', cls:'ok'},
+        {label:'Resting HR', value:'61bpm', delta:'On baseline', cls:'ok'},
+        {label:'Daily steps', value:'6,420', delta:'↑ 8% vs 4wk avg', cls:'ok'}
+      ],
+      alerts: [
+        {cls:'good', h:'No active alerts', p:'Everything shared for Robert is within his usual range — nothing needs attention right now.', when:'Checked today'}
+      ],
+      thresholds: [
+        ['Resting HR', 'rises > 10bpm vs baseline'],
+        ['Sleep score', 'drops > 15% vs baseline']
+      ],
+      trendLabel: 'Sleep score · last 21 days',
+      trendColor: 'stable',
+      trendPath: "M0 40 L60 36 L120 38 L180 32 L240 34 L300 28 L360 30 L420 24 L480 26 L540 20 L598 18"
+    },
+    sam: {
+      title: "Sam P. — last synced today",
+      metrics: [
+        {label:'Glucose avg', value:'118', delta:'On target', cls:'ok'},
+        {label:'Resting HR', value:'66bpm', delta:'↓ 2 vs baseline', cls:'ok'},
+        {label:'Sleep score', value:'76', delta:'On baseline', cls:'ok'}
+      ],
+      alerts: [
+        {cls:'good', h:'No active alerts', p:'Glucose and recovery metrics have stayed within the agreed range for 3 consecutive weeks.', when:'Checked today'}
+      ],
+      thresholds: [
+        ['Glucose avg', 'rises > 140 mg/dL'],
+        ['Resting HR', 'rises > 12bpm vs baseline']
+      ],
+      trendLabel: 'Glucose average · last 21 days',
+      trendColor: 'stable',
+      trendPath: "M0 32 L60 30 L120 34 L180 30 L240 32 L300 28 L360 34 L420 30 L480 32 L540 28 L598 30"
+    }
+  };
+
+  function render(person){
+    const d = data[person];
+    document.getElementById('detailName').textContent = d.title;
+    document.getElementById('metricRow').innerHTML = d.metrics.map(m => `
+      <div class="metric-card"><div class="label">${m.label}</div><div class="value">${m.value}</div><div class="delta ${m.cls}">${m.delta}</div></div>
+    `).join('');
+    document.getElementById('alertsBlock').innerHTML = d.alerts.map(a => `
+      <div class="alert-item ${a.cls}"><h4>${a.h}</h4><p>${a.p}</p><span class="when">${a.when}</span></div>
+    `).join('');
+    document.getElementById('thresholdBlock').innerHTML = d.thresholds.map(t => `
+      <div class="threshold-row"><span>${t[0]}</span><span class="cond">${t[1]}</span></div>
+    `).join('');
+
+    document.getElementById('trendLabel').textContent = d.trendLabel;
+    const line = document.getElementById('trendLine');
+    const fill = document.getElementById('trendFill');
+    const dot = document.getElementById('trendDot');
+    line.setAttribute('d', d.trendPath);
+    fill.setAttribute('d', d.trendPath + ' L598 70 L0 70 Z');
+    const endPoint = d.trendPath.match(/L?(\d+) (\d+)$/);
+    if (endPoint){ dot.setAttribute('cx', endPoint[1]); dot.setAttribute('cy', endPoint[2]); }
+    const color = d.trendColor === 'declining' ? 'var(--down)' : 'var(--vital)';
+    const colorSoft = d.trendColor === 'declining' ? 'var(--down-soft)' : 'var(--vital-soft)';
+    line.style.stroke = color;
+    fill.style.fill = colorSoft;
+    dot.style.fill = color;
+  }
+
+  document.querySelectorAll('.person-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.person-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      render(card.getAttribute('data-person'));
+    });
+  });
+</script>
+
+</body>
+</html>
