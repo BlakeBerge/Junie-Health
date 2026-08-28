@@ -218,11 +218,26 @@
   // Same category methodology as the mcp edge function's get_health_score
   // and dashboard.html's score card -- kept in sync by hand. Only
   // categories with at least one real datapoint in the window are scored;
-  // nothing is ever fabricated to fill a category with no data.
+  // nothing is ever fabricated to fill a category with no data. Every
+  // metric_type a sync job writes gets normalized to 0-100 and slotted
+  // into a category, so the score factors in whatever's actually syncing
+  // without per-provider special-casing beyond this map.
   const SCORE_CATEGORIES = {
-    'Sleep': ['oura_sleep_score'],
-    'Recovery / Readiness': ['oura_readiness_score'],
-    'Activity': ['oura_activity_score'],
+    'Sleep': ['oura_sleep_score', 'fitbit_sleep_efficiency', 'whoop_sleep_performance'],
+    'Recovery / Readiness': ['oura_readiness_score', 'whoop_recovery_score'],
+    'Activity': ['oura_activity_score', 'strava_moving_time_s', 'fitbit_steps'],
+  };
+  const SCORE_NORMALIZERS = {
+    oura_sleep_score: v => v,
+    oura_readiness_score: v => v,
+    oura_activity_score: v => v,
+    fitbit_sleep_efficiency: v => v,
+    whoop_sleep_performance: v => v,
+    whoop_recovery_score: v => v,
+    // Metrics with no built-in 0-100 score get one derived from a plain
+    // daily target, capped at 100: 30+ min moving time, 10k+ steps.
+    strava_moving_time_s: v => Math.min(100, (v / 1800) * 100),
+    fitbit_steps: v => Math.min(100, (v / 10000) * 100),
   };
   const WINDOW_DAYS = 14;
 
@@ -245,7 +260,7 @@
 
     const categoryScores = {};
     for (const [category, types] of Object.entries(SCORE_CATEGORIES)){
-      const values = types.flatMap(t => byType[t] || []);
+      const values = types.flatMap(t => (byType[t] || []).map(SCORE_NORMALIZERS[t]));
       if (values.length) categoryScores[category] = Math.round(values.reduce((s,v) => s+v, 0) / values.length);
     }
 
