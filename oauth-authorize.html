@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Authorize — Junie</title>
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
+<script src="/supabase-config.js"></script>
 <style>
   :root{
     --paper: #FBFAF6; --paper-alt: #F1EFE7; --ink: #0A0A0A; --ink-soft: #55584E; --ink-faint: #8A8D80;
@@ -68,48 +68,70 @@
 </div>
 
 <script>
+  const content = document.getElementById('content');
+  function showError(msg){
+    content.innerHTML = `<div class="error-box">${msg}</div>`;
+  }
+
+  // If nothing below has replaced this within 10s, something hung silently
+  // (e.g. a network call that never resolved) instead of throwing -- surface
+  // that instead of leaving "Loading…" up forever with no way to diagnose it.
+  const watchdog = setTimeout(() => {
+    showError('This is taking too long — something hung without an error. DEBUG: params=' + window.location.search);
+  }, 10000);
+
   (async () => {
-    const params = new URLSearchParams(window.location.search);
-    const responseType = params.get('response_type');
-    const clientId = params.get('client_id');
-    const redirectUri = params.get('redirect_uri');
-    const codeChallenge = params.get('code_challenge');
-    const codeChallengeMethod = params.get('code_challenge_method') || 'S256';
-    const state = params.get('state') || '';
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const responseType = params.get('response_type');
+      const clientId = params.get('client_id');
+      const redirectUri = params.get('redirect_uri');
+      const codeChallenge = params.get('code_challenge');
+      const codeChallengeMethod = params.get('code_challenge_method') || 'S256';
+      const state = params.get('state') || '';
 
-    const content = document.getElementById('content');
-    function showError(msg){
-      content.innerHTML = `<div class="error-box">${msg}</div>`;
-    }
+      if (responseType !== 'code' || !clientId || !redirectUri || !codeChallenge){
+        clearTimeout(watchdog);
+        showError('This authorization request is missing required parameters. DEBUG: params=' + window.location.search);
+        return;
+      }
+      if (codeChallengeMethod !== 'S256'){
+        clearTimeout(watchdog);
+        showError('This app requested an unsupported PKCE method. Junie only supports S256.');
+        return;
+      }
 
-    if (responseType !== 'code' || !clientId || !redirectUri || !codeChallenge){
-      showError('This authorization request is missing required parameters. Ask the app you\'re connecting from to try again.');
-      return;
-    }
-    if (codeChallengeMethod !== 'S256'){
-      showError('This app requested an unsupported PKCE method. Junie only supports S256.');
-      return;
-    }
+      if (typeof supabaseClient === 'undefined' || !supabaseClient){
+        clearTimeout(watchdog);
+        showError('Could not connect to Junie\'s sign-in service (supabaseClient never initialized) -- likely a script blocked from loading. Try reloading.');
+        return;
+      }
 
-    const session = await requireAuth();
-    if (!session) return; // requireAuth already redirected to login.html?next=<this URL>
+      const session = await requireAuth();
+      if (!session){ clearTimeout(watchdog); return; } // requireAuth already redirected to login.html?next=<this URL>
 
-    const { data: client, error: clientErr } = await supabaseClient
-      .from('oauth_clients')
-      .select('client_id, client_name, redirect_uris')
-      .eq('client_id', clientId)
-      .maybeSingle();
+      const { data: client, error: clientErr } = await supabaseClient
+        .from('oauth_clients')
+        .select('client_id, client_name, redirect_uris')
+        .eq('client_id', clientId)
+        .maybeSingle();
 
-    if (clientErr || !client){
-      showError('Unknown app -- this connector hasn\'t registered with Junie. Ask it to reconnect from scratch.');
-      return;
-    }
-    if (!client.redirect_uris.includes(redirectUri)){
-      showError('This app\'s redirect address doesn\'t match what it registered with. For your safety, Junie won\'t continue.');
-      return;
-    }
+      clearTimeout(watchdog);
 
-    content.innerHTML = `
+      if (clientErr){
+        showError('Could not look up this app: ' + clientErr.message);
+        return;
+      }
+      if (!client){
+        showError('Unknown app -- this connector hasn\'t registered with Junie yet. DEBUG: client_id=' + clientId);
+        return;
+      }
+      if (!client.redirect_uris.includes(redirectUri)){
+        showError('This app\'s redirect address doesn\'t match what it registered with. For your safety, Junie won\'t continue. DEBUG: got=' + redirectUri + ' registered=' + JSON.stringify(client.redirect_uris));
+        return;
+      }
+
+      content.innerHTML = `
       <h1><span class="client-name">${client.client_name}</span> wants to access your Junie data</h1>
       <p>Signed in as ${session.user.email}.</p>
       <div class="scope-box">
@@ -139,25 +161,33 @@
       allowBtn.disabled = true;
       allowBtn.textContent = 'Connecting…';
 
-      const codeBytes = crypto.getRandomValues(new Uint8Array(24));
-      const code = 'ac_' + [...codeBytes].map(b => b.toString(16).padStart(2,'0')).join('');
-      const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+      try {
+        const codeBytes = crypto.getRandomValues(new Uint8Array(24));
+        const code = 'ac_' + [...codeBytes].map(b => b.toString(16).padStart(2,'0')).join('');
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
 
-      const { error: insertErr } = await supabaseClient.from('oauth_auth_codes').insert([{
-        code, client_id: clientId, user_id: session.user.id, redirect_uri: redirectUri,
-        code_challenge: codeChallenge, code_challenge_method: codeChallengeMethod, expires_at: expiresAt,
-      }]);
+        const { error: insertErr } = await supabaseClient.from('oauth_auth_codes').insert([{
+          code, client_id: clientId, user_id: session.user.id, redirect_uri: redirectUri,
+          code_challenge: codeChallenge, code_challenge_method: codeChallengeMethod, expires_at: expiresAt,
+        }]);
 
-      if (insertErr){
-        showError('Could not start the connection: ' + insertErr.message);
-        return;
+        if (insertErr){
+          showError('Could not start the connection: ' + insertErr.message);
+          return;
+        }
+
+        const target = new URL(redirectUri);
+        target.searchParams.set('code', code);
+        if (state) target.searchParams.set('state', state);
+        window.location.href = target.toString();
+      } catch (err) {
+        showError('Unexpected error approving the connection: ' + (err instanceof Error ? err.message : String(err)));
       }
-
-      const target = new URL(redirectUri);
-      target.searchParams.set('code', code);
-      if (state) target.searchParams.set('state', state);
-      window.location.href = target.toString();
     });
+    } catch (err) {
+      clearTimeout(watchdog);
+      showError('Unexpected error: ' + (err instanceof Error ? err.message : String(err)));
+    }
   })();
 </script>
 
