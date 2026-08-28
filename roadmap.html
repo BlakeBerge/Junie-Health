@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roadmap — Junie</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-32x32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-192x192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #FBFAF6; --paper-alt: #F1EFE7; --ink: #0A0A0A; --ink-soft: #55584E; --ink-faint: #8A8D80;
+    --rule: rgba(10,10,10,0.14); --rule-soft: rgba(10,10,10,0.07);
+    --signal: #F2664A; --signal-soft: rgba(242,102,74,0.12);
+    --vital: #0F9E92; --vital-soft: rgba(15,158,146,0.12);
+    --amber: #C98A2C; --amber-soft: rgba(201,138,44,0.12);
+    --serif: 'Fraunces', Georgia, serif; --mono: 'IBM Plex Mono', ui-monospace, monospace; --sans: 'Inter', -apple-system, sans-serif;
+    --max: 900px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 40px;}
+  @media (max-width:640px){ .wrap{padding:0 20px;} }
+  h1,h2,h3{font-family:var(--serif); font-weight:600; margin:0; letter-spacing:-0.01em;}
+  p{margin:0;}
+
+  header.nav{position:sticky; top:0; z-index:50; background:rgba(251,250,246,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--rule);}
+  .nav-inner{max-width:1320px; margin:0 auto; padding:20px 40px; display:flex; align-items:center; justify-content:space-between; gap:24px;}
+  @media (max-width:640px){ .nav-inner{padding:16px 20px;} }
+  .logo{display:flex; align-items:center; gap:11px; font-family:var(--serif); font-weight:700; font-size:21px; text-decoration:none; color:var(--signal);}
+  .logo-mark{width:32px; height:32px; border-radius:8px; background:var(--ink); display:flex; align-items:center; justify-content:center; flex:none;}
+  .logo-mark svg{width:18px; height:18px;}
+  .logo-mark{animation: heartbeat 1.7s ease-in-out infinite;}
+  @keyframes heartbeat{
+    0%, 100% { transform: scale(1); }
+    12% { transform: scale(1.16); }
+    24% { transform: scale(1); }
+    36% { transform: scale(1.1); }
+    48% { transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .logo-mark{animation: none;}
+  }
+
+  .back-link{font-family:var(--sans); font-size:14.5px; color:var(--ink-soft); text-decoration:none;}
+  .back-link:hover{color:var(--ink);}
+
+  .hero{padding:60px 0 8px;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--signal);
+    display:flex; align-items:center; gap:8px; margin-bottom:16px;
+  }
+  .eyebrow::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--signal); display:inline-block;}
+  .hero h1{font-size:clamp(32px,4.2vw,46px); margin-bottom:14px; max-width:640px;}
+  .hero p{color:var(--ink-soft); font-size:16.5px; max-width:560px; margin-bottom:32px;}
+
+  /* request form */
+  .request-form{
+    display:flex; gap:0; border:2px solid var(--ink); border-radius:10px; overflow:hidden; max-width:640px;
+  }
+  @media (max-width:600px){ .request-form{flex-direction:column; border-width:1.5px;} }
+  .request-form input{
+    flex:1; min-width:0; border:none; outline:none; background:none; padding:16px 18px;
+    font-family:var(--sans); font-size:15px; color:var(--ink);
+  }
+  .request-form input::placeholder{color:var(--ink-faint);}
+  .request-form input + input{border-left:1px solid var(--rule);}
+  @media (max-width:600px){ .request-form input + input{border-left:none; border-top:1px solid var(--rule);} }
+  .request-form button{
+    flex:none; border:none; background:var(--signal); color:#fff; font-family:var(--sans); font-weight:600;
+    font-size:15px; padding:16px 26px; cursor:pointer;
+  }
+  .request-form button:hover{background:#C94A2E;}
+  .request-note{font-family:var(--mono); font-size:12px; color:var(--ink-faint); margin-top:12px;}
+
+  section{padding:52px 0;}
+  .section-head{margin-bottom:28px;}
+  .section-head h2{font-size:24px; margin-bottom:8px;}
+  .section-head p{color:var(--ink-soft); font-size:15px;}
+
+  .board{display:flex; flex-direction:column; gap:0; border-top:1px solid var(--rule);}
+  .board-item{
+    display:flex; align-items:center; gap:20px; padding:20px 0; border-bottom:1px solid var(--rule);
+  }
+  .board-item-text h3{font-size:16.5px; font-weight:600; margin-bottom:5px;}
+  .board-item-text p{color:var(--ink-soft); font-size:14px;}
+  .board-item-tag{
+    font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:0.06em;
+    padding:3px 9px; border-radius:20px; font-weight:600; flex:none;
+    color:var(--amber); background:var(--amber-soft);
+  }
+
+  .vote-btn{
+    flex:none; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    width:56px; height:56px; border-radius:8px; border:1px solid var(--rule); background:var(--paper);
+    cursor:pointer; font-family:var(--mono); transition:all .15s ease; gap:2px;
+  }
+  .vote-btn .arrow{font-size:13px; color:var(--ink-faint); line-height:1;}
+  .vote-btn .count{font-size:14px; font-weight:600; color:var(--ink);}
+  .vote-btn:hover{border-color:var(--signal);}
+  .vote-btn.voted{background:var(--signal-soft); border-color:var(--signal);}
+  .vote-btn.voted .arrow, .vote-btn.voted .count{color:var(--signal);}
+
+  .shipped-item{opacity:0.7;}
+  .shipped-check{
+    flex:none; width:56px; height:56px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    background:var(--signal-soft); color:var(--signal); font-size:18px;
+  }
+
+  .cta-note{
+    font-family:var(--mono); font-size:12px; color:var(--ink-faint); margin-top:20px;
+  }
+
+  footer{border-top:1px solid var(--rule); padding:36px 0; background:var(--paper-alt); text-align:center;}
+  footer p{font-family:var(--mono); font-size:12px; color:var(--ink-faint);}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M2 12h4l2-7 4 14 3-9 2 5h5" stroke="var(--signal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Junie
+    </a>
+    <a href="index.html" class="back-link">← Back to Junie</a>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <p class="eyebrow">Roadmap</p>
+  <h1>Help decide what we build next.</h1>
+  <p>Request a source, feature, or fix below, or upvote something already on the list. The most-requested items move up the build queue.</p>
+
+  <form class="request-form" id="requestForm">
+    <input type="text" id="requestThing" placeholder="Device, app, or feature" aria-label="What should we build" required>
+    <input type="email" id="requestEmail" placeholder="you@email.com" aria-label="Email address" required>
+    <button type="submit">Request →</button>
+  </form>
+  <p class="request-note" id="requestNote">We'll email you when it ships.</p>
+</div>
+
+<div class="wrap">
+  <section id="in-progress">
+    <div class="section-head">
+      <h2>In progress</h2>
+      <p>Already being built — no vote needed, just a matter of time.</p>
+    </div>
+    <div class="board">
+      <div class="board-item">
+        <span class="board-item-tag">Building</span>
+        <div class="board-item-text">
+          <h3>Cohort benchmarking</h3>
+          <p>Compare your HRV, sleep, or resting heart rate to others like you, anonymously.</p>
+        </div>
+      </div>
+      <div class="board-item">
+        <span class="board-item-tag">Building</span>
+        <div class="board-item-text">
+          <h3>Ask two AIs at once</h3>
+          <p>Run the same question through Claude and ChatGPT side by side and compare answers.</p>
+        </div>
+      </div>
+      <div class="board-item">
+        <span class="board-item-tag">Building</span>
+        <div class="board-item-text">
+          <h3>Dexcom out of alpha</h3>
+          <p>Full general availability for continuous glucose data, no waitlist.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="requested">
+    <div class="section-head">
+      <h2>Requested — vote for what ships next</h2>
+      <p>Ranked by votes. Your vote is remembered on this device.</p>
+    </div>
+    <div class="board" id="voteBoard"></div>
+  </section>
+
+  <section id="shipped">
+    <div class="section-head">
+      <h2>Recently shipped</h2>
+      <p>Already live. <a href="changelog.html" style="color:var(--signal); text-decoration:underline;">See the full changelog →</a></p>
+    </div>
+    <div class="board">
+      <div class="board-item shipped-item">
+        <span class="shipped-check">✓</span>
+        <div class="board-item-text">
+          <h3>Labs &amp; bloodwork</h3>
+          <p>LabCorp, Quest Diagnostics, and Function Health are connectable sources.</p>
+        </div>
+      </div>
+      <div class="board-item shipped-item">
+        <span class="shipped-check">✓</span>
+        <div class="board-item-text">
+          <h3>Family &amp; caregiver sharing</h3>
+          <p>Shared, permissioned access for up to 4 people, with optional safety alerts.</p>
+        </div>
+      </div>
+      <div class="board-item shipped-item">
+        <span class="shipped-check">✓</span>
+        <div class="board-item-text">
+          <h3>Nutrition logging</h3>
+          <p>MyFitnessPal and Cronometer connect alongside your wearable data.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <p>© 2026 Junie Health, Inc. · demo roadmap — votes are stored in your browser only, not shared publicly</p>
+</footer>
+
+<script>
+  const items = [
+    { id: 'xiaomi-full',   title: 'Xiaomi Mi Band out of beta',        desc: 'Full support, not just early access.', base: 142 },
+    { id: 'huawei-full',   title: 'Huawei Health out of beta',         desc: 'Same treatment as Xiaomi — full GA support.', base: 118 },
+    { id: 'peloton',       title: 'Peloton',                            desc: 'Ride, run, and strength class data as a source.', base: 96 },
+    { id: 'apple-watch-ecg', title: 'Apple Watch ECG readings',        desc: 'Pull ECG waveforms, not just the summary result.', base: 84 },
+    { id: 'cronometer-recipes', title: 'Cronometer recipe import',     desc: 'Bring in custom recipes, not just logged meals.', base: 61 },
+    { id: 'ouraring-gen4', title: 'Oura Ring Gen4 metrics',            desc: 'The newer sensor data Oura only recently started exposing.', base: 57 },
+    { id: 'strava',        title: 'Strava',                             desc: 'As a lighter-weight alternative to full Garmin/Polar sync.', base: 49 },
+    { id: 'multi-lang',    title: 'Non-English chat support',           desc: 'Ask questions in Spanish, French, or Japanese and get answers in kind.', base: 33 }
+  ];
+
+  const STORAGE_KEY = 'junie_roadmap_votes_v1';
+  function getVoted(){
+    try { return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')); }
+    catch { return new Set(); }
+  }
+  function saveVoted(set){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(set)));
+  }
+
+  function render(){
+    const voted = getVoted();
+    const sorted = [...items].sort((a,b) => {
+      const av = a.base + (voted.has(a.id) ? 1 : 0);
+      const bv = b.base + (voted.has(b.id) ? 1 : 0);
+      return bv - av;
+    });
+    const board = document.getElementById('voteBoard');
+    board.innerHTML = '';
+    sorted.forEach(item => {
+      const isVoted = voted.has(item.id);
+      const count = item.base + (isVoted ? 1 : 0);
+      const row = document.createElement('div');
+      row.className = 'board-item';
+      row.innerHTML = `
+        <button class="vote-btn${isVoted ? ' voted' : ''}" data-id="${item.id}" aria-pressed="${isVoted}" aria-label="Upvote ${item.title}">
+          <span class="arrow">▲</span>
+          <span class="count">${count}</span>
+        </button>
+        <div class="board-item-text">
+          <h3>${item.title}</h3>
+          <p>${item.desc}</p>
+        </div>
+      `;
+      board.appendChild(row);
+    });
+    board.querySelectorAll('.vote-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-id');
+        const v = getVoted();
+        if (v.has(id)) v.delete(id); else v.add(id);
+        saveVoted(v);
+        render();
+      });
+    });
+  }
+  render();
+
+  // request form — demo only, no backend
+  const form = document.getElementById('requestForm');
+  const note = document.getElementById('requestNote');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const thing = document.getElementById('requestThing');
+    const email = document.getElementById('requestEmail');
+    if (!thing.checkValidity() || !email.checkValidity()){
+      thing.reportValidity();
+      return;
+    }
+    note.textContent = `Got it — we'll email you at ${email.value} when "${thing.value}" ships.`;
+    note.style.color = 'var(--signal)';
+    thing.value = '';
+    email.value = '';
+    setTimeout(() => { note.textContent = "We'll email you when it ships."; note.style.color = ''; }, 4000);
+  });
+</script>
+
+</body>
+</html>

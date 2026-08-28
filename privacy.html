@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — Junie</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-32x32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-192x192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #FBFAF6; --paper-alt: #F1EFE7; --ink: #0A0A0A; --ink-soft: #55584E; --ink-faint: #8A8D80;
+    --rule: rgba(10,10,10,0.14); --rule-soft: rgba(10,10,10,0.07);
+    --signal: #F2664A; --signal-soft: rgba(242,102,74,0.12);
+    --amber: #C98A2C; --amber-soft: rgba(201,138,44,0.12);
+    --serif: 'Fraunces', Georgia, serif; --mono: 'IBM Plex Mono', ui-monospace, monospace; --sans: 'Inter', -apple-system, sans-serif;
+    --max: 780px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.65; -webkit-font-smoothing:antialiased;}
+  a{color:var(--signal);}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 40px;}
+  @media (max-width:640px){ .wrap{padding:0 20px;} }
+  h1,h2,h3{font-family:var(--serif); font-weight:600; margin:0; letter-spacing:-0.01em; color:var(--ink);}
+  p{margin:0;}
+
+  header.nav{position:sticky; top:0; z-index:50; background:rgba(251,250,246,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--rule);}
+  .nav-inner{max-width:1320px; margin:0 auto; padding:20px 40px; display:flex; align-items:center; justify-content:space-between; gap:24px;}
+  @media (max-width:640px){ .nav-inner{padding:16px 20px;} }
+  .logo{display:flex; align-items:center; gap:11px; font-family:var(--serif); font-weight:700; font-size:21px; text-decoration:none; color:var(--signal);}
+  .logo-mark{width:32px; height:32px; border-radius:8px; background:var(--ink); display:flex; align-items:center; justify-content:center; flex:none;}
+  .logo-mark svg{width:18px; height:18px;}
+  .logo-mark{animation: heartbeat 1.7s ease-in-out infinite;}
+  @keyframes heartbeat{
+    0%, 100% { transform: scale(1); }
+    12% { transform: scale(1.16); }
+    24% { transform: scale(1); }
+    36% { transform: scale(1.1); }
+    48% { transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .logo-mark{animation: none;}
+  }
+
+  .back-link{font-family:var(--sans); font-size:14.5px; color:var(--ink-soft); text-decoration:none;}
+  .back-link:hover{color:var(--ink);}
+
+  .hero{padding:56px 0 8px;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--signal);
+    display:flex; align-items:center; gap:8px; margin-bottom:14px;
+  }
+  .eyebrow::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--signal); display:inline-block;}
+  .hero h1{font-size:clamp(30px,3.8vw,42px); margin-bottom:10px;}
+  .updated{font-family:var(--mono); font-size:12.5px; color:var(--ink-faint);}
+
+  .disclaimer-box{
+    display:flex; gap:12px; align-items:flex-start;
+    background:var(--amber-soft); border:1px solid var(--amber); border-radius:6px;
+    padding:16px 18px; margin:28px 0 0; font-size:14px; color:var(--ink-soft);
+  }
+  .disclaimer-box strong{color:var(--ink);}
+  .disclaimer-mark{font-family:var(--mono); color:var(--amber); font-weight:700; flex:none;}
+
+  .related-box{
+    display:flex; gap:12px; align-items:flex-start;
+    background:var(--signal-soft); border:1px solid var(--signal); border-radius:6px;
+    padding:16px 18px; margin:16px 0 0; font-size:14px; color:var(--ink-soft);
+  }
+  .related-box strong{color:var(--ink);}
+
+  .doc{padding:40px 0 100px;}
+  .doc h2{font-size:20px; margin:40px 0 14px; border-top:1px solid var(--rule); padding-top:32px;}
+  .doc h2:first-child{border-top:none; padding-top:0; margin-top:0;}
+  .doc p{color:var(--ink-soft); font-size:15px; margin-bottom:14px;}
+  .doc ul, .doc ol{color:var(--ink-soft); font-size:15px; padding-left:20px; margin:0 0 14px;}
+  .doc li{margin-bottom:8px;}
+  .doc strong{color:var(--ink);}
+  .doc table{border-collapse:collapse; width:100%; font-size:14px; margin-bottom:16px;}
+  .doc th, .doc td{text-align:left; padding:10px 12px; border-bottom:1px solid var(--rule); color:var(--ink-soft); vertical-align:top;}
+  .doc th{font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-faint);}
+  .placeholder{background:var(--signal-soft); color:#B8401F; padding:1px 6px; border-radius:3px; font-family:var(--mono); font-size:0.88em;}
+
+  footer{border-top:1px solid var(--rule); padding:36px 0; background:var(--paper-alt); text-align:center;}
+  footer p{font-family:var(--mono); font-size:12px; color:var(--ink-faint);}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M2 12h4l2-7 4 14 3-9 2 5h5" stroke="var(--signal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Junie
+    </a>
+    <a href="index.html" class="back-link">← Back to Junie</a>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <p class="eyebrow">Legal</p>
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated: <span class="placeholder">[DATE]</span></p>
+
+  <div class="disclaimer-box">
+    <span class="disclaimer-mark">!</span>
+    <span><strong>This is a starting template, not legal advice.</strong> It's a reasonable, complete structure to work from, but it hasn't been reviewed by a lawyer and doesn't reflect your actual vendors, entity, or jurisdiction. Have a licensed attorney review this before you rely on it with real users.</span>
+  </div>
+
+  <div class="related-box">
+    <span>📋</span>
+    <span><strong>Looking for how we handle health data specifically?</strong> That lives in a separate <a href="consumer-health-data-policy.html">Consumer Health Data Privacy Policy</a>, as required under laws like Washington's My Health My Data Act. This page covers everything else.</span>
+  </div>
+</div>
+
+<div class="wrap doc">
+  <h2>1. Who this applies to</h2>
+  <p>This Privacy Policy explains how <span class="placeholder">[Junie Health, Inc.]</span> ("Junie," "we," "us") collects, uses, and shares information when you use our website, application, and MCP server (the "Service"). For consumer health data specifically, see our separate <a href="consumer-health-data-policy.html">Consumer Health Data Privacy Policy</a>, which controls where the two overlap.</p>
+
+  <h2>2. Information we collect</h2>
+  <table>
+    <tr><th>Category</th><th>Examples</th></tr>
+    <tr><td>Account information</td><td>Name, email address, password (hashed), plan tier</td></tr>
+    <tr><td>Connected source data</td><td>Sleep, HRV, training, glucose, lab results, nutrition logs, and similar data from sources you authorize</td></tr>
+    <tr><td>Payment information</td><td>Handled by our payment processor (e.g., Stripe); we do not store full card numbers</td></tr>
+    <tr><td>Usage data</td><td>Queries made through connected AI assistants, feature usage, log data, device/browser type</td></tr>
+    <tr><td>Communications</td><td>Support requests, roadmap/feature requests, survey responses</td></tr>
+  </table>
+
+  <h2>3. How we use information</h2>
+  <ul>
+    <li>To operate the Service — authenticating you, syncing connected sources, and serving your data to the AI assistants you connect;</li>
+    <li>To send you service communications (e.g., your daily digest, if enabled, or account and billing notices);</li>
+    <li>To provide customer support and respond to requests;</li>
+    <li>To maintain security, detect fraud, and enforce our Terms;</li>
+    <li>To improve the Service — for example, understanding which connectors are most requested.</li>
+  </ul>
+  <p><strong>We do not use your data to train Junie's own systems or any third-party AI model, and we do not sell your data.</strong></p>
+
+  <h2>4. How information is shared</h2>
+  <p>We share information only in these circumstances:</p>
+  <ul>
+    <li><strong>With AI assistants you connect</strong> — when you query Claude, ChatGPT, or another assistant through your Junie link, your data is sent to that assistant to answer your question, subject to that provider's own terms and privacy policy;</li>
+    <li><strong>With service providers</strong> who help us run the Service (hosting, payment processing, email delivery), under contracts limiting their use of your data to providing that service;</li>
+    <li><strong>With a clinician or coach</strong>, only when you generate a scoped report link and choose to share it;</li>
+    <li><strong>For legal reasons</strong>, if required by law, subpoena, or to protect the rights, property, or safety of Junie or others;</li>
+    <li><strong>In a business transfer</strong> (merger, acquisition, or asset sale), with notice to you and the same privacy commitments carried forward.</li>
+  </ul>
+  <p>We do not share or sell your data to advertisers or data brokers.</p>
+
+  <h2>5. Data retention and deletion</h2>
+  <p>We retain your data for as long as your account is active. You can export your full history as CSV at any time, and delete your account, connectors, and history — every byte — from your account settings. Deletion is immediate and we don't retain a copy afterward, except where we're legally required to retain limited records (e.g., billing records for tax purposes).</p>
+
+  <h2>6. Security</h2>
+  <p>We use encryption in transit and at rest, scoped read-only access to connected sources, and maintain an audit log of queries made against your data. No system is perfectly secure, and we can't guarantee absolute security — see Section 9 for what happens if something goes wrong.</p>
+
+  <h2>7. Your rights</h2>
+  <p>Depending on where you live, you may have rights to access, correct, delete, or export your data, and to opt out of certain processing. You can exercise most of these directly from your account settings, or by contacting us at <span class="placeholder">[privacy@yourdomain.com]</span>. Residents of California, Virginia, Colorado, and other states with comprehensive privacy laws have additional statutory rights; residents of Washington should also see our <a href="consumer-health-data-policy.html">Consumer Health Data Privacy Policy</a>.</p>
+
+  <h2>8. Children's privacy</h2>
+  <p>The Service is not directed at children under 13 (or the relevant age of digital consent in your country), and we do not knowingly collect information from them. If you believe a child has provided us information, contact us and we'll delete it.</p>
+
+  <h2>9. Breach notification</h2>
+  <p>If there's a breach of unsecured, individually identifiable health information, we'll notify affected users, and where required, the FTC and media, consistent with the FTC's Health Breach Notification Rule and applicable state law.</p>
+
+  <h2>10. International users</h2>
+  <p>If you access the Service from outside <span class="placeholder">[the United States]</span>, your information will be transferred to and processed in <span class="placeholder">[the United States]</span>. Where applicable law (such as the GDPR) requires additional safeguards for that transfer, we put them in place.</p>
+
+  <h2>11. Changes to this policy</h2>
+  <p>We'll post updates here with a new "Last updated" date, and for material changes, notify you by email or in-product notice.</p>
+
+  <h2>12. Contact</h2>
+  <p>Questions or requests: <span class="placeholder">[privacy@yourdomain.com]</span></p>
+</div>
+
+<footer>
+  <p>© 2026 Junie Health, Inc. · template document — have an attorney review before relying on it</p>
+</footer>
+
+</body>
+</html>

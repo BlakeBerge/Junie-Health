@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Junie</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-32x32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-192x192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<style>
+  :root{
+    --paper: #FBFAF6; --paper-alt: #F1EFE7; --ink: #0A0A0A; --ink-soft: #55584E; --ink-faint: #8A8D80;
+    --rule: rgba(10,10,10,0.14); --rule-soft: rgba(10,10,10,0.07);
+    --signal: #F2664A; --signal-soft: rgba(242,102,74,0.12);
+    --vital: #0F9E92; --vital-soft: rgba(15,158,146,0.12);
+    --amber: #C98A2C; --amber-soft: rgba(201,138,44,0.12);
+    --down: #9C2B44; --down-soft: rgba(156,43,68,0.1);
+    --serif: 'Fraunces', Georgia, serif; --mono: 'IBM Plex Mono', ui-monospace, monospace; --sans: 'Inter', -apple-system, sans-serif;
+    --max: 1180px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 32px;}
+  @media (max-width:640px){ .wrap{padding:0 18px;} }
+  h1,h2,h3{font-family:var(--serif); font-weight:600; margin:0; letter-spacing:-0.01em;}
+  p{margin:0;}
+  button{font-family:inherit;}
+
+  /* app header */
+  header.appnav{border-bottom:1px solid var(--rule); background:var(--paper);}
+  .appnav-inner{max-width:var(--max); margin:0 auto; padding:16px 32px; display:flex; align-items:center; justify-content:space-between; gap:24px;}
+  @media (max-width:640px){ .appnav-inner{padding:14px 18px;} }
+  .logo{display:flex; align-items:center; gap:10px; font-family:var(--serif); font-weight:700; font-size:19px; text-decoration:none; color:var(--signal); flex:none;}
+  .logo-mark{width:30px; height:30px; border-radius:8px; background:var(--ink); display:flex; align-items:center; justify-content:center; flex:none;}
+  .logo-mark svg{width:17px; height:17px;}
+  .logo-mark{animation: heartbeat 1.7s ease-in-out infinite;}
+  @keyframes heartbeat{0%,100%{transform:scale(1);} 12%{transform:scale(1.16);} 24%{transform:scale(1);} 36%{transform:scale(1.1);} 48%{transform:scale(1);}}
+  @media (prefers-reduced-motion: reduce){ .logo-mark{animation:none;} }
+
+  .applinks{display:flex; align-items:center; gap:26px; flex:1; padding-left:20px;}
+  .applinks a{font-family:var(--sans); font-size:14.5px; color:var(--ink-soft); text-decoration:none;}
+  .applinks a.active{color:var(--ink); font-weight:600;}
+  .applinks a:hover{color:var(--ink);}
+  @media (max-width:860px){ .applinks{display:none;} }
+
+  .account{display:flex; align-items:center; gap:14px; flex:none;}
+  .avatar{width:34px; height:34px; border-radius:50%; background:var(--signal-soft); color:var(--signal); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:700; font-size:13px;}
+  .logout{font-family:var(--mono); font-size:12.5px; color:var(--ink-faint); text-decoration:none;}
+  .logout:hover{color:var(--ink);}
+
+  section{padding:36px 0;}
+  .section-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px;}
+  .section-head h2{font-size:20px;}
+  .section-head .link{font-family:var(--mono); font-size:12.5px; color:var(--signal); text-decoration:underline;}
+  .eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:6px;}
+
+  .greeting h1{font-size:28px; margin-bottom:6px;}
+  .greeting p{color:var(--ink-soft); font-size:15px;}
+
+  /* score + goals + alerts grid */
+  .top-grid{display:grid; grid-template-columns:1fr 1.4fr; gap:20px;}
+  @media (max-width:900px){ .top-grid{grid-template-columns:1fr;} }
+
+  .score-card{
+    border:1px solid var(--rule); border-radius:12px; padding:26px; background:var(--paper-alt);
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+  }
+  .score-ring{position:relative; width:140px; height:140px; margin-bottom:14px;}
+  .score-ring svg{transform:rotate(-90deg);}
+  .score-ring .bg{fill:none; stroke:var(--rule); stroke-width:10;}
+  .score-ring .fg{fill:none; stroke:var(--signal); stroke-width:10; stroke-linecap:round;}
+  .score-num{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .score-num .n{font-family:var(--serif); font-size:34px; font-weight:600;}
+  .score-num .g{font-family:var(--mono); font-size:12px; color:var(--ink-faint);}
+  .score-card p.desc{color:var(--ink-soft); font-size:13.5px; margin-bottom:18px;}
+  .score-actions{display:flex; gap:10px; width:100%;}
+  .btn{
+    font-family:var(--sans); font-weight:600; font-size:13.5px; padding:10px 16px; border-radius:8px;
+    text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    border:1px solid var(--ink); background:none; color:var(--ink); cursor:pointer; flex:1;
+  }
+  .btn-primary{background:var(--signal); border-color:var(--signal); color:#fff;}
+  .btn-primary:hover{background:#C94A2E;}
+  .btn:hover{background:var(--paper);}
+
+  .panel{border:1px solid var(--rule); border-radius:12px; padding:22px; background:var(--paper);}
+  .goal{margin-bottom:18px;}
+  .goal:last-child{margin-bottom:0;}
+  .goal-head{display:flex; justify-content:space-between; font-size:14px; margin-bottom:8px;}
+  .goal-head strong{font-weight:600;}
+  .goal-head span{font-family:var(--mono); font-size:12px; color:var(--ink-faint);}
+  .goal-track{height:8px; border-radius:6px; background:var(--rule-soft); overflow:hidden;}
+  .goal-fill{height:100%; background:var(--vital); border-radius:6px;}
+  .goal-fill.warm{background:var(--signal);}
+
+  .badge-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; padding-top:18px; border-top:1px solid var(--rule-soft);}
+  .badge{
+    display:flex; align-items:center; gap:7px; font-family:var(--mono); font-size:11px;
+    border:1px solid var(--rule); border-radius:20px; padding:6px 11px; color:var(--ink-faint);
+  }
+  .badge.earned{color:var(--signal); border-color:var(--signal); background:var(--signal-soft);}
+  .badge .dot{width:6px; height:6px; border-radius:50%; background:currentColor;}
+
+  /* mood & stress */
+  .mood-log-row{display:flex; gap:40px; flex-wrap:wrap; margin-bottom:16px;}
+  .mood-label{font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-faint); margin-bottom:10px;}
+  .mood-scale{display:flex; gap:8px;}
+  .mood-scale button{
+    width:44px; height:44px; border-radius:50%; border:1px solid var(--rule); background:var(--paper-alt);
+    font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:transform .12s ease, border-color .12s ease;
+  }
+  .mood-scale button:hover{transform:scale(1.08);}
+  .mood-scale button.selected{border-color:var(--signal); background:var(--signal-soft); transform:scale(1.1);}
+  .mood-status{font-family:var(--mono); font-size:12.5px; color:var(--signal); margin-bottom:16px;}
+  .mood-history{display:flex; gap:6px; flex-wrap:wrap; padding-top:14px; border-top:1px solid var(--rule-soft);}
+  .mood-history .day{
+    width:30px; height:30px; border-radius:6px; display:flex; align-items:center; justify-content:center;
+    font-size:14px; border:1px solid var(--rule); background:var(--paper-alt);
+  }
+  .mood-history .day-label{font-family:var(--mono); font-size:9px; color:var(--ink-faint); text-align:center; width:30px;}
+
+  /* GLP-1 / medication log */
+  .glp1-form{display:flex; gap:14px; flex-wrap:wrap; align-items:end; margin-bottom:10px;}
+  .glp1-form .field{display:flex; flex-direction:column; gap:6px; min-width:140px;}
+  .glp1-form label{font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-faint);}
+  .glp1-form input{
+    border:1px solid var(--rule); border-radius:7px; padding:9px 11px;
+    font-family:var(--sans); font-size:13.5px; color:var(--ink); background:var(--paper-alt);
+  }
+  .glp1-btn{
+    border:none; border-radius:7px; background:var(--ink); color:#fff; font-family:var(--sans);
+    font-weight:600; font-size:13px; padding:10px 16px; cursor:pointer; flex:none;
+  }
+  .glp1-status{font-family:var(--mono); font-size:12px; color:var(--signal); min-height:16px; margin-bottom:10px;}
+  .glp1-history{display:flex; flex-direction:column; gap:0;}
+  .glp1-history .entry{
+    display:flex; justify-content:space-between; gap:14px; padding:10px 0; border-top:1px solid var(--rule-soft);
+    font-size:13px;
+  }
+  .glp1-history .entry .med{font-weight:600;}
+  .glp1-history .entry .note{color:var(--ink-soft); font-size:12.5px;}
+  .glp1-history .entry .date{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); flex:none;}
+  .glp1-disclaimer{font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-top:14px; padding-top:14px; border-top:1px solid var(--rule-soft);}
+
+  /* predictive insights */
+  .predict-list{display:flex; flex-direction:column; gap:0;}
+  .predict-item{
+    display:flex; gap:14px; padding:16px 0; border-top:1px solid var(--rule-soft);
+  }
+  .predict-item:first-child{border-top:none; padding-top:0;}
+  .predict-icon{
+    font-size:18px; flex:none; width:34px; height:34px; border-radius:50%;
+    background:var(--amber-soft); color:var(--amber); display:flex; align-items:center; justify-content:center;
+  }
+  .predict-title{font-size:15px; font-weight:600; margin-bottom:6px;}
+  .predict-body{font-size:13.5px; color:var(--ink-soft); margin-bottom:8px;}
+  .predict-work-toggle{
+    font-family:var(--mono); font-size:11.5px; color:var(--vital); background:none; border:none;
+    cursor:pointer; padding:0; text-decoration:underline;
+  }
+  .predict-work{
+    display:none; margin-top:10px; padding:12px 14px; background:var(--paper-alt); border-radius:6px;
+    font-size:12.5px; color:var(--ink-soft);
+  }
+  .predict-work.open{display:block;}
+  .predict-work p{margin-bottom:6px;}
+  .predict-work p:last-child{margin-bottom:0;}
+  .predict-note{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); margin-top:16px; padding-top:14px; border-top:1px solid var(--rule-soft);}
+
+  /* alerts */
+  .alert-list{display:flex; flex-direction:column; gap:0;}
+  .alert-row{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    padding:14px 0; border-bottom:1px solid var(--rule-soft);
+  }
+  .alert-row:first-child{padding-top:0;}
+  .alert-row:last-child{border-bottom:none; padding-bottom:0;}
+  .alert-info{font-size:14px;}
+  .alert-info b{font-weight:600;}
+  .alert-info .cond{font-family:var(--mono); font-size:12px; color:var(--ink-faint); display:block; margin-top:3px;}
+  .toggle{
+    position:relative; width:38px; height:21px; border-radius:20px; background:var(--rule);
+    flex:none; cursor:pointer; border:none; padding:0;
+  }
+  .toggle.on{background:var(--signal);}
+  .toggle::after{content:""; position:absolute; width:16px; height:16px; border-radius:50%; background:#fff; top:2.5px; left:3px; transition:left .15s ease;}
+  .toggle.on::after{left:19px;}
+
+  .add-alert{margin-top:18px; padding-top:18px; border-top:1px solid var(--rule-soft);}
+  .add-alert-grid{display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; align-items:end;}
+  @media (max-width:760px){ .add-alert-grid{grid-template-columns:1fr 1fr;} }
+  .field label{display:block; font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-faint); margin-bottom:5px;}
+  .field select, .field input{
+    width:100%; border:1px solid var(--rule); border-radius:7px; padding:9px 10px;
+    font-family:var(--sans); font-size:13.5px; color:var(--ink); background:var(--paper-alt);
+  }
+  .add-alert-btn{
+    border:none; border-radius:7px; background:var(--ink); color:#fff; font-family:var(--sans);
+    font-weight:600; font-size:13px; padding:10px 14px; cursor:pointer; white-space:nowrap;
+  }
+  .add-alert-note{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); margin-top:10px;}
+
+  /* sources strip */
+  .source-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
+  @media (max-width:860px){ .source-grid{grid-template-columns:repeat(2,1fr);} }
+  .source-card{border:1px solid var(--rule); border-radius:10px; padding:16px; display:flex; align-items:center; gap:12px;}
+  .source-status{width:8px; height:8px; border-radius:50%; background:var(--vital); flex:none;}
+  .source-card .name{font-size:14px; font-weight:600;}
+  .source-card .synced{font-family:var(--mono); font-size:11px; color:var(--ink-faint);}
+
+  .portal-banner{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+    border:1px solid var(--vital); background:var(--vital-soft); border-radius:12px; padding:20px 24px;
+  }
+  .portal-banner h3{font-size:16px; margin-bottom:4px;}
+  .portal-banner p{color:var(--ink-soft); font-size:13.5px;}
+  .portal-banner .btn{border-color:var(--vital); color:var(--vital); flex:none;}
+  .portal-banner .btn:hover{background:var(--vital); color:#fff;}
+
+  footer{border-top:1px solid var(--rule); padding:30px 0; background:var(--paper-alt); text-align:center;}
+  footer p{font-family:var(--mono); font-size:12px; color:var(--ink-faint);}
+</style>
+</head>
+<body>
+
+<header class="appnav">
+  <div class="appnav-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M2 12h4l2-7 4 14 3-9 2 5h5" stroke="var(--signal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Junie
+    </a>
+    <nav class="applinks">
+      <a href="dashboard.html" class="active">Dashboard</a>
+      <a href="health-audit.html">Health Audit</a>
+      <a href="#goals">Goals</a>
+      <a href="#alerts">Alerts</a>
+      <a href="sources.html">Sources</a>
+    </nav>
+    <div class="account">
+      <span class="avatar" id="userAvatar">··</span>
+      <a href="index.html" class="logout" onclick="logOut(event)">Log out</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap greeting" style="padding-top:36px;">
+  <p class="eyebrow">Welcome back</p>
+  <div style="display:flex; align-items:baseline; gap:16px; flex-wrap:wrap;">
+    <h1 id="userGreeting">Hi there.</h1>
+    <button id="editNameBtn" style="font-family:var(--mono); font-size:12.5px; color:var(--ink-faint); background:none; border:none; text-decoration:underline; cursor:pointer; padding:0;">Edit name</button>
+  </div>
+  <form id="editNameForm" style="display:none; align-items:center; gap:10px; margin-top:14px; max-width:400px;">
+    <input type="text" id="editNameInput" placeholder="Your name" style="flex:1; border:1px solid var(--rule); border-radius:8px; padding:10px 14px; font-family:var(--sans); font-size:15px; color:var(--ink); background:var(--paper-alt);">
+    <button type="submit" class="btn btn-primary" style="flex:none;">Save</button>
+    <button type="button" id="cancelNameBtn" class="btn" style="flex:none;">Cancel</button>
+  </form>
+  <p id="nameSaveNote" style="display:none; font-family:var(--mono); font-size:12px; color:var(--signal); margin-top:10px;"></p>
+  <p>Here's where things stand across everything you've connected.</p>
+</div>
+
+<section>
+  <div class="wrap top-grid">
+    <div class="score-card">
+      <div class="score-ring">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle class="bg" cx="70" cy="70" r="60"></circle>
+          <circle class="fg" cx="70" cy="70" r="60" stroke-dasharray="377" stroke-dashoffset="68"></circle>
+        </svg>
+        <div class="score-num">
+          <span class="n">82</span>
+          <span class="g">B+ · GOOD</span>
+        </div>
+      </div>
+      <p class="desc">Better than 64% of people your age and sex with similar tracking history.</p>
+      <div class="score-actions">
+        <a href="health-audit.html" class="btn">View report</a>
+        <a href="health-audit.html#run" class="btn btn-primary">Run audit</a>
+      </div>
+    </div>
+
+    <div class="panel" id="goals">
+      <div class="section-head" style="margin-bottom:16px;">
+        <h2>Goals</h2>
+        <a href="#" class="link" id="addGoalLink">+ Add a goal</a>
+      </div>
+      <div class="goal">
+        <div class="goal-head"><strong>Resting HR under 58bpm avg</strong><span>54.2 / 58 bpm</span></div>
+        <div class="goal-track"><div class="goal-fill" style="width:88%"></div></div>
+      </div>
+      <div class="goal">
+        <div class="goal-head"><strong>8+ sleep score, 20 nights this month</strong><span>14 / 20 nights</span></div>
+        <div class="goal-track"><div class="goal-fill" style="width:70%"></div></div>
+      </div>
+      <div class="goal">
+        <div class="goal-head"><strong>Strength train 3x/week, 4-week streak</strong><span>Week 3 of 4</span></div>
+        <div class="goal-track"><div class="goal-fill warm" style="width:75%"></div></div>
+      </div>
+      <div class="goal">
+        <div class="goal-head"><strong>150g protein, 5 days/week</strong><span>4 / 5 days</span></div>
+        <div class="goal-track"><div class="goal-fill" style="width:80%"></div></div>
+      </div>
+      <div class="badge-row">
+        <span class="badge earned"><span class="dot"></span>7-day streak</span>
+        <span class="badge earned"><span class="dot"></span>First audit</span>
+        <span class="badge earned"><span class="dot"></span>3 sources connected</span>
+        <span class="badge"><span class="dot"></span>Goal crusher</span>
+        <span class="badge"><span class="dot"></span>90-day streak</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="mood">
+  <div class="wrap">
+    <div class="panel">
+      <div class="section-head" style="margin-bottom:6px;">
+        <h2>Mood &amp; stress</h2>
+        <span class="link" style="color:var(--ink-faint); text-decoration:none;">One tap, correlated against your sleep and training</span>
+      </div>
+      <div class="mood-log-row">
+        <div class="mood-picker">
+          <p class="mood-label">Mood today</p>
+          <div class="mood-scale" id="moodScale">
+            <button data-val="1" title="Rough">😞</button>
+            <button data-val="2" title="Low">🙁</button>
+            <button data-val="3" title="Okay">😐</button>
+            <button data-val="4" title="Good">🙂</button>
+            <button data-val="5" title="Great">😄</button>
+          </div>
+        </div>
+        <div class="mood-picker">
+          <p class="mood-label">Stress today</p>
+          <div class="mood-scale" id="stressScale">
+            <button data-val="1" title="Calm">😌</button>
+            <button data-val="2" title="Mild">🙂</button>
+            <button data-val="3" title="Moderate">😐</button>
+            <button data-val="4" title="High">😬</button>
+            <button data-val="5" title="Overwhelmed">🥵</button>
+          </div>
+        </div>
+      </div>
+      <p class="mood-status" id="moodStatus">Loading today's log…</p>
+      <div class="mood-history" id="moodHistory"></div>
+    </div>
+  </div>
+</section>
+
+<section id="glp1">
+  <div class="wrap">
+    <div class="panel">
+      <div class="section-head" style="margin-bottom:6px;">
+        <h2>Medication log</h2>
+        <span class="link" style="color:var(--ink-faint); text-decoration:none;">Log GLP-1 or other doses, correlated against your weight, energy &amp; sleep over time</span>
+      </div>
+      <form class="glp1-form" id="glp1Form">
+        <div class="field">
+          <label for="glp1Med">Medication</label>
+          <input type="text" id="glp1Med" placeholder="e.g. Semaglutide" required>
+        </div>
+        <div class="field">
+          <label for="glp1Date">Date</label>
+          <input type="date" id="glp1Date">
+        </div>
+        <div class="field" style="flex:1;">
+          <label for="glp1Note">Note (optional)</label>
+          <input type="text" id="glp1Note" placeholder="Injection site, side effects, anything worth remembering">
+        </div>
+        <button type="submit" class="glp1-btn">Log it</button>
+      </form>
+      <p class="glp1-status" id="glp1Status"></p>
+      <div class="glp1-history" id="glp1History"></div>
+      <p class="glp1-disclaimer">This just records what you tell it — Junie doesn't provide dosing guidance. Always follow your prescriber's instructions.</p>
+    </div>
+  </div>
+</section>
+
+<section id="predictions">
+  <div class="wrap">
+    <div class="panel">
+      <div class="section-head" style="margin-bottom:6px;">
+        <h2>Predictive insights</h2>
+        <span class="link" style="color:var(--ink-faint); text-decoration:none;">Patterns from your history, flagged before they cost you a bad day</span>
+      </div>
+      <div class="predict-list" id="predictList">
+        <div class="predict-item">
+          <span class="predict-icon">⚠</span>
+          <div>
+            <p class="predict-title">Tomorrow matches a pattern that's hit you before</p>
+            <p class="predict-body">The last 3 times you had 2+ hard training days plus under 7 hours of sleep, your HRV dropped 15+ points the next morning. That combination just happened again.</p>
+            <button class="predict-work-toggle" data-target="predict-work-1">Show your work ▾</button>
+            <div class="predict-work" id="predict-work-1">
+              <p>Pattern matched across: <b>Oct 14–15</b>, <b>Nov 2–3</b>, <b>Nov 19–20</b> (training load + sleep duration, last 90 days)</p>
+              <p>Metrics used: Training load (Hevy, Strava), Sleep duration (Oura), HRV (Oura)</p>
+            </div>
+          </div>
+        </div>
+        <div class="predict-item">
+          <span class="predict-icon">↗</span>
+          <div>
+            <p class="predict-title">Your recovery is trending ahead of your training load</p>
+            <p class="predict-body">HRV has climbed steadily for 9 days while training volume held flat — historically your best window for adding a harder session without a setback.</p>
+            <button class="predict-work-toggle" data-target="predict-work-2">Show your work ▾</button>
+            <div class="predict-work" id="predict-work-2">
+              <p>Trend window: last 9 days, compared against your 90-day rolling baseline.</p>
+              <p>Metrics used: HRV (Oura), Training load (Hevy, Strava)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="predict-note">Demo patterns shown with sample data — real prediction needs a few weeks of your actual history to learn from.</p>
+    </div>
+  </div>
+</section>
+
+<section id="alerts">
+  <div class="wrap">
+    <div class="panel">
+      <div class="section-head" style="margin-bottom:6px;">
+        <h2>Alerts</h2>
+        <span class="link" style="color:var(--ink-faint); text-decoration:none;">Notify me when a metric crosses a line</span>
+      </div>
+      <div class="alert-list" id="alertList">
+        <div class="alert-row">
+          <div class="alert-info"><b>Resting heart rate</b><span class="cond">Oura · falls below 60 bpm avg (7-day) · Email + Push</span></div>
+          <button class="toggle on" aria-label="Toggle alert"></button>
+        </div>
+        <div class="alert-row">
+          <div class="alert-info"><b>Sleep score</b><span class="cond">Oura · drops more than 8% vs 30-day baseline · Email</span></div>
+          <button class="toggle on" aria-label="Toggle alert"></button>
+        </div>
+        <div class="alert-row">
+          <div class="alert-info"><b>Weekly training load</b><span class="cond">Strava · rises more than 30% week over week · Push</span></div>
+          <button class="toggle" aria-label="Toggle alert"></button>
+        </div>
+      </div>
+
+      <div class="add-alert">
+        <div class="add-alert-grid">
+          <div class="field">
+            <label>Source</label>
+            <select id="alertSource">
+              <option>Oura</option>
+              <option>Strava</option>
+              <option>Garmin</option>
+              <option>Dexcom</option>
+              <option>Withings</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Metric</label>
+            <select id="alertMetric">
+              <option>Resting heart rate</option>
+              <option>HRV</option>
+              <option>Sleep score</option>
+              <option>Weekly training load</option>
+              <option>Glucose average</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Condition</label>
+            <select id="alertCondition">
+              <option>falls below</option>
+              <option>rises above</option>
+              <option>changes by more than 5%</option>
+              <option>changes by more than 10%</option>
+            </select>
+          </div>
+          <button class="add-alert-btn" id="addAlertBtn">Add alert</button>
+        </div>
+        <p class="add-alert-note">Demo only — alerts shown here aren't wired to real email or push delivery yet.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head"><h2>Connected sources</h2><a href="sources.html" class="link">Manage sources →</a></div>
+    <div class="source-grid">
+      <div class="source-card"><span class="source-status"></span><div><div class="name">Oura</div><div class="synced">Synced 4 min ago</div></div></div>
+      <div class="source-card"><span class="source-status"></span><div><div class="name">Strava</div><div class="synced">Synced 1 hr ago</div></div></div>
+      <div class="source-card"><span class="source-status"></span><div><div class="name">Withings</div><div class="synced">Synced today</div></div></div>
+      <div class="source-card"><span class="source-status" style="background:var(--amber);"></span><div><div class="name">LabCorp</div><div class="synced">Awaiting next result</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="portal-banner">
+      <div>
+        <h3>Monitoring someone else?</h3>
+        <p>Open the caregiver &amp; clinician portal to see trends and alerts for people who've shared access with you.</p>
+      </div>
+      <a href="caregiver-portal.html" class="btn">Open portal →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Junie Health, Inc. · demo dashboard — data shown is sample data, not live</p>
+</footer>
+
+<script>
+  let currentUser = null;
+  let currentFullName = '';
+
+  function renderGreeting(fullName, email){
+    const displayName = fullName ? fullName.split(' ')[0] : email.split('@')[0];
+    document.getElementById('userGreeting').textContent = `Hi, ${displayName}.`;
+    const initials = fullName
+      ? fullName.split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase()
+      : email.slice(0,2).toUpperCase();
+    document.getElementById('userAvatar').textContent = initials;
+  }
+
+  (async () => {
+    const session = await requireAuth();
+    if (!session) return; // requireAuth already redirected to login.html
+
+    currentUser = session.user;
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('name')
+      .eq('user_id', currentUser.id)
+      .maybeSingle();
+
+    currentFullName = (profile && profile.name) ? profile.name : '';
+    renderGreeting(currentFullName, currentUser.email);
+    initMoodTracking();
+    initGlp1Tracking();
+  })();
+
+  // ---- GLP-1 / medication log (real Supabase table: glp1_logs) ----
+  function initGlp1Tracking(){
+    document.getElementById('glp1Date').value = todayISO();
+
+    document.getElementById('glp1Form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const statusEl = document.getElementById('glp1Status');
+      const med = document.getElementById('glp1Med').value.trim();
+      const date = document.getElementById('glp1Date').value || todayISO();
+      const note = document.getElementById('glp1Note').value.trim();
+      if (!med) return;
+
+      statusEl.textContent = 'Saving…';
+      const { error } = await supabaseClient
+        .from('glp1_logs')
+        .upsert([{ user_id: currentUser.id, log_date: date, medication: med, note: note || null }], { onConflict: 'user_id,log_date' });
+
+      if (error){
+        statusEl.textContent = "Couldn't save: " + error.message;
+        return;
+      }
+      statusEl.textContent = 'Logged.';
+      document.getElementById('glp1Note').value = '';
+      loadGlp1History();
+    });
+
+    loadGlp1History();
+  }
+
+  async function loadGlp1History(){
+    const historyEl = document.getElementById('glp1History');
+    const { data: rows } = await supabaseClient
+      .from('glp1_logs')
+      .select('log_date, medication, note')
+      .eq('user_id', currentUser.id)
+      .order('log_date', { ascending: false })
+      .limit(8);
+
+    if (!rows || rows.length === 0){
+      historyEl.innerHTML = '<p style="font-family:var(--mono); font-size:12px; color:var(--ink-faint); padding:10px 0;">No entries yet — log your first dose above.</p>';
+      return;
+    }
+    historyEl.innerHTML = rows.map(r => {
+      const d = new Date(r.log_date + 'T00:00:00');
+      const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return `<div class="entry">
+        <div><span class="med">${r.medication}</span>${r.note ? ' — <span class="note">' + r.note + '</span>' : ''}</div>
+        <div class="date">${label}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ---- Mood & stress tracking (real Supabase table: mood_logs) ----
+  function todayISO(){
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  async function initMoodTracking(){
+    const moodScale = document.getElementById('moodScale');
+    const stressScale = document.getElementById('stressScale');
+    const statusEl = document.getElementById('moodStatus');
+    let selectedMood = null;
+    let selectedStress = null;
+
+    const today = todayISO();
+    const { data: todayLog } = await supabaseClient
+      .from('mood_logs')
+      .select('mood, stress')
+      .eq('user_id', currentUser.id)
+      .eq('log_date', today)
+      .maybeSingle();
+
+    if (todayLog){
+      selectedMood = todayLog.mood;
+      selectedStress = todayLog.stress;
+      markSelected(moodScale, selectedMood);
+      markSelected(stressScale, selectedStress);
+      statusEl.textContent = "Logged for today — tap again to update.";
+    } else {
+      statusEl.textContent = "Tap a mood and a stress level to log today.";
+    }
+
+    function markSelected(container, val){
+      container.querySelectorAll('button').forEach(b => {
+        b.classList.toggle('selected', parseInt(b.dataset.val) === val);
+      });
+    }
+
+    async function saveLog(){
+      if (selectedMood === null || selectedStress === null) return;
+      statusEl.textContent = "Saving…";
+      const { error } = await supabaseClient
+        .from('mood_logs')
+        .upsert([{ user_id: currentUser.id, log_date: today, mood: selectedMood, stress: selectedStress }], { onConflict: 'user_id,log_date' });
+      if (error){
+        statusEl.textContent = "Couldn't save: " + error.message;
+        return;
+      }
+      statusEl.textContent = "Logged for today — tap again to update.";
+      loadMoodHistory();
+    }
+
+    moodScale.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedMood = parseInt(btn.dataset.val);
+        markSelected(moodScale, selectedMood);
+        saveLog();
+      });
+    });
+    stressScale.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        selectedStress = parseInt(btn.dataset.val);
+        markSelected(stressScale, selectedStress);
+        saveLog();
+      });
+    });
+
+    loadMoodHistory();
+  }
+
+  async function loadMoodHistory(){
+    const historyEl = document.getElementById('moodHistory');
+    const since = new Date();
+    since.setDate(since.getDate() - 6);
+    const sinceISO = since.toISOString().slice(0, 10);
+
+    const { data: rows } = await supabaseClient
+      .from('mood_logs')
+      .select('log_date, mood')
+      .eq('user_id', currentUser.id)
+      .gte('log_date', sinceISO)
+      .order('log_date', { ascending: true });
+
+    const byDate = {};
+    (rows || []).forEach(r => { byDate[r.log_date] = r.mood; });
+    const moodEmoji = { 1:'😞', 2:'🙁', 3:'😐', 4:'🙂', 5:'😄' };
+
+    let html = '';
+    for (let i = 6; i >= 0; i--){
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const iso = d.toISOString().slice(0, 10);
+      const label = d.toLocaleDateString('en-US', { weekday: 'short' })[0];
+      const mood = byDate[iso];
+      html += `<div><div class="day">${mood ? moodEmoji[mood] : ''}</div><div class="day-label">${label}</div></div>`;
+    }
+    historyEl.innerHTML = html;
+  }
+
+  // ---- Predictive insights: "show your work" toggles ----
+  document.querySelectorAll('.predict-work-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.target);
+      const isOpen = target.classList.toggle('open');
+      btn.textContent = isOpen ? 'Hide the data ▴' : 'Show your work ▾';
+    });
+  });
+
+  // Edit name — safe update-or-insert so this works whether or not a
+  // profiles row already exists for this account (e.g. if the original
+  // signup insert failed for any reason).
+  const editBtn = document.getElementById('editNameBtn');
+  const editForm = document.getElementById('editNameForm');
+  const editInput = document.getElementById('editNameInput');
+  const cancelBtn = document.getElementById('cancelNameBtn');
+  const saveNote = document.getElementById('nameSaveNote');
+
+  editBtn.addEventListener('click', () => {
+    editInput.value = currentFullName;
+    editForm.style.display = 'flex';
+    saveNote.style.display = 'none';
+    editInput.focus();
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    editForm.style.display = 'none';
+  });
+
+  editForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const newName = editInput.value.trim();
+    if (!newName) return;
+
+    const saveBtn = editForm.querySelector('button[type="submit"]');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving…';
+
+    try {
+      const { data: existing } = await supabaseClient
+        .from('profiles')
+        .select('user_id')
+        .eq('user_id', currentUser.id)
+        .maybeSingle();
+
+      let saveError;
+      if (existing) {
+        const { error } = await supabaseClient.from('profiles').update({ name: newName }).eq('user_id', currentUser.id);
+        saveError = error;
+      } else {
+        const { error } = await supabaseClient.from('profiles').insert([{ user_id: currentUser.id, name: newName, account_type: 'individual', plan: 'free' }]);
+        saveError = error;
+      }
+
+      if (saveError) {
+        saveNote.style.color = 'var(--down, #C0392B)';
+        saveNote.textContent = 'Couldn\'t save: ' + saveError.message;
+        saveNote.style.display = 'block';
+      } else {
+        currentFullName = newName;
+        renderGreeting(currentFullName, currentUser.email);
+        editForm.style.display = 'none';
+        saveNote.style.color = 'var(--signal)';
+        saveNote.textContent = 'Saved.';
+        saveNote.style.display = 'block';
+        setTimeout(() => { saveNote.style.display = 'none'; }, 2500);
+      }
+    } catch (err) {
+      saveNote.style.color = 'var(--down, #C0392B)';
+      saveNote.textContent = 'Something went wrong saving your name. Please try again.';
+      saveNote.style.display = 'block';
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save';
+    }
+  });
+
+  document.querySelectorAll('.toggle').forEach(t => {
+    t.addEventListener('click', () => t.classList.toggle('on'));
+  });
+
+  const alertList = document.getElementById('alertList');
+  document.getElementById('addAlertBtn').addEventListener('click', () => {
+    const source = document.getElementById('alertSource').value;
+    const metric = document.getElementById('alertMetric').value;
+    const condition = document.getElementById('alertCondition').value;
+    const row = document.createElement('div');
+    row.className = 'alert-row';
+    row.innerHTML = `
+      <div class="alert-info"><b>${metric}</b><span class="cond">${source} · ${condition} · Email + Push</span></div>
+      <button class="toggle on" aria-label="Toggle alert"></button>
+    `;
+    alertList.appendChild(row);
+    row.querySelector('.toggle').addEventListener('click', (e) => e.target.classList.toggle('on'));
+  });
+
+  document.getElementById('addGoalLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    alert('Demo only — goal creation isn\'t wired up yet, but this is where a "set a new goal" form would open.');
+  });
+</script>
+
+</body>
+</html>

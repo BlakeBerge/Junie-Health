@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For developers — Junie</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-32x32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-192x192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #FBFAF6;
+    --paper-alt: #F1EFE7;
+    --ink: #0A0A0A;
+    --ink-soft: #55584E;
+    --ink-faint: #8A8D80;
+    --rule: rgba(10,10,10,0.14);
+    --rule-soft: rgba(10,10,10,0.07);
+    --signal: #F2664A;
+    --signal-soft: rgba(242,102,74,0.12);
+    --vital: #0F9E92;
+    --vital-soft: rgba(15,158,146,0.12);
+    --serif: 'Fraunces', Georgia, serif;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --sans: 'Inter', -apple-system, sans-serif;
+    --max: 1180px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 40px;}
+  @media (max-width:640px){ .wrap{padding:0 20px;} }
+  h1,h2,h3{font-family:var(--serif); font-weight:600; margin:0; letter-spacing:-0.01em;}
+  p{margin:0;}
+  code{font-family:var(--mono); font-size:0.92em; background:var(--paper-alt); padding:2px 6px; border-radius:4px;}
+
+  header.nav{position:sticky; top:0; z-index:50; background:rgba(251,250,246,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--rule);}
+  .nav-inner{max-width:1320px; margin:0 auto; padding:20px 40px; display:flex; align-items:center; justify-content:space-between; gap:24px;}
+  @media (max-width:640px){ .nav-inner{padding:16px 20px;} }
+  .logo{display:flex; align-items:center; gap:11px; font-family:var(--serif); font-weight:700; font-size:21px; text-decoration:none; color:var(--signal);}
+  .logo-mark{width:32px; height:32px; border-radius:8px; background:var(--ink); display:flex; align-items:center; justify-content:center; flex:none;}
+  .logo-mark svg{width:18px; height:18px;}
+  .logo-mark{animation: heartbeat 1.7s ease-in-out infinite;}
+  @keyframes heartbeat{
+    0%, 100% { transform: scale(1); }
+    12% { transform: scale(1.16); }
+    24% { transform: scale(1); }
+    36% { transform: scale(1.1); }
+    48% { transform: scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .logo-mark{animation: none;}
+  }
+
+  .back-link{font-family:var(--sans); font-size:14.5px; color:var(--ink-soft); text-decoration:none; display:flex; align-items:center; gap:6px;}
+  .back-link:hover{color:var(--ink);}
+
+  .hero{padding:64px 0 12px;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--signal);
+    display:flex; align-items:center; gap:8px; margin-bottom:16px;
+  }
+  .eyebrow::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--signal); display:inline-block;}
+  .hero h1{font-size:clamp(34px,4.4vw,50px); line-height:1.06; margin-bottom:18px; max-width:760px;}
+  .hero p.lede{font-size:17.5px; color:var(--ink-soft); max-width:600px; margin-bottom:8px;}
+
+  section{padding:56px 0;}
+  section.alt{background:var(--paper-alt);}
+  .section-head{max-width:600px; margin-bottom:36px;}
+  .section-head h2{font-size:26px; margin-bottom:12px;}
+  .section-head p{color:var(--ink-soft); font-size:15.5px;}
+
+  .card-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  @media (max-width:860px){ .card-grid{grid-template-columns:1fr;} }
+  .card{border:1px solid var(--rule); border-radius:6px; padding:24px; background:var(--paper);}
+  .card h3{font-size:18px; margin-bottom:10px;}
+  .card p{color:var(--ink-soft); font-size:14.5px;}
+
+  pre{
+    background:var(--ink); color:#E9EAD9; font-family:var(--mono); font-size:13.5px;
+    padding:20px 22px; border-radius:8px; overflow-x:auto; max-width:720px; line-height:1.65;
+  }
+  pre .cmt{color:#7C8C82;}
+  pre .str{color:#7FDDA8;}
+  pre .kw{color:#6FB8E8;}
+
+  table{border-collapse:collapse; width:100%; max-width:720px; font-size:14.5px;}
+  th, td{text-align:left; padding:10px 14px; border-bottom:1px solid var(--rule);}
+  th{font-family:var(--mono); font-size:11.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-faint);}
+  td code{background:none; padding:0;}
+
+  .cta-band{text-align:center; padding:80px 0;}
+  .cta-band h2{font-size:clamp(26px,3.2vw,36px); margin-bottom:22px;}
+  .btn{
+    font-family:var(--sans); font-weight:600; font-size:15px; padding:13px 24px; border-radius:8px;
+    text-decoration:none; display:inline-flex; align-items:center; gap:9px;
+    border:1px solid var(--signal); background:var(--signal); color:#fff;
+  }
+
+  footer{border-top:1px solid var(--rule); padding:36px 0; background:var(--paper-alt); text-align:center;}
+  footer p{font-family:var(--mono); font-size:12px; color:var(--ink-faint);}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M2 12h4l2-7 4 14 3-9 2 5h5" stroke="var(--signal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Junie
+    </a>
+    <a href="index.html" class="back-link">← Back to Junie</a>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <p class="eyebrow">For developers &amp; agent builders</p>
+  <h1>Build automations on top of your own vitals.</h1>
+  <p class="lede">Junie isn't just a chat connector. Every tool it exposes to Claude or ChatGPT is also callable directly, so you can wire scheduled agents, dashboards, or your own product on top of the same feed.</p>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Three ways to build</h2>
+      <p>Pick the surface that matches what you're making.</p>
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <h3>Scheduled agents</h3>
+        <p>Point a cron-triggered agent (OpenClaw, a Claude Code job, your own script) at your MCP link and have it check readiness every morning, then message you when something drifts.</p>
+      </div>
+      <div class="card">
+        <h3>Personal API</h3>
+        <p>Pull raw JSON with a bearer token. No MCP client required — good for dashboards, spreadsheet syncs, or feeding your own model.</p>
+      </div>
+      <div class="card">
+        <h3>MCP tools</h3>
+        <p>Call <code>list_metrics</code>, <code>query_metrics</code>, <code>get_profile</code>, and <code>sync_source</code> directly from any MCP-aware agent framework.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Authenticate</h2>
+      <p>Generate a token from Settings → Developer, then send it as a bearer token on every request.</p>
+    </div>
+    <pre><span class="kw">const</span> res = <span class="kw">await</span> fetch(<span class="str">"https://junie.health/api/v1/metrics?metric=hrv&days=30"</span>, {
+  headers: { <span class="str">Authorization</span>: <span class="str">`Bearer ${process.env.CORPUS_TOKEN}`</span> }
+});
+<span class="kw">const</span> data = <span class="kw">await</span> res.json();</pre>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Rate limits</h2>
+      <p>Limits scale with plan. All limits are per token, per rolling minute.</p>
+    </div>
+    <table>
+      <tr><th>Plan</th><th>Requests / min</th><th>History window</th></tr>
+      <tr><td>Free</td><td><code>20</code></td><td>7 days</td></tr>
+      <tr><td>Pro</td><td><code>120</code></td><td>Full history</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="alt">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Example: a morning readiness agent</h2>
+      <p>A minimal scheduled job that checks HRV against baseline and only messages you when it's genuinely low.</p>
+    </div>
+    <pre><span class="cmt">// runs on a daily schedule, e.g. via cron or an agent framework</span>
+<span class="kw">const</span> { hrv, baseline } = <span class="kw">await</span> junie.query_metrics({
+  metrics: [<span class="str">"hrv"</span>, <span class="str">"hrv_baseline_30d"</span>],
+  days: 1
+});
+
+<span class="kw">if</span> (hrv &lt; baseline * 0.85) {
+  notify(<span class="str">`HRV is ${Math.round((1 - hrv/baseline) * 100)}% below baseline — consider an easy day.`</span>);
+}</pre>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="wrap">
+    <h2>Get a token and start building.</h2>
+    <a href="index.html#pricing" class="btn">Go to pricing →</a>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Junie Health, Inc. · demo developer docs</p>
+</footer>
+
+</body>
+</html>

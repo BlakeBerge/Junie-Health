@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sources — Junie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  :root{
+    --paper: #FBFAF6; --paper-alt: #F1EFE7; --ink: #0A0A0A; --ink-soft: #55584E; --ink-faint: #8A8D80;
+    --rule: rgba(10,10,10,0.14); --rule-soft: rgba(10,10,10,0.07);
+    --signal: #F2664A; --signal-soft: rgba(242,102,74,0.12);
+    --vital: #0F9E92; --vital-soft: rgba(15,158,146,0.12);
+    --amber: #C98A2C; --amber-soft: rgba(201,138,44,0.12);
+    --down: #9C2B44; --down-soft: rgba(156,43,68,0.1);
+    --serif: 'Fraunces', Georgia, serif; --mono: 'IBM Plex Mono', ui-monospace, monospace; --sans: 'Inter', -apple-system, sans-serif;
+    --max: 980px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 32px;}
+  @media (max-width:640px){ .wrap{padding:0 18px;} }
+  h1,h2,h3{font-family:var(--serif); font-weight:600; margin:0; letter-spacing:-0.01em;}
+  p{margin:0;}
+  button{font-family:inherit;}
+
+  header.appnav{border-bottom:1px solid var(--rule); background:var(--paper);}
+  .appnav-inner{max-width:1180px; margin:0 auto; padding:16px 32px; display:flex; align-items:center; justify-content:space-between; gap:24px;}
+  @media (max-width:640px){ .appnav-inner{padding:14px 18px;} }
+  .logo{display:flex; align-items:center; gap:10px; font-family:var(--serif); font-weight:700; font-size:19px; text-decoration:none; color:var(--signal); flex:none;}
+  .logo-mark{width:30px; height:30px; border-radius:8px; background:var(--ink); display:flex; align-items:center; justify-content:center; flex:none;}
+  .logo-mark svg{width:17px; height:17px;}
+  .logo-mark{animation: heartbeat 1.7s ease-in-out infinite;}
+  @keyframes heartbeat{0%,100%{transform:scale(1);} 12%{transform:scale(1.16);} 24%{transform:scale(1);} 36%{transform:scale(1.1);} 48%{transform:scale(1);}}
+  @media (prefers-reduced-motion: reduce){ .logo-mark{animation:none;} }
+
+  .applinks{display:flex; align-items:center; gap:26px; flex:1; padding-left:20px;}
+  .applinks a{font-family:var(--sans); font-size:14.5px; color:var(--ink-soft); text-decoration:none;}
+  .applinks a.active{color:var(--ink); font-weight:600;}
+  .applinks a:hover{color:var(--ink);}
+  @media (max-width:860px){ .applinks{display:none;} }
+
+  .account{display:flex; align-items:center; gap:14px; flex:none;}
+  .avatar{width:34px; height:34px; border-radius:50%; background:var(--signal-soft); color:var(--signal); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:700; font-size:13px;}
+  .logout{font-family:var(--mono); font-size:12.5px; color:var(--ink-faint); text-decoration:none;}
+  .logout:hover{color:var(--ink);}
+
+  .eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--signal); display:flex; align-items:center; gap:8px; margin-bottom:14px;}
+  .eyebrow::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--signal); display:inline-block;}
+
+  .hero{padding:44px 0 8px;}
+  .hero-top{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;}
+  .hero h1{font-size:clamp(28px,3.6vw,40px);}
+  .hero p.sub{color:var(--ink-soft); font-size:15px; max-width:520px; margin-top:8px;}
+  .plan-pill{
+    font-family:var(--mono); font-size:12.5px; color:var(--ink-soft);
+    border:1px solid var(--rule); border-radius:20px; padding:8px 16px; white-space:nowrap;
+  }
+  .plan-pill b{color:var(--signal);}
+
+  .honesty-banner{
+    display:flex; gap:12px; align-items:flex-start; border:1px solid var(--vital); background:var(--vital-soft);
+    border-radius:8px; padding:14px 18px; margin:24px 0 8px; font-size:13.5px; color:var(--ink-soft);
+  }
+  .honesty-banner .mark{font-family:var(--mono); color:var(--vital); font-weight:700; flex:none;}
+
+  section{padding:28px 0;}
+  .cat-block{margin-bottom:8px;}
+  .cat-label{
+    font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-faint);
+    padding:22px 0 12px; border-top:1px solid var(--rule);
+  }
+  .cat-block:first-child .cat-label{border-top:none; padding-top:0;}
+
+  .source-row{
+    display:flex; align-items:center; gap:16px; padding:16px 0; border-bottom:1px solid var(--rule-soft);
+  }
+  .source-icon{
+    width:38px; height:38px; border-radius:9px; flex:none; display:flex; align-items:center; justify-content:center;
+  }
+  .source-icon svg{width:18px; height:18px;}
+  .source-info{flex:1; min-width:0;}
+  .source-name{font-size:15px; font-weight:600;}
+  .source-meta{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); margin-top:2px;}
+  .source-meta.connected{color:var(--vital);}
+
+  .source-actions{display:flex; align-items:center; gap:14px; flex:none;}
+  .btn-connect{
+    font-family:var(--sans); font-weight:600; font-size:13px; padding:9px 16px; border-radius:8px;
+    border:1px solid var(--ink); background:none; color:var(--ink); cursor:pointer;
+  }
+  .btn-connect:hover{background:var(--paper-alt);}
+  .btn-connect:disabled{opacity:0.4; cursor:not-allowed;}
+  .btn-remove{
+    font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); background:none; border:none;
+    cursor:pointer; text-decoration:underline; padding:0;
+  }
+  .btn-remove:hover{color:var(--down);}
+  .planned-tag{
+    font-family:var(--mono); font-size:10.5px; text-transform:uppercase; color:var(--amber);
+    background:var(--amber-soft); padding:3px 9px; border-radius:20px;
+  }
+
+  .toggle{
+    position:relative; width:38px; height:21px; border-radius:20px; background:var(--rule);
+    flex:none; cursor:pointer; border:none; padding:0;
+  }
+  .toggle.on{background:var(--vital);}
+  .toggle::after{content:""; position:absolute; width:16px; height:16px; border-radius:50%; background:#fff; top:2.5px; left:3px; transition:left .15s ease;}
+  .toggle.on::after{left:19px;}
+
+  .limit-note{
+    font-family:var(--mono); font-size:12px; color:var(--signal); margin-top:8px; display:none;
+  }
+  .limit-note.show{display:block;}
+
+  /* CSV import */
+  .import-panel{border:2px solid var(--ink); border-radius:10px; padding:28px; background:var(--paper);}
+  .import-head h2{font-size:19px; margin-bottom:8px;}
+  .import-head p{color:var(--ink-soft); font-size:14px; margin-bottom:20px;}
+  .import-label{font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-faint); display:block; margin-bottom:8px;}
+  .import-step select, .import-step input[type="file"]{
+    border:1px solid var(--rule); border-radius:8px; padding:10px 12px;
+    font-family:var(--sans); font-size:14px; color:var(--ink); background:var(--paper-alt);
+    width:100%; max-width:360px;
+  }
+  .import-hint{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); margin-top:8px;}
+  .import-metric-cols{display:flex; flex-wrap:wrap; gap:10px;}
+  .import-metric-cols label{
+    display:flex; align-items:center; gap:6px; font-size:13px; color:var(--ink-soft);
+    border:1px solid var(--rule); border-radius:20px; padding:6px 12px; cursor:pointer;
+  }
+  .import-metric-cols input{width:auto;}
+  .import-preview{margin-top:18px; overflow-x:auto;}
+  .import-preview table{border-collapse:collapse; font-size:12px; width:100%;}
+  .import-preview th, .import-preview td{border:1px solid var(--rule); padding:6px 10px; text-align:left; white-space:nowrap;}
+  .import-preview th{background:var(--paper-alt); font-family:var(--mono); font-size:10.5px; text-transform:uppercase;}
+  .import-status{font-family:var(--mono); font-size:12.5px; color:var(--signal); margin-top:14px;}
+
+  /* PDF lab row editor */
+  .pdf-row{
+    display:flex; align-items:center; gap:8px; padding:8px 0; border-top:1px solid var(--rule-soft); flex-wrap:wrap;
+  }
+  .pdf-row:first-child{border-top:none;}
+  .pdf-row input[type="text"], .pdf-row input[type="number"]{
+    border:1px solid var(--rule); border-radius:6px; padding:7px 9px; font-family:var(--sans); font-size:13px;
+    background:var(--paper-alt); color:var(--ink);
+  }
+  .pdf-row .pdf-name{flex:2; min-width:160px;}
+  .pdf-row .pdf-value{flex:1; min-width:80px;}
+  .pdf-row .pdf-unit{flex:1; min-width:70px;}
+  .pdf-row .pdf-remove{
+    background:none; border:none; color:var(--down, #9C2B44); cursor:pointer; font-family:var(--mono); font-size:12px;
+    text-decoration:underline; flex:none;
+  }
+
+  footer{border-top:1px solid var(--rule); padding:30px 0; background:var(--paper-alt); text-align:center; margin-top:20px;}
+  footer p{font-family:var(--mono); font-size:12px; color:var(--ink-faint);}
+</style>
+</head>
+<body>
+
+<header class="appnav">
+  <div class="appnav-inner">
+    <a href="dashboard.html" class="logo">
+      <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M2 12h4l2-7 4 14 3-9 2 5h5" stroke="var(--signal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      Junie
+    </a>
+    <nav class="applinks">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="health-audit.html">Health Audit</a>
+      <a href="dashboard.html#goals">Goals</a>
+      <a href="dashboard.html#alerts">Alerts</a>
+      <a href="sources.html" class="active">Sources</a>
+    </nav>
+    <div class="account">
+      <span class="avatar" id="userAvatar">··</span>
+      <a href="index.html" class="logout" onclick="logOut(event)">Log out</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap hero">
+  <div class="hero-top">
+    <div>
+      <p class="eyebrow">Data in</p>
+      <h1>Sources</h1>
+      <p class="sub">Connect the rings, watches, labs, and logs you already use. Read-only, revocable any time.</p>
+    </div>
+    <div class="plan-pill" id="planPill">Loading plan…</div>
+  </div>
+
+  <div class="honesty-banner">
+    <span class="mark">i</span>
+    <span>Connecting a source here is real — it's saved to your account and persists across logins. What's not built yet: pulling live data from each provider's actual API. That's a bigger integration project, in progress. Today, connecting sets up the link; it doesn't yet stream real biometrics.</span>
+  </div>
+
+  <p class="limit-note" id="limitNote">You're on the Free plan — 1 active source included. <a href="index.html#pricing" style="color:var(--signal); text-decoration:underline;">Go Pro for unlimited →</a></p>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="import-panel">
+      <div class="import-head">
+        <h2>Import your own export — this one's real</h2>
+        <p>Oura, Garmin, and Apple Health all let you export your own data as a file. Upload it here and it's genuinely stored on your account — not a demo.</p>
+      </div>
+
+      <div class="import-step" id="importStep1">
+        <label class="import-label">1. What's this data from?</label>
+        <select id="importSource">
+          <option>Oura</option>
+          <option>Garmin</option>
+          <option>Apple Health</option>
+          <option>Strava</option>
+          <option>Other</option>
+        </select>
+        <label class="import-label" style="margin-top:16px;">2. Choose your exported CSV file</label>
+        <input type="file" id="importFile" accept=".csv">
+        <p class="import-hint">Don't have one yet? Most apps have an export option under Settings → Export data / Download my data.</p>
+      </div>
+
+      <div class="import-step" id="importStep2" style="display:none;">
+        <label class="import-label">3. Which column is the date?</label>
+        <select id="importDateCol"></select>
+        <label class="import-label" style="margin-top:16px;">4. Which columns do you want to import as metrics?</label>
+        <div id="importMetricCols" class="import-metric-cols"></div>
+        <div class="import-preview">
+          <p class="import-label">Preview (first 3 rows)</p>
+          <div id="importPreviewTable"></div>
+        </div>
+        <button class="btn-connect" id="importConfirmBtn" style="margin-top:16px;">Import this data →</button>
+      </div>
+
+      <p class="import-status" id="importStatus"></p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="import-panel">
+      <div class="import-head">
+        <h2>Import a lab PDF — LabCorp, Function Health, Quest</h2>
+        <p>Lab results come as PDFs, not spreadsheets, so this reads the report and pulls out biomarker rows for you to check before anything is saved. PDF layouts vary a lot — always review the extracted rows below before importing.</p>
+      </div>
+
+      <div class="import-step">
+        <label class="import-label">1. Which lab is this from?</label>
+        <select id="pdfSource">
+          <option>LabCorp</option>
+          <option>Function Health</option>
+          <option>Quest Diagnostics</option>
+          <option>Other</option>
+        </select>
+        <label class="import-label" style="margin-top:16px;">2. Choose your lab report PDF</label>
+        <input type="file" id="pdfFile" accept=".pdf">
+        <p class="import-hint">Most patient portals have a "Download PDF" or "Print report" option next to your results.</p>
+      </div>
+
+      <div class="import-step" id="pdfStep2" style="display:none;">
+        <label class="import-label">3. Date of this draw</label>
+        <input type="date" id="pdfDate" style="max-width:200px;">
+
+        <label class="import-label" style="margin-top:16px;">4. Review what was found — edit or remove anything that's wrong</label>
+        <p class="import-hint" style="margin-bottom:12px;">PDF extraction is best-effort. Nothing is saved until you confirm each row below.</p>
+        <div id="pdfRows"></div>
+        <button class="btn-connect" id="pdfAddRowBtn" type="button" style="margin-top:10px;">+ Add a row</button>
+        <br>
+        <button class="btn-connect" id="pdfConfirmBtn" style="margin-top:16px;">Import checked rows →</button>
+      </div>
+
+      <p class="import-status" id="pdfStatus"></p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap" id="catalogRoot">
+    <!-- rendered by JS -->
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Junie Health, Inc. · connection state is real; live provider data sync is not yet built</p>
+</footer>
+
+<script>
+  // Generic, category-level icons — deliberately not per-brand logos (no
+  // trademark reproduction), each tied to what the category of device does.
+  const CATEGORY_ICONS = {
+    'Mobile (iOS & Android)': { color: 'var(--signal)', bg: 'var(--signal-soft)', path: 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm4 17.5a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8Z' },
+    'Rings & watches': { color: 'var(--vital)', bg: 'var(--vital-soft)', path: 'M12 4a8 8 0 1 0 0.01 0Z M12 8.5a3.5 3.5 0 1 0 0.01 0Z' },
+    'Labs & bloodwork': { color: 'var(--down)', bg: 'var(--down-soft)', path: 'M12 2v6.5L6 19a3 3 0 0 0 2.6 4.5h6.8A3 3 0 0 0 18 19l-6-10.5V2M9 2h6M8 15h8' },
+    'Glucose, power & effort': { color: 'var(--amber)', bg: 'var(--amber-soft)', path: 'M13 2 4 14h6l-1 8 9-12h-6l1-8Z' },
+    'Nutrition': { color: 'var(--signal)', bg: 'var(--signal-soft)', path: 'M7 2v8a2 2 0 0 0 2 2v10M7 2v20M11 2v10M15 2c-1.5 0-3 1.5-3 4s1.5 4 3 4v10' },
+    'Strength & training logs': { color: 'var(--vital)', bg: 'var(--vital-soft)', path: 'M4 9v6M2 10v4M20 9v6M22 10v4M7 12h10M6 8v8M18 8v8' },
+    'Home & sleep environment': { color: 'var(--amber)', bg: 'var(--amber-soft)', path: 'M3 11.5 12 4l9 7.5M5 10v10h5v-6h4v6h5V10' }
+  };
+
+  const CATALOG = [
+    { key:'apple_health', name:'Apple Health', category:'Mobile (iOS & Android)', live:true },
+    { key:'health_connect', name:'Health Connect', category:'Mobile (iOS & Android)', live:true },
+
+    { key:'oura', name:'Oura', category:'Rings & watches', live:true },
+    { key:'garmin', name:'Garmin Connect', category:'Rings & watches', live:true },
+    { key:'whoop', name:'WHOOP', category:'Rings & watches', live:true },
+    { key:'polar', name:'Polar', category:'Rings & watches', live:true },
+    { key:'suunto', name:'Suunto', category:'Rings & watches', live:true },
+    { key:'withings', name:'Withings', category:'Rings & watches', live:true },
+    { key:'ultrahuman', name:'Ultrahuman', category:'Rings & watches', live:true },
+    { key:'fitbit', name:'Fitbit', category:'Rings & watches', live:true },
+    { key:'coros', name:'Coros', category:'Rings & watches', live:true },
+    { key:'amazfit', name:'Amazfit', category:'Rings & watches', live:false },
+    { key:'xiaomi', name:'Xiaomi Mi Band', category:'Rings & watches', live:false },
+    { key:'huawei', name:'Huawei Health', category:'Rings & watches', live:false },
+
+    { key:'labcorp', name:'LabCorp', category:'Labs & bloodwork', live:true },
+    { key:'quest', name:'Quest Diagnostics', category:'Labs & bloodwork', live:true },
+    { key:'function_health', name:'Function Health', category:'Labs & bloodwork', live:true },
+
+    { key:'dexcom', name:'Dexcom', category:'Glucose, power & effort', live:false },
+    { key:'strava', name:'Strava', category:'Glucose, power & effort', live:true },
+    { key:'wahoo', name:'Wahoo', category:'Glucose, power & effort', live:true },
+    { key:'concept2', name:'Concept2', category:'Glucose, power & effort', live:true },
+    { key:'intervals', name:'Intervals.icu', category:'Glucose, power & effort', live:true },
+
+    { key:'myfitnesspal', name:'MyFitnessPal', category:'Nutrition', live:true },
+    { key:'cronometer', name:'Cronometer', category:'Nutrition', live:true },
+
+    { key:'hevy', name:'Hevy', category:'Strength & training logs', live:true },
+
+    { key:'eight_sleep', name:'Eight Sleep', category:'Home & sleep environment', live:true },
+    { key:'airthings', name:'Airthings', category:'Home & sleep environment', live:true },
+    { key:'sleep_cycle', name:'Sleep Cycle', category:'Home & sleep environment', live:false }
+  ];
+
+  function iconSvg(category){
+    const c = CATEGORY_ICONS[category];
+    return `<span class="source-icon" style="background:${c.bg}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="${c.color}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${c.path}"/></svg>
+    </span>`;
+  }
+
+  let currentUser = null;
+  let userPlan = 'free';
+  let connections = {}; // key -> { status, id }
+
+  async function loadConnections(){
+    const { data } = await supabaseClient
+      .from('connected_sources')
+      .select('id, source_key, status')
+      .eq('user_id', currentUser.id);
+    connections = {};
+    (data || []).forEach(row => { connections[row.source_key] = { id: row.id, status: row.status }; });
+  }
+
+  function activeCount(){
+    return Object.values(connections).filter(c => c.status === 'active').length;
+  }
+
+  function planLimit(){
+    return userPlan === 'free' ? 1 : Infinity;
+  }
+
+  function render(){
+    const root = document.getElementById('catalogRoot');
+    root.innerHTML = '';
+    const byCategory = {};
+    CATALOG.forEach(item => {
+      (byCategory[item.category] = byCategory[item.category] || []).push(item);
+    });
+
+    Object.keys(CATEGORY_ICONS).forEach(category => {
+      const items = byCategory[category] || [];
+      const block = document.createElement('div');
+      block.className = 'cat-block';
+      const rows = items.map(item => {
+        const conn = connections[item.key];
+        const isActive = conn && conn.status === 'active';
+        const isPaused = conn && conn.status === 'inactive';
+
+        let actionsHtml = '';
+        if (!item.live) {
+          actionsHtml = `<span class="planned-tag">Coming soon</span>`;
+        } else if (conn) {
+          actionsHtml = `
+            <button class="btn-remove" data-remove="${item.key}">Remove</button>
+            <button class="toggle ${isActive ? 'on' : ''}" data-toggle="${item.key}" aria-label="Toggle ${item.name}"></button>
+          `;
+        } else {
+          actionsHtml = `<button class="btn-connect" data-connect="${item.key}" data-name="${item.name}" data-category="${item.category}">Connect</button>`;
+        }
+
+        const metaText = !item.live ? 'Not yet available'
+          : isActive ? 'Active · syncing'
+          : isPaused ? 'Paused'
+          : 'Not connected';
+
+        return `
+          <div class="source-row">
+            ${iconSvg(item.category)}
+            <div class="source-info">
+              <div class="source-name">${item.name}</div>
+              <div class="source-meta ${isActive ? 'connected' : ''}">${metaText}</div>
+            </div>
+            <div class="source-actions">${actionsHtml}</div>
+          </div>
+        `;
+      }).join('');
+
+      block.innerHTML = `<div class="cat-label">${category}</div>${rows}`;
+      root.appendChild(block);
+    });
+
+    // wire up buttons
+    root.querySelectorAll('[data-connect]').forEach(btn => {
+      btn.addEventListener('click', () => handleConnect(btn.dataset.connect, btn.dataset.name, btn.dataset.category));
+    });
+    root.querySelectorAll('[data-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => handleToggle(btn.dataset.toggle));
+    });
+    root.querySelectorAll('[data-remove]').forEach(btn => {
+      btn.addEventListener('click', () => handleRemove(btn.dataset.remove));
+    });
+
+    updatePlanUI();
+  }
+
+  function updatePlanUI(){
+    const limit = planLimit();
+    const used = activeCount();
+    const planLabel = userPlan === 'free' ? 'Free' : userPlan === 'pro' ? 'Pro' : 'Founding';
+    document.getElementById('planPill').innerHTML = limit === Infinity
+      ? `Plan: <b>${planLabel}</b> · unlimited sources`
+      : `<b>${used} of ${limit}</b> source slot${limit===1?'':'s'} on your plan in use`;
+    document.getElementById('limitNote').classList.toggle('show', userPlan === 'free');
+  }
+
+  async function handleConnect(key, name, category){
+    if (activeCount() >= planLimit()){
+      alert(`You've used your Free plan's source slot. Upgrade to Pro for unlimited sources, or pause your current source first.`);
+      return;
+    }
+
+    if (key in OAUTH_PROVIDER_NAMES){
+      await startProviderOAuth(key);
+      return;
+    }
+
+    const { data, error } = await supabaseClient
+      .from('connected_sources')
+      .insert([{ user_id: currentUser.id, source_key: key, source_name: name, category: category, status: 'active' }])
+      .select()
+      .single();
+    if (error){
+      console.error('Connect failed:', error.message);
+      alert('Could not connect this source: ' + error.message);
+      return;
+    }
+    connections[key] = { id: data.id, status: 'active' };
+    render();
+  }
+
+  // Real OAuth providers -- each has a `<key>-start` edge function that
+  // returns the provider's authorize URL. See oura-start/fitbit-start/
+  // whoop-start in Supabase for the server side of this.
+  const OAUTH_PROVIDER_NAMES = { oura: 'Oura', fitbit: 'Fitbit', whoop: 'WHOOP', strava: 'Strava' };
+
+  async function startProviderOAuth(key){
+    const providerName = OAUTH_PROVIDER_NAMES[key] || key;
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session){
+      alert(`Please sign in again before connecting ${providerName}.`);
+      return;
+    }
+    try {
+      const resp = await fetch(`https://sakfofbohkndoeiqlndo.supabase.co/functions/v1/${key}-start`, {
+        headers: { Authorization: 'Bearer ' + session.access_token }
+      });
+      const data = await resp.json();
+      if (data.authorizeUrl){
+        window.location.href = data.authorizeUrl;
+      } else {
+        alert(data.error || `Could not start the ${providerName} connection.`);
+      }
+    } catch (err) {
+      alert(`Could not reach the ${providerName} connection service: ` + err.message);
+    }
+  }
+
+  async function handleToggle(key){
+    const conn = connections[key];
+    if (!conn) return;
+    const newStatus = conn.status === 'active' ? 'inactive' : 'active';
+    if (newStatus === 'active' && activeCount() >= planLimit()){
+      alert(`You've used your Free plan's source slot. Upgrade to Pro for unlimited sources, or pause another source first.`);
+      return;
+    }
+    const { error } = await supabaseClient.from('connected_sources').update({ status: newStatus }).eq('id', conn.id);
+    if (error){ alert('Could not update this source: ' + error.message); return; }
+    conn.status = newStatus;
+    render();
+  }
+
+  async function handleRemove(key){
+    const conn = connections[key];
+    if (!conn) return;
+    if (!confirm('Remove this source? Your connection choice will be deleted — you can reconnect any time.')) return;
+    const { error } = await supabaseClient.from('connected_sources').delete().eq('id', conn.id);
+    if (error){ alert('Could not remove this source: ' + error.message); return; }
+    delete connections[key];
+    render();
+  }
+
+  (async () => {
+    const session = await requireAuth();
+    if (!session) return;
+    currentUser = session.user;
+
+    const { data: profile } = await supabaseClient
+      .from('profiles')
+      .select('name, plan')
+      .eq('user_id', currentUser.id)
+      .maybeSingle();
+
+    userPlan = (profile && profile.plan) ? profile.plan : 'free';
+    const fullName = (profile && profile.name) ? profile.name : '';
+    document.getElementById('userAvatar').textContent = fullName
+      ? fullName.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase()
+      : currentUser.email.slice(0,2).toUpperCase();
+
+    await loadConnections();
+    render();
+    initCsvImport();
+    initPdfImport();
+    showProviderReturnStatus();
+  })();
+
+  // Shows a banner if we just landed back here from a provider's OAuth
+  // redirect (oura-callback / fitbit-callback / whoop-callback all use
+  // this same `?<provider>=connected|error&msg=...` convention).
+  function showProviderReturnStatus(){
+    const params = new URLSearchParams(window.location.search);
+    const key = Object.keys(OAUTH_PROVIDER_NAMES).find(k => params.get(k));
+    if (!key) return;
+    const providerName = OAUTH_PROVIDER_NAMES[key];
+    const result = params.get(key);
+    const msg = params.get('msg') || '';
+    const banner = document.createElement('div');
+    banner.style.cssText = `margin:16px 0; padding:14px 18px; border-radius:8px; font-size:14px; font-family:var(--sans);
+      ${result === 'connected' ? 'background:var(--vital-soft); border:1px solid var(--vital); color:var(--ink);' : 'background:var(--down-soft, #fdecea); border:1px solid var(--down, #9C2B44); color:var(--ink);'}`;
+    banner.textContent = result === 'connected'
+      ? `✓ ${providerName} connected successfully — this is a real, working connection.`
+      : `✗ ${providerName} connection failed: ` + decodeURIComponent(msg);
+    document.querySelector('.wrap.hero').appendChild(banner);
+    // clean the URL so a refresh doesn't re-show the banner
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
+  // ---- CSV import (real Supabase table: health_metrics) ----
+  let parsedRows = [];
+  let parsedHeaders = [];
+
+  function initCsvImport(){
+    document.getElementById('importFile').addEventListener('change', handleFileSelect);
+    document.getElementById('importConfirmBtn').addEventListener('click', confirmImport);
+  }
+
+  function handleFileSelect(e){
+    const file = e.target.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('importStatus');
+    statusEl.textContent = 'Reading file…';
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results){
+        parsedRows = results.data;
+        parsedHeaders = results.meta.fields || [];
+        if (parsedRows.length === 0 || parsedHeaders.length === 0){
+          statusEl.textContent = "Couldn't find any rows in that file — check it's a valid CSV with a header row.";
+          return;
+        }
+        statusEl.textContent = `Found ${parsedRows.length} rows, ${parsedHeaders.length} columns.`;
+        renderColumnMapping();
+      },
+      error: function(err){
+        statusEl.textContent = 'Could not read that file: ' + err.message;
+      }
+    });
+  }
+
+  function renderColumnMapping(){
+    document.getElementById('importStep2').style.display = 'block';
+
+    const dateSelect = document.getElementById('importDateCol');
+    dateSelect.innerHTML = parsedHeaders.map(h => `<option value="${h}">${h}</option>`).join('');
+    // best-effort guess at the date column
+    const dateGuess = parsedHeaders.find(h => /date|day|time/i.test(h));
+    if (dateGuess) dateSelect.value = dateGuess;
+
+    const metricCols = document.getElementById('importMetricCols');
+    metricCols.innerHTML = parsedHeaders.map(h => `
+      <label><input type="checkbox" value="${h}" ${/date|day|time/i.test(h) ? '' : 'checked'}>${h}</label>
+    `).join('');
+
+    const previewEl = document.getElementById('importPreviewTable');
+    const previewRows = parsedRows.slice(0, 3);
+    previewEl.innerHTML = `
+      <table>
+        <tr>${parsedHeaders.map(h => `<th>${h}</th>`).join('')}</tr>
+        ${previewRows.map(r => `<tr>${parsedHeaders.map(h => `<td>${r[h] ?? ''}</td>`).join('')}</tr>`).join('')}
+      </table>
+    `;
+  }
+
+  async function confirmImport(){
+    const statusEl = document.getElementById('importStatus');
+    const btn = document.getElementById('importConfirmBtn');
+    const source = document.getElementById('importSource').value;
+    const dateCol = document.getElementById('importDateCol').value;
+    const metricCols = Array.from(document.querySelectorAll('#importMetricCols input:checked')).map(el => el.value);
+
+    if (!dateCol || metricCols.length === 0){
+      statusEl.textContent = 'Pick a date column and at least one metric column first.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Importing…';
+
+    const rowsToInsert = [];
+    for (const row of parsedRows){
+      const rawDate = row[dateCol];
+      const parsedDate = parseFlexibleDate(rawDate);
+      if (!parsedDate) continue;
+
+      for (const col of metricCols){
+        const rawVal = row[col];
+        const num = parseFloat(String(rawVal).replace(/[^0-9.\-]/g, ''));
+        if (isNaN(num)) continue;
+        rowsToInsert.push({
+          user_id: currentUser.id,
+          source: source,
+          metric_date: parsedDate,
+          metric_type: col,
+          value: num
+        });
+      }
+    }
+
+    if (rowsToInsert.length === 0){
+      statusEl.textContent = "Couldn't find any usable numeric values in the columns you picked.";
+      btn.disabled = false;
+      btn.textContent = 'Import this data →';
+      return;
+    }
+
+    // insert in batches of 500 to stay well within request size limits
+    let inserted = 0;
+    for (let i = 0; i < rowsToInsert.length; i += 500){
+      const batch = rowsToInsert.slice(i, i + 500);
+      const { error } = await supabaseClient.from('health_metrics').insert(batch);
+      if (error){
+        statusEl.textContent = 'Import failed partway through: ' + error.message;
+        btn.disabled = false;
+        btn.textContent = 'Import this data →';
+        return;
+      }
+      inserted += batch.length;
+    }
+
+    statusEl.textContent = `Imported ${inserted} data points from ${source}. This is now real data on your account.`;
+    btn.disabled = false;
+    btn.textContent = 'Import this data →';
+  }
+
+  function parseFlexibleDate(raw){
+    if (!raw) return null;
+    const d = new Date(raw);
+    if (isNaN(d.getTime())) return null;
+    return d.toISOString().slice(0, 10);
+  }
+
+  // ---- PDF lab import (best-effort extraction, real Supabase table: health_metrics) ----
+  let pdfExtractedText = '';
+
+  function initPdfImport(){
+    if (window.pdfjsLib){
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+    document.getElementById('pdfFile').addEventListener('change', handlePdfSelect);
+    document.getElementById('pdfAddRowBtn').addEventListener('click', () => addPdfRow('', '', ''));
+    document.getElementById('pdfConfirmBtn').addEventListener('click', confirmPdfImport);
+    document.getElementById('pdfDate').value = new Date().toISOString().slice(0, 10);
+  }
+
+  async function extractPdfLines(pdfDoc){
+    const lines = [];
+    for (let i = 1; i <= pdfDoc.numPages; i++){
+      const page = await pdfDoc.getPage(i);
+      const content = await page.getTextContent();
+      const rows = {};
+      content.items.forEach(item => {
+        const y = Math.round(item.transform[5]);
+        if (!rows[y]) rows[y] = [];
+        rows[y].push(item);
+      });
+      const ys = Object.keys(rows).map(Number).sort((a, b) => b - a);
+      ys.forEach(y => {
+        const rowItems = rows[y].sort((a, b) => a.transform[4] - b.transform[4]);
+        const lineText = rowItems.map(it => it.str).join(' ').replace(/\s+/g, ' ').trim();
+        if (lineText) lines.push(lineText);
+      });
+    }
+    return lines;
+  }
+
+  function parseBiomarkerLine(line){
+    const match = line.match(/^([A-Za-z][A-Za-z0-9\s\-\/(),.]{2,45}?)\s+([-+]?\d+\.?\d*)\s*([a-zA-Z%\/µ]{0,12})?/);
+    if (!match) return null;
+    const name = match[1].trim();
+    const value = parseFloat(match[2]);
+    const unit = (match[3] || '').trim();
+    if (isNaN(value)) return null;
+    if (name.length < 2) return null;
+    if (/^(page|date|dob|patient|specimen|report|collected|received|fax|phone|physician|address|account|order)/i.test(name)) return null;
+    return { name, value, unit };
+  }
+
+  function findLikelyDate(lines){
+    for (const line of lines){
+      const m = line.match(/\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})\b/);
+      if (m){
+        let [, mo, da, yr] = m;
+        if (yr.length === 2) yr = '20' + yr;
+        const d = new Date(`${yr}-${mo.padStart(2,'0')}-${da.padStart(2,'0')}`);
+        if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+      }
+    }
+    return null;
+  }
+
+  async function handlePdfSelect(e){
+    const file = e.target.files[0];
+    if (!file) return;
+    const statusEl = document.getElementById('pdfStatus');
+
+    if (!window.pdfjsLib){
+      statusEl.textContent = "The PDF reading library didn't load — check your connection and try again.";
+      return;
+    }
+
+    statusEl.textContent = 'Reading PDF…';
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const lines = await extractPdfLines(pdfDoc);
+      pdfExtractedText = lines.join('\n');
+
+      const candidates = [];
+      for (const line of lines){
+        const parsed = parseBiomarkerLine(line);
+        if (parsed) candidates.push(parsed);
+        if (candidates.length >= 40) break;
+      }
+
+      const likelyDate = findLikelyDate(lines);
+      if (likelyDate) document.getElementById('pdfDate').value = likelyDate;
+
+      document.getElementById('pdfRows').innerHTML = '';
+      if (candidates.length === 0){
+        statusEl.textContent = "Couldn't automatically find any biomarker rows in this PDF. You can add rows manually below using '+ Add a row'.";
+      } else {
+        candidates.forEach(c => addPdfRow(c.name, c.value, c.unit));
+        statusEl.textContent = `Found ${candidates.length} possible rows — review them below before importing.`;
+      }
+      document.getElementById('pdfStep2').style.display = 'block';
+    } catch (err) {
+      statusEl.textContent = 'Could not read that PDF: ' + err.message;
+    }
+  }
+
+  function addPdfRow(name, value, unit){
+    const container = document.getElementById('pdfRows');
+    const row = document.createElement('div');
+    row.className = 'pdf-row';
+    row.innerHTML = `
+      <input type="text" class="pdf-name" placeholder="Biomarker name" value="${name}">
+      <input type="number" step="any" class="pdf-value" placeholder="Value" value="${value}">
+      <input type="text" class="pdf-unit" placeholder="Unit" value="${unit}">
+      <button type="button" class="pdf-remove">Remove</button>
+    `;
+    row.querySelector('.pdf-remove').addEventListener('click', () => row.remove());
+    container.appendChild(row);
+  }
+
+  async function confirmPdfImport(){
+    const statusEl = document.getElementById('pdfStatus');
+    const btn = document.getElementById('pdfConfirmBtn');
+    const source = document.getElementById('pdfSource').value;
+    const date = document.getElementById('pdfDate').value;
+
+    if (!date){
+      statusEl.textContent = 'Set the draw date first.';
+      return;
+    }
+
+    const rows = Array.from(document.querySelectorAll('#pdfRows .pdf-row')).map(row => ({
+      name: row.querySelector('.pdf-name').value.trim(),
+      value: parseFloat(row.querySelector('.pdf-value').value),
+      unit: row.querySelector('.pdf-unit').value.trim()
+    })).filter(r => r.name && !isNaN(r.value));
+
+    if (rows.length === 0){
+      statusEl.textContent = 'No valid rows to import — check that each row has a name and a numeric value.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Importing…';
+
+    const toInsert = rows.map(r => ({
+      user_id: currentUser.id,
+      source: source,
+      metric_date: date,
+      metric_type: r.name,
+      value: r.value,
+      unit: r.unit || null
+    }));
+
+    const { error } = await supabaseClient.from('health_metrics').insert(toInsert);
+    if (error){
+      statusEl.textContent = 'Import failed: ' + error.message;
+    } else {
+      statusEl.textContent = `Imported ${toInsert.length} biomarkers from ${source}. This is now real data on your account.`;
+    }
+    btn.disabled = false;
+    btn.textContent = 'Import checked rows →';
+  }
+</script>
+
+</body>
+</html>
