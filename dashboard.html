@@ -92,6 +92,19 @@
   .btn:hover{background:var(--paper);}
 
   .panel{border:1px solid var(--rule); border-radius:12px; padding:22px; background:var(--paper);}
+
+  .sources-stat-row{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; padding-bottom:18px; border-bottom:1px solid var(--rule-soft);}
+  @media (max-width:640px){ .sources-stat-row{grid-template-columns:1fr;} }
+  .sources-stat{display:flex; flex-direction:column; gap:4px;}
+  .sources-stat .n{font-family:var(--serif); font-size:30px; font-weight:600;}
+  .sources-stat .l{font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-faint);}
+  .sources-chip-row{display:flex; flex-wrap:wrap; gap:10px; padding-top:16px;}
+  .source-chip{
+    display:flex; align-items:center; gap:8px; border:1px solid var(--rule); border-radius:20px;
+    padding:7px 14px 7px 10px; font-size:13px; font-family:var(--sans);
+  }
+  .source-chip .dot{width:7px; height:7px; border-radius:50%; background:var(--vital); flex:none;}
+  .source-chip-empty{font-family:var(--mono); font-size:12.5px; color:var(--ink-faint);}
   .goal{margin-bottom:18px;}
   .goal:last-child{margin-bottom:0;}
   .goal-head{display:flex; justify-content:space-between; font-size:14px; margin-bottom:8px;}
@@ -266,6 +279,26 @@
   <p id="nameSaveNote" style="display:none; font-family:var(--mono); font-size:12px; color:var(--signal); margin-top:10px;"></p>
   <p>Here's where things stand across everything you've connected.</p>
 </div>
+
+<section>
+  <div class="wrap">
+    <div class="panel" id="sourcesOverview">
+      <div class="section-head" style="margin-bottom:16px;">
+        <h2>Sources</h2>
+        <span>
+          <a href="sources.html" class="link">Manage →</a>
+          <a href="sources.html" class="link" style="margin-left:14px;">+ Add source</a>
+        </span>
+      </div>
+      <div class="sources-stat-row" id="sourcesStatRow">
+        <div class="sources-stat"><span class="n">—</span><span class="l">Connected sources</span></div>
+        <div class="sources-stat"><span class="n">—</span><span class="l">Datapoints</span></div>
+        <div class="sources-stat"><span class="n">—</span><span class="l">Latest data</span></div>
+      </div>
+      <div class="sources-chip-row" id="sourcesChipRow"></div>
+    </div>
+  </div>
+</section>
 
 <section>
   <div class="wrap top-grid">
@@ -538,7 +571,49 @@
     renderGreeting(currentFullName, currentUser.email);
     initMoodTracking();
     initGlp1Tracking();
+    loadSourcesOverview();
   })();
+
+  // ---- Sources overview (real Supabase tables: connected_sources, health_metrics) ----
+  async function loadSourcesOverview(){
+    const statRow = document.getElementById('sourcesStatRow');
+    const chipRow = document.getElementById('sourcesChipRow');
+
+    const { data: sources } = await supabaseClient
+      .from('connected_sources')
+      .select('source_key, source_name, status')
+      .eq('user_id', currentUser.id)
+      .eq('status', 'active');
+
+    const { count: datapointCount } = await supabaseClient
+      .from('health_metrics')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', currentUser.id);
+
+    const { data: latestRows } = await supabaseClient
+      .from('health_metrics')
+      .select('source, metric_date')
+      .eq('user_id', currentUser.id)
+      .order('metric_date', { ascending: false })
+      .limit(1);
+
+    const latest = (latestRows && latestRows[0])
+      ? `${latestRows[0].metric_date} · ${latestRows[0].source}`
+      : 'No data yet';
+
+    const stats = [
+      { n: (sources || []).length, l: 'Connected sources' },
+      { n: datapointCount || 0, l: 'Datapoints' },
+      { n: latest, l: 'Latest data' },
+    ];
+    statRow.innerHTML = stats.map(s => `
+      <div class="sources-stat"><span class="n">${s.n}</span><span class="l">${s.l}</span></div>
+    `).join('');
+
+    chipRow.innerHTML = (sources && sources.length)
+      ? sources.map(s => `<span class="source-chip"><span class="dot"></span>${s.source_name}</span>`).join('')
+      : `<span class="source-chip-empty">Nothing connected yet — <a href="sources.html" class="link">connect a source →</a></span>`;
+  }
 
   // ---- GLP-1 / medication log (real Supabase table: glp1_logs) ----
   function initGlp1Tracking(){
