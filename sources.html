@@ -163,6 +163,16 @@
 
   footer{border-top:1px solid var(--rule); padding:30px 0; background:var(--paper-alt); text-align:center; margin-top:20px;}
   footer p{font-family:var(--mono); font-size:12px; color:var(--ink-faint);}
+
+  .manual-import-fallback summary{
+    cursor:pointer; font-family:var(--mono); font-size:12.5px; color:var(--ink-faint);
+    padding:10px 0; list-style:none;
+  }
+  .manual-import-fallback summary::-webkit-details-marker{display:none;}
+  .manual-import-fallback summary:hover{color:var(--ink-soft);}
+  .manual-import-fallback summary::before{content:"+ "; font-weight:700;}
+  .manual-import-fallback[open] summary::before{content:"- ";}
+  .manual-import-fallback .import-panel{margin-top:16px;}
 </style>
 </head>
 <body>
@@ -199,88 +209,11 @@
 
   <div class="honesty-banner">
     <span class="mark">i</span>
-    <span>Connecting a source here is real — it's saved to your account and persists across logins. What's not built yet: pulling live data from each provider's actual API. That's a bigger integration project, in progress. Today, connecting sets up the link; it doesn't yet stream real biometrics.</span>
+    <span>Oura, Fitbit, WHOOP, and Strava connect for real below — a genuine OAuth handshake with that provider, tokens stored on your account. Everything else in the catalog is marked "Coming soon" until its own connection is built, rather than pretending to connect.</span>
   </div>
 
   <p class="limit-note" id="limitNote">You're on the Free plan — 1 active source included. <a href="index.html#pricing" style="color:var(--signal); text-decoration:underline;">Go Pro for unlimited →</a></p>
 </div>
-
-<section>
-  <div class="wrap">
-    <div class="import-panel">
-      <div class="import-head">
-        <h2>Import your own export — this one's real</h2>
-        <p>Oura, Garmin, and Apple Health all let you export your own data as a file. Upload it here and it's genuinely stored on your account — not a demo.</p>
-      </div>
-
-      <div class="import-step" id="importStep1">
-        <label class="import-label">1. What's this data from?</label>
-        <select id="importSource">
-          <option>Oura</option>
-          <option>Garmin</option>
-          <option>Apple Health</option>
-          <option>Strava</option>
-          <option>Other</option>
-        </select>
-        <label class="import-label" style="margin-top:16px;">2. Choose your exported CSV file</label>
-        <input type="file" id="importFile" accept=".csv">
-        <p class="import-hint">Don't have one yet? Most apps have an export option under Settings → Export data / Download my data.</p>
-      </div>
-
-      <div class="import-step" id="importStep2" style="display:none;">
-        <label class="import-label">3. Which column is the date?</label>
-        <select id="importDateCol"></select>
-        <label class="import-label" style="margin-top:16px;">4. Which columns do you want to import as metrics?</label>
-        <div id="importMetricCols" class="import-metric-cols"></div>
-        <div class="import-preview">
-          <p class="import-label">Preview (first 3 rows)</p>
-          <div id="importPreviewTable"></div>
-        </div>
-        <button class="btn-connect" id="importConfirmBtn" style="margin-top:16px;">Import this data →</button>
-      </div>
-
-      <p class="import-status" id="importStatus"></p>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <div class="import-panel">
-      <div class="import-head">
-        <h2>Import a lab PDF — LabCorp, Function Health, Quest</h2>
-        <p>Lab results come as PDFs, not spreadsheets, so this reads the report and pulls out biomarker rows for you to check before anything is saved. PDF layouts vary a lot — always review the extracted rows below before importing.</p>
-      </div>
-
-      <div class="import-step">
-        <label class="import-label">1. Which lab is this from?</label>
-        <select id="pdfSource">
-          <option>LabCorp</option>
-          <option>Function Health</option>
-          <option>Quest Diagnostics</option>
-          <option>Other</option>
-        </select>
-        <label class="import-label" style="margin-top:16px;">2. Choose your lab report PDF</label>
-        <input type="file" id="pdfFile" accept=".pdf">
-        <p class="import-hint">Most patient portals have a "Download PDF" or "Print report" option next to your results.</p>
-      </div>
-
-      <div class="import-step" id="pdfStep2" style="display:none;">
-        <label class="import-label">3. Date of this draw</label>
-        <input type="date" id="pdfDate" style="max-width:200px;">
-
-        <label class="import-label" style="margin-top:16px;">4. Review what was found — edit or remove anything that's wrong</label>
-        <p class="import-hint" style="margin-bottom:12px;">PDF extraction is best-effort. Nothing is saved until you confirm each row below.</p>
-        <div id="pdfRows"></div>
-        <button class="btn-connect" id="pdfAddRowBtn" type="button" style="margin-top:10px;">+ Add a row</button>
-        <br>
-        <button class="btn-connect" id="pdfConfirmBtn" style="margin-top:16px;">Import checked rows →</button>
-      </div>
-
-      <p class="import-status" id="pdfStatus"></p>
-    </div>
-  </div>
-</section>
 
 <section>
   <div class="wrap" id="catalogRoot">
@@ -288,8 +221,85 @@
   </div>
 </section>
 
+<section>
+  <div class="wrap">
+    <details class="manual-import-fallback">
+      <summary>Don't see your source live yet? Import a file manually instead →</summary>
+
+      <div class="import-panel">
+        <div class="import-head">
+          <h2>Import your own export</h2>
+          <p>Oura, Garmin, and Apple Health all let you export your own data as a file. Upload it here and it's genuinely stored on your account — not a demo.</p>
+        </div>
+
+        <div class="import-step" id="importStep1">
+          <label class="import-label">1. What's this data from?</label>
+          <select id="importSource">
+            <option>Oura</option>
+            <option>Garmin</option>
+            <option>Apple Health</option>
+            <option>Strava</option>
+            <option>Other</option>
+          </select>
+          <label class="import-label" style="margin-top:16px;">2. Choose your exported CSV file</label>
+          <input type="file" id="importFile" accept=".csv">
+          <p class="import-hint">Don't have one yet? Most apps have an export option under Settings → Export data / Download my data.</p>
+        </div>
+
+        <div class="import-step" id="importStep2" style="display:none;">
+          <label class="import-label">3. Which column is the date?</label>
+          <select id="importDateCol"></select>
+          <label class="import-label" style="margin-top:16px;">4. Which columns do you want to import as metrics?</label>
+          <div id="importMetricCols" class="import-metric-cols"></div>
+          <div class="import-preview">
+            <p class="import-label">Preview (first 3 rows)</p>
+            <div id="importPreviewTable"></div>
+          </div>
+          <button class="btn-connect" id="importConfirmBtn" style="margin-top:16px;">Import this data →</button>
+        </div>
+
+        <p class="import-status" id="importStatus"></p>
+      </div>
+
+      <div class="import-panel" style="margin-top:20px;">
+        <div class="import-head">
+          <h2>Import a lab PDF — LabCorp, Function Health, Quest</h2>
+          <p>Lab results come as PDFs, not spreadsheets, so this reads the report and pulls out biomarker rows for you to check before anything is saved. PDF layouts vary a lot — always review the extracted rows below before importing.</p>
+        </div>
+
+        <div class="import-step">
+          <label class="import-label">1. Which lab is this from?</label>
+          <select id="pdfSource">
+            <option>LabCorp</option>
+            <option>Function Health</option>
+            <option>Quest Diagnostics</option>
+            <option>Other</option>
+          </select>
+          <label class="import-label" style="margin-top:16px;">2. Choose your lab report PDF</label>
+          <input type="file" id="pdfFile" accept=".pdf">
+          <p class="import-hint">Most patient portals have a "Download PDF" or "Print report" option next to your results.</p>
+        </div>
+
+        <div class="import-step" id="pdfStep2" style="display:none;">
+          <label class="import-label">3. Date of this draw</label>
+          <input type="date" id="pdfDate" style="max-width:200px;">
+
+          <label class="import-label" style="margin-top:16px;">4. Review what was found — edit or remove anything that's wrong</label>
+          <p class="import-hint" style="margin-bottom:12px;">PDF extraction is best-effort. Nothing is saved until you confirm each row below.</p>
+          <div id="pdfRows"></div>
+          <button class="btn-connect" id="pdfAddRowBtn" type="button" style="margin-top:10px;">+ Add a row</button>
+          <br>
+          <button class="btn-connect" id="pdfConfirmBtn" style="margin-top:16px;">Import checked rows →</button>
+        </div>
+
+        <p class="import-status" id="pdfStatus"></p>
+      </div>
+    </details>
+  </div>
+</section>
+
 <footer>
-  <p>© 2026 Junie Health, Inc. · connection state is real; live provider data sync is not yet built</p>
+  <p>© 2026 Junie Health, Inc. · Oura, Fitbit, WHOOP, and Strava connections are real and live</p>
 </footer>
 
 <script>
@@ -306,39 +316,39 @@
   };
 
   const CATALOG = [
-    { key:'apple_health', name:'Apple Health', category:'Mobile (iOS & Android)', live:true },
-    { key:'health_connect', name:'Health Connect', category:'Mobile (iOS & Android)', live:true },
+    { key:'apple_health', name:'Apple Health', category:'Mobile (iOS & Android)', live:false },
+    { key:'health_connect', name:'Health Connect', category:'Mobile (iOS & Android)', live:false },
 
     { key:'oura', name:'Oura', category:'Rings & watches', live:true },
-    { key:'garmin', name:'Garmin Connect', category:'Rings & watches', live:true },
-    { key:'whoop', name:'WHOOP', category:'Rings & watches', live:true },
-    { key:'polar', name:'Polar', category:'Rings & watches', live:true },
-    { key:'suunto', name:'Suunto', category:'Rings & watches', live:true },
-    { key:'withings', name:'Withings', category:'Rings & watches', live:true },
-    { key:'ultrahuman', name:'Ultrahuman', category:'Rings & watches', live:true },
     { key:'fitbit', name:'Fitbit', category:'Rings & watches', live:true },
-    { key:'coros', name:'Coros', category:'Rings & watches', live:true },
+    { key:'whoop', name:'WHOOP', category:'Rings & watches', live:true },
+    { key:'garmin', name:'Garmin Connect', category:'Rings & watches', live:false },
+    { key:'polar', name:'Polar', category:'Rings & watches', live:false },
+    { key:'suunto', name:'Suunto', category:'Rings & watches', live:false },
+    { key:'withings', name:'Withings', category:'Rings & watches', live:false },
+    { key:'ultrahuman', name:'Ultrahuman', category:'Rings & watches', live:false },
+    { key:'coros', name:'Coros', category:'Rings & watches', live:false },
     { key:'amazfit', name:'Amazfit', category:'Rings & watches', live:false },
     { key:'xiaomi', name:'Xiaomi Mi Band', category:'Rings & watches', live:false },
     { key:'huawei', name:'Huawei Health', category:'Rings & watches', live:false },
 
-    { key:'labcorp', name:'LabCorp', category:'Labs & bloodwork', live:true },
-    { key:'quest', name:'Quest Diagnostics', category:'Labs & bloodwork', live:true },
-    { key:'function_health', name:'Function Health', category:'Labs & bloodwork', live:true },
+    { key:'labcorp', name:'LabCorp', category:'Labs & bloodwork', live:false },
+    { key:'quest', name:'Quest Diagnostics', category:'Labs & bloodwork', live:false },
+    { key:'function_health', name:'Function Health', category:'Labs & bloodwork', live:false },
 
-    { key:'dexcom', name:'Dexcom', category:'Glucose, power & effort', live:false },
     { key:'strava', name:'Strava', category:'Glucose, power & effort', live:true },
-    { key:'wahoo', name:'Wahoo', category:'Glucose, power & effort', live:true },
-    { key:'concept2', name:'Concept2', category:'Glucose, power & effort', live:true },
-    { key:'intervals', name:'Intervals.icu', category:'Glucose, power & effort', live:true },
+    { key:'dexcom', name:'Dexcom', category:'Glucose, power & effort', live:false },
+    { key:'wahoo', name:'Wahoo', category:'Glucose, power & effort', live:false },
+    { key:'concept2', name:'Concept2', category:'Glucose, power & effort', live:false },
+    { key:'intervals', name:'Intervals.icu', category:'Glucose, power & effort', live:false },
 
-    { key:'myfitnesspal', name:'MyFitnessPal', category:'Nutrition', live:true },
-    { key:'cronometer', name:'Cronometer', category:'Nutrition', live:true },
+    { key:'myfitnesspal', name:'MyFitnessPal', category:'Nutrition', live:false },
+    { key:'cronometer', name:'Cronometer', category:'Nutrition', live:false },
 
-    { key:'hevy', name:'Hevy', category:'Strength & training logs', live:true },
+    { key:'hevy', name:'Hevy', category:'Strength & training logs', live:false },
 
-    { key:'eight_sleep', name:'Eight Sleep', category:'Home & sleep environment', live:true },
-    { key:'airthings', name:'Airthings', category:'Home & sleep environment', live:true },
+    { key:'eight_sleep', name:'Eight Sleep', category:'Home & sleep environment', live:false },
+    { key:'airthings', name:'Airthings', category:'Home & sleep environment', live:false },
     { key:'sleep_cycle', name:'Sleep Cycle', category:'Home & sleep environment', live:false }
   ];
 
@@ -399,8 +409,8 @@
           actionsHtml = `<button class="btn-connect" data-connect="${item.key}" data-name="${item.name}" data-category="${item.category}">Connect</button>`;
         }
 
-        const metaText = !item.live ? 'Not yet available'
-          : isActive ? 'Active · syncing'
+        const metaText = !item.live ? 'Coming soon'
+          : isActive ? 'Connected'
           : isPaused ? 'Paused'
           : 'Not connected';
 
