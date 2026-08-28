@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Junie — Real answers from your own data.</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon-32x32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="favicon-192x192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<style>
+  :root{
+    --paper: #FBFAF6;
+    --paper-alt: #F1EFE7;
+    --paper-line: #ECECE6;
+    --ink: #0A0A0A;
+    --ink-soft: #55584E;
+    --ink-faint: #8A8D80;
+    --rule: rgba(10,10,10,0.14);
+    --rule-soft: rgba(10,10,10,0.07);
+    --signal: #F2664A;
+    --signal-soft: rgba(242,102,74,0.12);
+    --vital: #0F9E92;
+    --vital-soft: rgba(15,158,146,0.12);
+    --amber: #C98A2C;
+    --amber-soft: rgba(201,138,44,0.12);
+    --down: #9C2B44;
+    --down-soft: rgba(156,43,68,0.12);
+    --negative: #0A0A0A;
+    --negative-paper: #F5F6F0;
+    --radius: 3px;
+    --max: 1180px;
+    --serif: 'Fraunces', Georgia, serif;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --sans: 'Inter', -apple-system, sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:auto;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important;}
+  }
+
+  a{color:inherit;}
+  img{max-width:100%; display:block;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 32px;}
+  @media (max-width:640px){ .wrap{padding:0 20px;} }
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--signal);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:7px; height:7px; border-radius:50%;
+    background:var(--signal);
+    display:inline-block;
+  }
+
+  h1,h2,h3{font-family:var(--serif); font-weight:600; margin:0; letter-spacing:-0.01em;}
+  p{margin:0;}
+
+  /* ---------- pulse divider (signature element) ---------- */
+  .pulse-rule{
+    width:100%;
+    height:22px;
+    overflow:hidden;
+  }
+  .pulse-rule svg{width:100%; height:100%; display:block;}
+  .pulse-rule path{
+    fill:none;
+    stroke:var(--rule);
+    stroke-width:1.5;
+  }
+
+  /* ---------- nav ---------- */
+  header.nav{
+    position:sticky; top:0; z-index:50;
+    background:rgba(251,250,246,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--rule);
+  }
+  .nav-inner{
+    max-width:1320px; margin:0 auto; padding:13px 40px;
+    display:flex; align-items:center; justify-content:space-between;
+    position:relative; gap:24px;
+  }
+  .logo{
+    display:flex; align-items:center; gap:11px;
+    font-family:var(--serif); font-weight:700; font-size:21px;
+    text-decoration:none; color:var(--signal); flex:none;
+  }
+  .logo-mark{
+    width:32px; height:32px; border-radius:8px;
+    background:var(--ink); flex:none;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .logo-mark svg{width:18px; height:18px;}
+  .logo-mark{animation: heartbeat 1.7s ease-in-out infinite;}
+  @keyframes heartbeat{
+    0%, 100% { transform: scale(1); }
+    12% { transform: scale(1.16); }
+    24% { transform: scale(1); }
+    36% { transform: scale(1.1); }
+    48% { transform: scale(1); }
+  }
+
+
+  nav.links{display:flex; align-items:center; gap:36px;}
+  nav.links a{
+    font-family:var(--sans); font-size:15.5px; font-weight:450; text-decoration:none;
+    color:var(--ink-soft); white-space:nowrap;
+  }
+  nav.links a:hover{color:var(--ink);}
+  nav.links a.ext-link{color:var(--ink-soft);}
+
+  .nav-cta{display:flex; align-items:center; gap:26px; flex:none;}
+  .btn{
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:0;
+    padding:12px 22px;
+    border-radius:10px;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    border:1px solid var(--ink);
+    cursor:pointer;
+    background:none;
+    color:var(--ink);
+    transition:transform .15s ease, background .15s ease, color .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn-primary{background:var(--signal); border-color:var(--signal); color:#FFFFFF;}
+  .btn-primary:hover{background:#C94A2E; border-color:#C94A2E;}
+  .btn-ghost{border-color:transparent; padding-left:0; padding-right:0;}
+  .sign-in-link{font-family:var(--sans); font-size:15.5px; color:var(--ink-soft); text-decoration:none;}
+  .sign-in-link:hover{color:var(--ink);}
+
+  /* mobile fallback — links + sign in collapse into one menu, Get started stays visible */
+  .menu-toggle{
+    display:none; align-items:center; justify-content:center;
+    background:none; border:1px solid var(--rule); border-radius:6px;
+    width:38px; height:38px; cursor:pointer; flex:none;
+  }
+  .menu-toggle svg{width:16px; height:16px;}
+  .mobile-panel{
+    display:none; flex-direction:column; gap:2px;
+    position:absolute; top:100%; left:0; right:0;
+    background:var(--paper); border-bottom:1px solid var(--rule);
+    padding:8px 40px 18px;
+    box-shadow:0 16px 28px rgba(10,10,10,0.08);
+    z-index:60;
+  }
+  .mobile-panel.open{display:flex;}
+  .mobile-panel a{
+    font-family:var(--sans); font-size:16px; color:var(--ink-soft); text-decoration:none;
+    padding:12px 0; border-bottom:1px solid var(--rule-soft);
+  }
+  .mobile-panel a:last-of-type{border-bottom:none;}
+  .mobile-panel .btn{margin-top:12px; justify-content:center;}
+
+  @media (max-width:900px){
+    nav.links{display:none;}
+    .nav-cta .sign-in-link{display:none;}
+    .menu-toggle{display:inline-flex;}
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    padding:14px 0 0;
+    min-height:calc(100vh - 76px); min-height:calc(100dvh - 76px);
+    display:flex; flex-direction:column;
+  }
+  .hero-main{flex:1; display:flex; align-items:center; min-height:0;}
+  .hero-main .hero-split{width:100%;}
+  .hero-bottom-band{flex:none;}
+
+  .hero h1{
+    font-size:clamp(26px, 3.6vw, 42px);
+    line-height:1.04;
+    letter-spacing:-0.02em;
+    margin-bottom:8px;
+  }
+  .hero h1 em{font-style:italic; color:var(--signal);}
+  .tagline{
+    font-family:var(--mono); font-size:13px; font-weight:600; color:var(--ink);
+    letter-spacing:0.01em; margin-bottom:7px;
+  }
+  .hero-sub{
+    font-size:14px; color:var(--ink-soft); max-width:520px; margin-bottom:12px; line-height:1.45;
+  }
+  .hero-split{
+    display:grid; grid-template-columns:1.05fr 0.95fr; gap:40px; align-items:start;
+  }
+  @media (max-width:980px){ .hero-split{grid-template-columns:1fr; gap:28px;} }
+  .hero-top{max-width:560px;}
+  @media (max-width:980px){ .hero-top{max-width:none;} }
+  .hero-demo-col .demo-card{margin:0; max-width:none; height:min(64vh, 600px); display:flex; flex-direction:column;}
+
+  /* email capture — corner-bracket "instrument" treatment, not a bordered pill */
+  .email-cta-wrap{position:relative; display:inline-block; max-width:440px; width:100%; padding:8px;}
+  .bracket{position:absolute; width:14px; height:14px; pointer-events:none;}
+  .bracket.tl{top:0; left:0; border-top:2px solid var(--ink); border-left:2px solid var(--ink);}
+  .bracket.tr{top:0; right:0; border-top:2px solid var(--ink); border-right:2px solid var(--ink);}
+  .bracket.bl{bottom:0; left:0; border-bottom:2px solid var(--ink); border-left:2px solid var(--ink);}
+  .bracket.br{bottom:0; right:0; border-bottom:2px solid var(--ink); border-right:2px solid var(--ink);}
+  .email-cta{
+    display:flex; align-items:stretch; gap:0;
+    border:1px solid var(--rule); border-radius:6px;
+    overflow:hidden; width:100%;
+    background:var(--paper);
+  }
+  .email-cta .email-input{
+    flex:1; min-width:0; border:none; outline:none; background:none;
+    padding:0 20px; font-family:var(--sans); font-size:16.5px; color:var(--ink);
+  }
+  .email-cta .email-input::placeholder{color:var(--ink-faint);}
+  .email-cta .btn{
+    border:none; border-radius:0; flex:none;
+    padding:19px 26px; font-size:15.5px;
+  }
+  .email-cta.submitted .email-input{color:var(--signal);}
+  .see-how{margin-top:18px; margin-bottom:0; display:inline-block;}
+  .hero-note{
+    font-family:var(--mono); font-size:12px; color:var(--ink-faint); letter-spacing:0.01em;
+    margin-top:10px; margin-left:8px;
+  }
+  .hero-note .sep{margin:0 10px; color:var(--rule);}
+
+  /* full-bleed vitals band — signature element, not a side-column mockup */
+  .vitals-band{
+    width:100%; margin-top:12px;
+    border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);
+    background:var(--paper-alt);
+    overflow:hidden;
+  }
+  .waveform{
+    width:100%; height:30px; overflow:hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 6%, black 94%, transparent);
+    mask-image: linear-gradient(90deg, transparent, black 6%, black 94%, transparent);
+  }
+  .waveform-track{display:flex; width:200%; animation:scrollwave 11s linear infinite;}
+  .waveform-track svg{width:50%; flex:none; height:30px;}
+  .waveform path{fill:none; stroke:var(--signal); stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
+  @keyframes scrollwave{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+
+  /* compatibility ticker — replaces a static "works with" row with a moving readout */
+  .compat-ticker{
+    width:100%; overflow:hidden; white-space:nowrap;
+    border-bottom:1px solid var(--rule);
+    padding:6px 0; background:var(--ink);
+  }
+  .compat-track{display:inline-flex; animation:tickerscroll 22s linear infinite;}
+  .compat-group{display:inline-flex; align-items:center; flex:none;}
+  .compat-track span.name{
+    font-family:var(--mono); font-size:11.5px; letter-spacing:0.08em; color:#E9EAD9; padding:0 16px;
+  }
+  .compat-track span.dot{color:var(--signal); padding:0;}
+  @keyframes tickerscroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+  @media (prefers-reduced-motion: reduce){
+    .waveform-track, .compat-track{animation:none;}
+  }
+
+  .demo-showcase{padding:52px 0 40px; text-align:center;}
+  .demo-label{
+    font-family:var(--mono); font-size:12px; letter-spacing:0.1em; color:var(--ink-faint);
+    text-transform:uppercase; margin-bottom:20px;
+  }
+
+  /* chat demo card */
+  .demo-card{
+    background:var(--paper);
+    border:1px solid var(--ink);
+    border-radius:6px;
+    box-shadow:8px 8px 0 var(--rule);
+    overflow:hidden;
+    max-width:720px; margin:0 auto; text-align:left;
+  }
+  .demo-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:11px 16px; border-bottom:1px solid var(--rule);
+    font-family:var(--mono); font-size:11.5px; color:var(--ink-faint);
+    flex:none;
+  }
+  .demo-head .dot-row{display:flex; gap:6px;}
+  .demo-head .dot-row span{width:7px; height:7px; border-radius:50%; background:var(--rule);}
+  .demo-body{padding:18px 22px 20px; overflow-y:auto; flex:1; min-height:0;}
+  .demo-dots{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:12px 16px; border-top:1px solid var(--rule); flex:none;
+  }
+  .demo-dot{
+    width:7px; height:7px; border-radius:50%; background:var(--rule);
+    border:none; padding:0; cursor:pointer; transition:background .2s ease, transform .2s ease;
+  }
+  .demo-dot.active{background:var(--signal); transform:scale(1.3);}
+  .demo-dot:hover{background:var(--ink-faint);}
+
+  .demo-meta{
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+    margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid var(--rule-soft);
+  }
+  .demo-time{font-family:var(--mono); font-size:11px; letter-spacing:0.06em; color:var(--ink-faint); text-transform:uppercase;}
+  .demo-status-pill{
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:var(--mono); font-size:11px; color:var(--ink-soft);
+    border:1px solid var(--rule); border-radius:20px; padding:5px 11px;
+  }
+  .live-dot{width:6px; height:6px; border-radius:50%; background:var(--signal); flex:none;}
+
+  .msg{margin-bottom:12px; font-size:14px;}
+  .msg.user{
+    font-family:var(--sans); font-weight:600; color:var(--ink);
+  }
+  .msg.user::before{content:"→ "; color:var(--signal);}
+  .tool-call{
+    font-family:var(--mono); font-size:11.5px; color:var(--vital);
+    background:var(--vital-soft); display:inline-flex; gap:6px; align-items:center;
+    padding:4px 10px; border-radius:20px; margin:8px 0;
+  }
+  .msg.answer{color:var(--ink-soft); line-height:1.6;}
+  .msg.answer strong{color:var(--ink); font-weight:600;}
+  .msg.answer .up{color:var(--amber); font-weight:600;}
+  .msg.answer .down{color:var(--down); font-weight:600;}
+  .chip-row{display:flex; gap:8px; flex-wrap:wrap; margin-top:16px;}
+  .chip{
+    font-family:var(--mono); font-size:11px; border:1px solid var(--rule);
+    border-radius:4px; padding:6px 9px; color:var(--ink-soft);
+  }
+  .chip b{color:var(--ink); font-weight:600;}
+  .chip .down{color:var(--down);}
+  .typing-cursor{display:inline-block; width:7px; height:14px; background:var(--ink); vertical-align:middle; animation:blink 1s step-start infinite;}
+  @keyframes blink{50%{opacity:0;}}
+
+  /* live stat-card row */
+  .demo-work-wrap{margin:-6px 0 10px;}
+  .demo-work-toggle{
+    font-family:var(--mono); font-size:11px; color:var(--vital); background:none; border:none;
+    cursor:pointer; padding:0; text-decoration:underline;
+  }
+  .demo-work{display:none; margin-top:8px; padding:10px 12px; background:var(--paper-alt); border-radius:6px; font-size:11.5px; color:var(--ink-soft);}
+  .demo-work.open{display:block;}
+  .demo-work p{margin:0;}
+
+  .stat-row{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:6px; overflow:hidden; margin:12px 0;}
+  .stat-card{background:var(--paper); padding:11px 12px 9px;}
+  .stat-card .label{font-family:var(--mono); font-size:9.5px; letter-spacing:0.06em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:8px;}
+  .stat-card .value{font-family:var(--serif); font-size:24px; color:var(--ink); line-height:1;}
+  .stat-card .value .unit{font-family:var(--mono); font-size:12px; color:var(--ink-faint); font-weight:400; margin-left:2px;}
+  .stat-card .delta{font-family:var(--mono); font-size:10.5px; margin-top:6px; color:var(--ink-faint);}
+  .stat-card .delta.down{color:var(--down);}
+  .stat-card .delta.up{color:var(--amber);}
+
+  /* mini trend chart */
+  .trend-block{margin:12px 0 14px;}
+  .trend-label{font-family:var(--mono); font-size:10.5px; letter-spacing:0.06em; color:var(--ink-faint); text-transform:uppercase; margin-bottom:10px; display:flex; justify-content:space-between;}
+  .trend-chart{width:100%; height:64px; display:block;}
+  .trend-chart .fill{fill:var(--signal-soft);}
+  .trend-chart .line{fill:none; stroke:var(--signal); stroke-width:2; stroke-linecap:round; stroke-linejoin:round;}
+  .trend-chart .end-dot{fill:var(--signal);}
+
+  /* ---------- trust strip ---------- */
+  .trust{
+    border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);
+    background:var(--paper-alt);
+  }
+  .trust-inner{
+    max-width:var(--max); margin:0 auto; padding:26px 32px;
+    display:grid; grid-template-columns:repeat(4,1fr); gap:24px;
+  }
+  @media (max-width:760px){ .trust-inner{grid-template-columns:repeat(2,1fr);} }
+  .trust-item{font-family:var(--mono);}
+  .trust-item .num{font-size:24px; color:var(--signal); font-weight:600;}
+  .trust-item .label{font-size:12px; color:var(--ink-soft); margin-top:2px;}
+
+  /* ---------- generic section ---------- */
+  section{padding:64px 0;}
+  @media (max-width:760px){ section{padding:64px 0;} }
+  .section-head{max-width:640px; margin-bottom:36px;}
+  .section-head h2{font-size:clamp(28px,3.4vw,42px); line-height:1.12;}
+  .section-head p.lede{margin-top:16px; font-size:17px; color:var(--ink-soft); max-width:560px;}
+
+  .alt{background:var(--paper-alt);}
+
+  /* ---------- problem mock cards ---------- */
+  .score-cards{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:12px;}
+  @media (max-width:860px){ .score-cards{grid-template-columns:repeat(2,1fr);} }
+  .score-card{
+    background:var(--paper); border:1px solid var(--rule); border-radius:4px; padding:18px;
+  }
+  .score-card .src{font-family:var(--mono); font-size:11px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.06em;}
+  .score-card .val{font-family:var(--serif); font-size:32px; margin-top:6px;}
+  .score-card .sub{font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-top:4px;}
+  .score-cards-caption{
+    font-family:var(--mono); font-size:12px; color:var(--ink-faint); margin-top:14px;
+  }
+
+  .problem-body{display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:start;}
+  @media (max-width:860px){ .problem-body{grid-template-columns:1fr;} }
+  .problem-text p{font-size:17px; color:var(--ink-soft); margin-bottom:16px;}
+
+  /* solution */
+  .solution-quote{
+    background:var(--ink); color:var(--paper);
+    border-radius:6px; padding:32px 36px; margin-top:40px;
+  }
+  .solution-quote .q{font-family:var(--serif); font-style:italic; font-size:22px; line-height:1.4;}
+  .solution-quote .a{margin-top:16px; font-size:15.5px; color:#C7D2C9; line-height:1.6;}
+  .solution-quote .a strong{color:var(--paper);}
+  .solution-quote .meta{margin-top:16px; font-family:var(--mono); font-size:11px; color:#8FA396;}
+
+  /* personas */
+  .persona-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  @media (max-width:900px){ .persona-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:600px){ .persona-grid{grid-template-columns:1fr;} }
+  .persona-card{
+    border:1px solid var(--rule); border-radius:4px; padding:22px; background:var(--paper);
+    display:flex; flex-direction:column; height:100%;
+  }
+  .persona-card h3{font-size:19px; margin-bottom:10px;}
+  .persona-card p{color:var(--ink-soft); font-size:14.5px; margin-bottom:14px; flex-grow:1;}
+  .persona-tags{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;}
+  .persona-tags span{
+    font-family:var(--mono); font-size:10.5px; border:1px solid var(--rule); border-radius:12px;
+    padding:4px 9px; color:var(--ink-faint);
+  }
+  .persona-q{
+    font-family:var(--mono); font-size:12.5px; color:var(--signal);
+    border-top:1px solid var(--rule); padding-top:12px;
+  }
+
+  /* how it works */
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:0; position:relative;}
+  @media (max-width:860px){ .steps{grid-template-columns:1fr; gap:32px;} }
+  .step{position:relative; padding:0 28px;}
+  .step:first-child{padding-left:0;}
+  .step:last-child{padding-right:0;}
+  .step + .step{border-left:1px dashed var(--rule);}
+  @media (max-width:860px){ .step + .step{border-left:none; border-top:1px dashed var(--rule); padding-top:32px;} }
+  .step .step-num{font-family:var(--mono); font-size:12px; color:var(--signal); margin-bottom:14px;}
+  .step h3{font-size:20px; margin-bottom:10px;}
+  .step p{color:var(--ink-soft); font-size:15px; margin-bottom:16px;}
+  .step-detail{
+    font-family:var(--mono); font-size:12px; color:var(--ink-faint);
+    background:var(--paper-alt); border-radius:4px; padding:10px 12px;
+  }
+
+  /* surfaces */
+  .surface-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  @media (max-width:900px){ .surface-grid{grid-template-columns:1fr;} }
+  .surface-grid-4{grid-template-columns:repeat(4,1fr);}
+  @media (max-width:1080px){ .surface-grid-4{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:600px){ .surface-grid-4{grid-template-columns:1fr;} }
+
+  /* bento grid — Built In showcase */
+  .bento-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:auto auto; gap:18px;
+    grid-template-areas:
+      "audit audit goals alerts"
+      "audit audit caregiver caregiver";
+  }
+  @media (max-width:900px){
+    .bento-grid{
+      grid-template-columns:1fr 1fr; grid-template-rows:auto auto auto;
+      grid-template-areas: "audit audit" "goals alerts" "caregiver caregiver";
+    }
+  }
+  @media (max-width:600px){
+    .bento-grid{grid-template-columns:1fr; grid-template-areas:"audit" "goals" "alerts" "caregiver";}
+  }
+  .bento-tile{border:1px solid var(--rule); border-radius:8px; padding:24px; background:var(--paper); display:flex; flex-direction:column;}
+  .bento-audit{grid-area:audit; background:var(--ink); border-color:var(--ink); color:#F5F6F0;}
+  .bento-audit .tag{color:var(--signal);}
+  .bento-audit h3{color:#F5F6F0;}
+  .bento-audit p{color:#C7D2C9;}
+  .bento-goals{grid-area:goals;}
+  .bento-alerts{grid-area:alerts;}
+  .bento-caregiver{grid-area:caregiver; flex-direction:row; align-items:center; gap:24px; flex-wrap:wrap;}
+  .bento-caregiver > div{flex:1; min-width:200px;}
+  .bento-tile .tag{
+    font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em;
+    color:var(--vital); margin-bottom:10px;
+  }
+  .bento-tile h3{font-size:17px; margin-bottom:8px;}
+  .bento-tile p{color:var(--ink-soft); font-size:13.5px; line-height:1.5;}
+  .bento-audit-visual{display:flex; align-items:baseline; gap:12px; margin:6px 0 18px;}
+  .bento-score{font-family:var(--serif); font-size:56px; color:#fff; line-height:1;}
+  .bento-score-label{font-family:var(--mono); font-size:11px; color:#A9AC9E; line-height:1.5;}
+
+  .guide-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+  @media (max-width:900px){ .guide-grid{grid-template-columns:1fr;} }
+  .guide-card{
+    border:1px solid var(--rule); border-radius:6px; padding:22px; background:var(--paper-alt);
+  }
+  .guide-tag{
+    font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em;
+    color:var(--vital); margin-bottom:12px;
+  }
+  .guide-q{font-family:var(--serif); font-style:italic; font-size:16.5px; color:var(--ink); line-height:1.4;}
+  .surface-card{border:1px solid var(--rule); border-radius:4px; padding:20px; background:var(--paper);}
+  .surface-card .tag{font-family:var(--mono); font-size:11px; color:var(--vital); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:10px;}
+  .surface-card h3{font-size:19px; margin-bottom:10px;}
+  .surface-card p{color:var(--ink-soft); font-size:14.5px;}
+
+  /* testimonials */
+
+  /* sources */
+  .source-cat{margin-bottom:36px;}
+  .source-cat h4{
+    font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:0.06em;
+    color:var(--ink-faint); margin-bottom:14px;
+  }
+  .badge-row{display:flex; flex-wrap:wrap; gap:10px;}
+  .badge{
+    font-family:var(--mono); font-size:13px; border:1px solid var(--rule); border-radius:4px;
+    padding:8px 14px; display:flex; align-items:center; gap:8px; background:var(--paper);
+  }
+  .badge .status{width:6px; height:6px; border-radius:50%; background:var(--signal);}
+  .badge.planned .status{background:var(--amber);}
+  .badge .status-label{font-size:10px; color:var(--ink-faint);}
+  .badge-icon{width:15px; height:15px; flex:none;}
+  .sources-note{font-family:var(--mono); font-size:12px; color:var(--ink-faint); margin-top:8px;}
+  .callout-strip{
+    display:flex; align-items:flex-start; gap:12px;
+    background:var(--signal-soft); border:1px solid var(--signal);
+    border-radius:6px; padding:14px 18px; margin-bottom:36px; max-width:640px;
+    font-size:14.5px; color:var(--ink-soft);
+  }
+  .callout-strip strong{color:var(--ink);}
+  .callout-strip-mark{
+    font-family:var(--mono); color:var(--signal); font-weight:700; flex:none; margin-top:1px;
+  }
+
+  /* data completeness meter */
+
+  /* privacy (dark panel — contrast against the white page) */
+  .privacy{background:var(--negative); color:var(--negative-paper);}
+  .privacy .eyebrow{color:var(--signal);}
+  .privacy .eyebrow::before{background:var(--signal);}
+  .privacy .section-head p.lede{color:#A9B8AE;}
+  .privacy-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:28px;}
+  @media (max-width:860px){ .privacy-grid{grid-template-columns:1fr;} }
+  .privacy-item{border-top:1px solid rgba(245,246,240,0.16); padding-top:18px;}
+  .privacy-item .mark{font-family:var(--mono); font-size:12px; color:var(--signal); margin-bottom:10px;}
+  .privacy-item h3{font-size:19px; margin-bottom:10px; color:var(--negative-paper); font-family:var(--serif);}
+  .privacy-item p{color:#A9B8AE; font-size:14.5px;}
+  .privacy-tags{display:flex; flex-wrap:wrap; gap:7px; margin-top:14px;}
+  .privacy-tags span{
+    font-family:var(--mono); font-size:10px; text-transform:uppercase; letter-spacing:0.04em;
+    color:#C7D2C9; border:1px solid rgba(245,246,240,0.22); border-radius:20px; padding:4px 10px;
+  }
+
+  /* pricing */
+  .pricing-layout{
+    display:grid; grid-template-columns:0.85fr 1.15fr; gap:24px; align-items:start; max-width:920px; margin:0 auto;
+  }
+  @media (max-width:820px){ .pricing-layout{grid-template-columns:1fr;} }
+
+  .free-card{
+    border:1px solid var(--rule); border-radius:6px; padding:28px; background:var(--paper);
+    display:flex; flex-direction:column;
+  }
+  .free-card .plan{font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-faint); margin-bottom:16px;}
+  .free-card .price{font-family:var(--serif); font-size:34px; margin-bottom:4px;}
+  .free-card .price span{font-family:var(--mono); font-size:12px; color:var(--ink-faint); margin-left:6px;}
+  .free-card .desc{color:var(--ink-soft); font-size:14px; margin-bottom:20px;}
+  .free-card ul{list-style:none; padding:0; margin:0 0 24px; flex-grow:1;}
+  .free-card li{
+    font-size:13.5px; padding:8px 0; border-top:1px solid var(--rule-soft); color:var(--ink-soft);
+    display:flex; gap:10px;
+  }
+  .free-card li::before{content:"—"; color:var(--ink-faint);}
+  .free-card .btn{justify-content:center; width:100%;}
+
+  .pro-stack{
+    background:var(--ink); color:#F5F6F0; border-radius:8px; padding:32px;
+    box-shadow:8px 8px 0 var(--signal-soft);
+  }
+  .pro-stack-head{border-bottom:1px solid rgba(245,246,240,0.16); padding-bottom:20px; margin-bottom:18px;}
+  .pro-stack .plan{font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--signal); margin-bottom:10px;}
+  .pro-stack .price{font-family:var(--serif); font-size:44px; color:#F5F6F0;}
+  .pro-stack .price span{font-family:var(--mono); font-size:14px; color:#A9AC9E; margin-left:6px;}
+  .pro-stack .per-month{font-family:var(--mono); font-size:12px; color:#A9AC9E; margin-top:8px;}
+  .value-rows{margin-bottom:24px;}
+  .value-row{
+    display:flex; align-items:flex-start; gap:12px; padding:9px 0;
+    border-top:1px solid rgba(245,246,240,0.1); font-size:14px; color:#DADCCF;
+  }
+  .value-row .check{color:var(--signal); font-weight:700; flex:none; font-family:var(--mono);}
+  .pro-stack .btn{
+    justify-content:center; width:100%; background:var(--signal); border-color:var(--signal); color:#fff;
+  }
+  .pro-stack .btn:hover{background:#C94A2E;}
+
+  .pricing-footnote{
+    text-align:center; margin-top:32px; font-family:var(--mono); font-size:13px; color:var(--ink-faint);
+  }
+  .pricing-footnote a{color:var(--signal); text-decoration:underline;}
+  .privacy .pricing-footnote{color:#A9B8AE; text-align:left; margin-top:32px;}
+
+  /* faq */
+  .faq-list{max-width:760px;}
+  .faq-item{border-bottom:1px solid var(--rule);}
+  .faq-q{
+    width:100%; text-align:left; background:none; border:none; cursor:pointer;
+    padding:22px 0; display:flex; align-items:center; justify-content:space-between;
+    font-family:var(--sans); font-size:16.5px; font-weight:600; color:var(--ink);
+  }
+  .faq-q .plus{font-family:var(--mono); color:var(--signal); font-size:20px; transition:transform .2s ease;}
+  .faq-item.open .plus{transform:rotate(45deg);}
+  .faq-a{
+    max-height:0; overflow:hidden; transition:max-height .25s ease;
+  }
+  .faq-a-inner{padding:0 0 22px; color:var(--ink-soft); font-size:15px; max-width:640px; line-height:1.6;}
+
+  /* final cta */
+  .final-cta{text-align:center; padding:72px 0;}
+  .final-cta h2{font-size:clamp(32px,4.4vw,52px); margin-bottom:28px;}
+  .final-cta .hero-note{margin-top:20px;}
+  .email-cta.centered{margin:0 auto; max-width:480px;}
+  .email-cta.centered .email-input{padding-left:22px; text-align:left;}
+
+  /* footer */
+  footer{border-top:1px solid var(--rule); padding:64px 0 32px; background:var(--paper-alt);}
+  .footer-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:40px;}
+  @media (max-width:760px){ .footer-grid{grid-template-columns:1fr 1fr; row-gap:32px;} }
+  .footer-brand p{color:var(--ink-soft); font-size:14px; margin-top:14px; max-width:280px;}
+  .footer-col h5{
+    font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.08em;
+    color:var(--ink-faint); margin-bottom:14px;
+  }
+  .footer-col a{
+    display:block; font-size:14px; color:var(--ink-soft); text-decoration:none; margin-bottom:10px;
+  }
+  .footer-col a:hover{color:var(--ink);}
+  .legal-strip{
+    margin-top:36px; padding-top:24px; border-top:1px solid var(--rule);
+  }
+  .legal-strip p{
+    font-size:12.5px; color:var(--ink-faint); line-height:1.7; max-width:820px;
+  }
+  .legal-strip strong{color:var(--ink-soft);}
+  .legal-strip a{color:var(--ink-soft); text-decoration:underline;}
+  .legal-strip a:hover{color:var(--signal);}
+  .footer-bottom{
+    margin-top:48px; padding-top:24px; border-top:1px solid var(--rule);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px;
+    font-family:var(--mono); font-size:11.5px; color:var(--ink-faint);
+  }
+
+  .reveal{opacity:0; transform:translateY(14px); transition:opacity .5s ease, transform .5s ease;}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  :focus-visible{outline:2px solid var(--signal); outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M2 12h4l2-7 4 14 3-9 2 5h5" stroke="var(--signal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      Junie
+    </a>
+
+    <nav class="links">
+      <a href="#how">How it works</a>
+      <a href="#sources">Sources</a>
+      <a href="#pricing">Pricing</a>
+      <a href="docs.html" class="ext-link">Docs</a>
+      <a href="for-developers.html" class="ext-link">For developers</a>
+    </nav>
+
+    <div class="nav-cta" id="navCtaLoggedOut">
+      <a href="login.html" class="sign-in-link">Sign in</a>
+      <a href="signup.html" class="btn btn-primary">Get started →</a>
+    </div>
+    <div class="nav-cta" id="navCtaLoggedIn" style="display:none;">
+      <a href="#" class="sign-in-link" id="navLogoutLink">Log out</a>
+      <a href="dashboard.html" class="btn btn-primary">Go to dashboard →</a>
+    </div>
+
+    <button class="menu-toggle" aria-label="Menu" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+
+    <div class="mobile-panel">
+      <a href="#how">How it works</a>
+      <a href="#sources">Sources</a>
+      <a href="#pricing">Pricing</a>
+      <a href="docs.html">Docs</a>
+      <a href="for-developers.html">For developers</a>
+      <div id="mobileLoggedOut" style="display:contents;">
+        <a href="login.html">Sign in</a>
+        <a href="signup.html" class="btn btn-primary">Get started →</a>
+      </div>
+      <div id="mobileLoggedIn" style="display:none;">
+        <a href="#" id="mobileLogoutLink">Log out</a>
+        <a href="dashboard.html" class="btn btn-primary">Go to dashboard →</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-main">
+    <div class="wrap hero-split">
+      <div class="hero-top">
+        <p class="eyebrow">Built for individuals, not developers</p>
+        <h1>Your data,<br><em>finally speaks.</em></h1>
+        <p class="tagline">One private feed. Every AI you use.</p>
+        <p class="hero-sub">Junie links your ring, watch, CGM, gym log, bloodwork, and food log into one private feed any AI can read from. Stop toggling six apps for six scores — just ask.</p>
+
+        <div class="email-cta-wrap">
+          <span class="bracket tl"></span><span class="bracket tr"></span><span class="bracket bl"></span><span class="bracket br"></span>
+          <form class="email-cta" data-email-cta>
+            <input type="email" class="email-input" placeholder="you@email.com" aria-label="Email address" required>
+            <button type="submit" class="btn btn-primary">Get started →</button>
+          </form>
+        </div>
+        <p class="hero-note">Free<span class="sep">•</span>zero set up fees<span class="sep">•</span>live under 2 minutes</p>
+        <a href="#how" class="btn btn-ghost see-how">See how it works ↓</a>
+      </div>
+
+      <div class="hero-demo-col">
+        <div class="demo-card">
+          <div class="demo-head">
+            <span>junie · connected to claude</span>
+            <div class="dot-row"><span></span><span></span><span></span></div>
+          </div>
+          <div class="demo-body" id="demoBody"></div>
+          <div class="demo-dots" id="demoDots"></div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <div class="hero-bottom-band">
+      <div class="vitals-band" aria-hidden="true">
+        <div class="waveform">
+          <div class="waveform-track">
+            <svg viewBox="0 0 600 76" preserveAspectRatio="none"><path d="M0 38 H60 L75 38 L85 6 L95 70 L105 38 L120 38 H210 L225 38 L235 13 L245 63 L255 38 H340 L355 38 L365 6 L375 70 L385 38 H470 L485 38 L495 20 L505 56 L515 38 H600"/></svg>
+            <svg viewBox="0 0 600 76" preserveAspectRatio="none"><path d="M0 38 H60 L75 38 L85 6 L95 70 L105 38 L120 38 H210 L225 38 L235 13 L245 63 L255 38 H340 L355 38 L365 6 L375 70 L385 38 H470 L485 38 L495 20 L505 56 L515 38 H600"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="compat-ticker">
+        <div class="compat-track">
+          <span class="compat-group">
+            <span class="name">ONE LINK</span><span class="dot">•</span>
+            <span class="name">CLAUDE</span><span class="dot">•</span>
+            <span class="name">CHATGPT</span><span class="dot">•</span>
+            <span class="name">GEMINI</span><span class="dot">•</span>
+            <span class="name">GROK</span><span class="dot">•</span>
+            <span class="name">AND ANY MCP AGENT</span><span class="dot">•</span>
+          </span>
+          <span class="compat-group">
+            <span class="name">ONE LINK</span><span class="dot">•</span>
+            <span class="name">CLAUDE</span><span class="dot">•</span>
+            <span class="name">CHATGPT</span><span class="dot">•</span>
+            <span class="name">GEMINI</span><span class="dot">•</span>
+            <span class="name">GROK</span><span class="dot">•</span>
+            <span class="name">AND ANY MCP AGENT</span><span class="dot">•</span>
+          </span>
+        </div>
+        <p style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">One private link works with Claude, ChatGPT, Gemini, Grok, and any MCP-speaking agent.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="pulse-rule" aria-hidden="true"><svg viewBox="0 0 1200 22" preserveAspectRatio="none"><path d="M0 11 H520 L535 11 L543 3 L551 19 L559 11 H1200"/></svg></div>
+
+  <!-- HEALTH AUDIT / GOALS / ALERTS / CAREGIVER SHOWCASE (bento) -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">Built in</p>
+        <h2>Most MCP servers stop at the data. Junie doesn't.</h2>
+        <p class="lede">Plugging your sources into an AI is the easy part. Here's what happens after that.</p>
+      </div>
+      <div class="bento-grid">
+        <div class="bento-tile bento-audit reveal">
+          <p class="tag">Health Audit</p>
+          <div class="bento-audit-visual">
+            <span class="bento-score">82</span>
+            <span class="bento-score-label">B+ · GOOD<br>biological age 34</span>
+          </div>
+          <h3>A real grade, not a vibe</h3>
+          <p>A 0–100 score across sleep, recovery, cardio, and more — benchmarked against your history and people your age, with a biological age estimate built in. Auto-emailed monthly.</p>
+        </div>
+        <div class="bento-tile bento-goals reveal">
+          <p class="tag">Goals</p>
+          <h3>Set a target, get notified</h3>
+          <p>Track progress, earn streak badges, get nudged when you're close.</p>
+        </div>
+        <div class="bento-tile bento-alerts reveal">
+          <p class="tag">Threshold alerts</p>
+          <h3>Hear about it before you feel it</h3>
+          <p>Email or push the moment a source crosses a line you set.</p>
+        </div>
+        <div class="bento-tile bento-caregiver reveal">
+          <p class="tag">Caregiver alerts</p>
+          <h3>Watch over someone, without watching</h3>
+          <p>Mom shares her sleep and heart rate — you get flagged the moment either one drifts, instead of checking in every day to find out.</p>
+        </div>
+      </div>
+      <p class="pricing-footnote"><a href="signup.html">See your score — start free →</a></p>
+    </div>
+  </section>
+
+  <div class="pulse-rule" aria-hidden="true"><svg viewBox="0 0 1200 22" preserveAspectRatio="none"><path d="M0 11 H520 L535 11 L543 3 L551 19 L559 11 H1200"/></svg></div>
+
+  <!-- TRUST STRIP -->
+  <section class="trust" style="padding:0;">
+    <div class="trust-inner">
+      <div class="trust-item"><div class="num" data-count="40" data-suffix="+">0+</div><div class="label">Sources — rings, watches, CGMs, labs, food logs</div></div>
+      <div class="trust-item"><div class="num" data-count="120" data-suffix="+">0+</div><div class="label">Metrics — sleep stages to lactate curves</div></div>
+      <div class="trust-item"><div class="num" data-count="1" data-suffix="">0</div><div class="label">Private link, same one for every AI</div></div>
+      <div class="trust-item"><div class="num" data-count="2" data-prefix="&lt;" data-suffix="min">&lt;0min</div><div class="label">From sign-up to your first answer</div></div>
+    </div>
+  </section>
+
+  <!-- PROBLEM + FIX -->
+  <section class="problem">
+    <div class="wrap">
+      <div class="problem-body">
+        <div class="reveal">
+          <p class="eyebrow">The problem</p>
+          <h2>Every app gives you a number.<br>None of them give you the reason.</h2>
+        </div>
+        <div class="problem-text reveal">
+          <p>Your ring, watch, CGM, and gym log have never seen each other's data — so none of them can explain last night's HRV dip. Connect them to Junie once, and any AI you use can reason across all of them at once.</p>
+        </div>
+      </div>
+
+      <div class="solution-quote reveal">
+        <p class="q">"Your training load rose 31% this week while sleep held flat — that's the gap that's been dragging your HRV down."</p>
+        <p class="meta">sources: ring · watch · gym log — one answer, not four apps</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PERSONAS -->
+  <section class="alt">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">Who it's for</p>
+        <h2>Different people, different questions.</h2>
+      </div>
+
+      <div class="persona-grid">
+        <div class="persona-card reveal">
+          <h3>Athletes</h3>
+          <p>Training load and recovery, across every session you've logged.</p>
+          <p class="persona-q">"Am I tapered enough for Saturday?"</p>
+        </div>
+        <div class="persona-card reveal">
+          <h3>Biohackers</h3>
+          <p>Cross-reference sleep, glucose, and environment for what's really moving your numbers.</p>
+          <p class="persona-q">"Is my afternoon workout why I can't fall asleep before midnight?"</p>
+        </div>
+        <div class="persona-card reveal">
+          <h3>Longevity trackers</h3>
+          <p>RHR, HRV, and weight, followed over years instead of seven days.</p>
+          <p class="persona-q">"How has my RHR changed since I started lifting?"</p>
+        </div>
+        <div class="persona-card reveal">
+          <h3>Families &amp; caregivers</h3>
+          <p>Permissioned access to a loved one's numbers, with alerts if something needs attention.</p>
+          <p class="persona-q">"Is Mom's blood pressure trending okay?"</p>
+          <a href="caregiver-portal.html" style="display:block; margin-top:12px; font-family:var(--mono); font-size:12px; color:var(--vital); text-decoration:underline;">See the caregiver portal →</a>
+        </div>
+        <div class="persona-card reveal">
+          <h3>Hormone &amp; cycle health</h3>
+          <p>Track cycle phase, perimenopause, or menopause symptoms against sleep, HRV, and temperature — not siloed from the rest of your data.</p>
+          <p class="persona-q">"Does my sleep get worse the week before my period?"</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="pulse-rule" aria-hidden="true"><svg viewBox="0 0 1200 22" preserveAspectRatio="none"><path d="M0 11 H520 L535 11 L543 3 L551 19 L559 11 H1200"/></svg></div>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="alt">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">How it works</p>
+        <h2>Set up once. Ask whenever you want.</h2>
+        <p class="lede">Everything happens inside the AI you already have open — nothing new to download, nothing separate to check.</p>
+      </div>
+
+      <div class="steps">
+        <div class="step reveal">
+          <div class="step-num">01</div>
+          <h3>Link your sources</h3>
+          <p>Authorize your ring, watch, CGM, or gym log through the provider's own login. Junie only reads — cut the connection whenever you want.</p>
+          <div class="step-detail">✓ oura &nbsp; ✓ garmin &nbsp; ✓ dexcom</div>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">02</div>
+          <h3>Point your AI at one link</h3>
+          <p>Paste your private Junie URL into Claude, ChatGPT, or any agent that speaks MCP.</p>
+          <div class="step-detail">junie.health/u/8f2c-mcp &nbsp; [copy]</div>
+        </div>
+        <div class="step reveal">
+          <div class="step-num">03</div>
+          <h3>Ask what you want to know</h3>
+          <p>Junie hands your assistant the numbers. Your assistant does the reasoning, in plain language.</p>
+          <div class="step-detail">"why do my legs feel heavy this week?" → grounded answer</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GUIDES / PROMPT STRIP -->
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">Guides</p>
+        <h2>Copy one of these to start.</h2>
+        <p class="lede">Copy one into Claude or ChatGPT once you're connected — swap in your own numbers.</p>
+      </div>
+      <div class="guide-grid">
+        <div class="guide-card reveal">
+          <p class="guide-tag">longevity</p>
+          <p class="guide-q">"Is my cardio fitness actually improving, or is my perceived effort just dropping?"</p>
+        </div>
+        <div class="guide-card reveal">
+          <p class="guide-tag">biohacking</p>
+          <p class="guide-q">"Which days I took magnesium had the best next-morning HRV?"</p>
+        </div>
+        <div class="guide-card reveal">
+          <p class="guide-tag">labs</p>
+          <p class="guide-q">"What's actually driving my blood pressure trend this month?"</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOURCES -->
+  <section id="sources">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">Sources</p>
+        <h2>Connect what you've already got.</h2>
+        <p class="lede">Rings, watches, CGMs, labs, food logs, and strength logs — new connectors ship most months. <a href="roadmap.html" style="color:var(--signal); text-decoration:underline;">Don't see yours? Request it →</a></p>
+      </div>
+
+      <div class="reveal">
+        <div class="badge-row">
+          <span class="badge"><svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="var(--vital)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4a8 8 0 1 0 0.01 0Z M12 8.5a3.5 3.5 0 1 0 0.01 0Z"/></svg>Oura</span>
+          <span class="badge"><svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="var(--vital)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4a8 8 0 1 0 0.01 0Z M12 8.5a3.5 3.5 0 1 0 0.01 0Z"/></svg>Garmin</span>
+          <span class="badge"><svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="var(--vital)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4a8 8 0 1 0 0.01 0Z M12 8.5a3.5 3.5 0 1 0 0.01 0Z"/></svg>WHOOP</span>
+          <span class="badge"><svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="var(--vital)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4a8 8 0 1 0 0.01 0Z M12 8.5a3.5 3.5 0 1 0 0.01 0Z"/></svg>Withings</span>
+          <span class="badge"><svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="var(--down)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6.5L6 19a3 3 0 0 0 2.6 4.5h6.8A3 3 0 0 0 18 19l-6-10.5V2M9 2h6M8 15h8"/></svg>LabCorp</span>
+          <span class="badge"><svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="var(--down)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6.5L6 19a3 3 0 0 0 2.6 4.5h6.8A3 3 0 0 0 18 19l-6-10.5V2M9 2h6M8 15h8"/></svg>Function Health</span>
+          <span class="badge planned"><svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg>Dexcom <span class="status-label">alpha</span></span>
+          <span class="badge"><svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="var(--signal)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 2v8a2 2 0 0 0 2 2v10M7 2v20M11 2v10M15 2c-1.5 0-3 1.5-3 4s1.5 4 3 4v10"/></svg>Cronometer</span>
+          <span class="badge"><svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="var(--vital)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6M2 10v4M20 9v6M22 10v4M7 12h10M6 8v8M18 8v8"/></svg>Hevy</span>
+          <span class="badge"><svg class="badge-icon" viewBox="0 0 24 24" fill="none" stroke="var(--signal)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm4 17.5a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8Z"/></svg>Apple Health</span>
+          <span class="badge">+ 30 more</span>
+        </div>
+        <p class="callout-strip reveal" style="margin-top:24px;">
+          <span class="callout-strip-mark">✓</span>
+          <span>Pulls your <strong>full history on day one</strong> — not just data going forward.</span>
+        </p>
+        <p class="sources-note" style="margin-top:14px;">Demo page — names describe integrations shown, not existing partnerships. <a href="signup.html" style="color:var(--signal); text-decoration:underline;">Sign up to manage real connections →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <div class="pulse-rule" aria-hidden="true"><svg viewBox="0 0 1200 22" preserveAspectRatio="none"><path d="M0 11 H520 L535 11 L543 3 L551 19 L559 11 H1200"/></svg></div>
+
+  <!-- PRIVACY -->
+  <section class="privacy">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">Why it's safe to connect</p>
+        <h2>You grant access.<br>You can take it back.</h2>
+      </div>
+      <div class="privacy-grid">
+        <div class="privacy-item reveal">
+          <p class="mark">01</p>
+          <h3>Scoped access</h3>
+          <p>Junie only ever reads — never posts a workout or changes a device setting.</p>
+          <div class="privacy-tags"><span>read-only</span><span>per-source</span></div>
+        </div>
+        <div class="privacy-item reveal">
+          <p class="mark">02</p>
+          <h3>One click off</h3>
+          <p>Turn off a connection and everything tied to it disappears right away.</p>
+          <div class="privacy-tags"><span>fully erased</span><span>instant</span></div>
+        </div>
+        <div class="privacy-item reveal">
+          <p class="mark">03</p>
+          <h3>Not training data</h3>
+          <p>Nothing you connect trains Junie or any model provider's AI.</p>
+          <div class="privacy-tags"><span>never sold</span><span>never trained on</span></div>
+        </div>
+      </div>
+      <p class="pricing-footnote" style="margin-top:32px;"><a href="security.html" style="color:var(--signal);">Read the full technical security details →</a></p>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">Pricing</p>
+        <h2>One source is free forever.<br>Everything else is <em>$40 a year.</em></h2>
+        <p class="lede">No tiers to decode, no usage cliff — just a lot more room once you're hooked.</p>
+      </div>
+
+      <div class="pricing-layout">
+        <div class="free-card reveal">
+          <p class="plan">Free</p>
+          <p class="price">$0<span>forever</span></p>
+          <p class="desc">Enough to see what Junie can actually do.</p>
+          <ul>
+            <li>1 connected source</li>
+            <li>Last 7 days of history</li>
+            <li>Basic Health Audit (score only)</li>
+            <li>1 notification alert</li>
+            <li>Works with any MCP-speaking AI</li>
+          </ul>
+          <a href="signup.html?plan=free" class="btn">Start free →</a>
+        </div>
+
+        <div class="pro-stack reveal">
+          <div class="pro-stack-head">
+            <p class="plan">Junie Pro</p>
+            <p class="price">$40<span>/ year</span></p>
+            <p class="per-month">≈ $3.33/month — less than one coffee</p>
+          </div>
+          <div class="value-rows">
+            <div class="value-row"><span class="check">✓</span><span>Unlimited connected sources</span></div>
+            <div class="value-row"><span class="check">✓</span><span>Full history on every source, not just 7 days</span></div>
+            <div class="value-row"><span class="check">✓</span><span>Cross-source correlation — sleep × glucose × training in one answer</span></div>
+            <div class="value-row"><span class="check">✓</span><span>Full Health Audit — category breakdown + auto monthly report</span></div>
+            <div class="value-row"><span class="check">✓</span><span>Unlimited goals, alerts &amp; gamified badges</span></div>
+            <div class="value-row"><span class="check">✓</span><span>Family &amp; caregiver sharing — up to 6 people</span></div>
+            <div class="value-row"><span class="check">✓</span><span>Clinician &amp; coach report links</span></div>
+            <div class="value-row"><span class="check">✓</span><span>Personal API — build your own dashboard</span></div>
+            <div class="value-row"><span class="check">✓</span><span>Early access to new connectors</span></div>
+            <div class="value-row"><span class="check">✓</span><span>Priority support</span></div>
+          </div>
+          <a href="signup.html?plan=pro" class="btn btn-primary">Go Pro →</a>
+        </div>
+      </div>
+      <p class="pricing-footnote">Buying for someone else? <a href="gift.html">Gift Junie →</a> &nbsp;·&nbsp; Need this for a team? <a href="for-teams.html">Junie for teams →</a></p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="alt">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow">Questions we hear a lot</p>
+        <h2>FAQ</h2>
+      </div>
+
+      <div class="faq-list reveal">
+        <div class="faq-item">
+          <button class="faq-q">Is my health data actually private?<span class="plus">+</span></button>
+          <div class="faq-a"><div class="faq-a-inner">Yes. Access is read-only and scoped per source, everything is encrypted at rest and in transit, and nothing you connect is used to train any model. You can pull a full audit log of every query Junie has answered.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Can I disconnect a source later?<span class="plus">+</span></button>
+          <div class="faq-a"><div class="faq-a-inner">Any time, in one click, from your dashboard. Once disconnected, that source's data is removed — Junie doesn't keep a shadow copy after you revoke access.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Which AI tools work with Junie?<span class="plus">+</span></button>
+          <div class="faq-a"><div class="faq-a-inner">Anything that speaks MCP, including Claude, Claude Code, and ChatGPT's app directory. If your agent supports custom MCP connectors, it'll work with your Junie link too.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Do I need to keep anything running for this to work?<span class="plus">+</span></button>
+          <div class="faq-a"><div class="faq-a-inner">No. Junie is cloud infrastructure, not an app you open — it syncs your connected sources in the background whether you're at your computer or not, so the answer is current whenever you actually ask.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Where does my data actually live?<span class="plus">+</span></button>
+          <div class="faq-a"><div class="faq-a-inner">On encrypted infrastructure in the US, isolated per account with row-level security — your data is never in a shared pool other accounts can query. You can request full deletion at any time; see the Privacy Policy for specifics.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">What happens to my data if I cancel?<span class="plus">+</span></button>
+          <div class="faq-a"><div class="faq-a-inner">Export your full history as CSV any time before you go. Canceling removes your account and every connected source completely — nothing lingers on our end afterward.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="pulse-rule" aria-hidden="true"><svg viewBox="0 0 1200 22" preserveAspectRatio="none"><path d="M0 11 H520 L535 11 L543 3 L551 19 L559 11 H1200"/></svg></div>
+
+  <!-- FINAL CTA -->
+  <section class="final-cta">
+    <div class="wrap">
+      <h2>Your data already has<br>the answer. Go ask it.</h2>
+      <form class="email-cta centered" data-email-cta>
+        <input type="email" class="email-input" placeholder="you@email.com" aria-label="Email address" required>
+        <button type="submit" class="btn btn-primary">Get started →</button>
+      </form>
+      <p class="hero-note">Free<span class="sep">•</span>zero set up fees<span class="sep">•</span>live under 2 minutes</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M2 12h4l2-7 4 14 3-9 2 5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Junie
+        </a>
+        <p>One private link that hands your AI real numbers from your rings, watches, and gym logs — not another app to check.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <a href="#how">How it works</a>
+        <a href="#sources">Sources</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a href="roadmap.html">Roadmap</a>
+        <a href="gift.html">Gift Junie</a>
+        <a href="for-teams.html">For teams</a>
+        <a href="caregiver-portal.html">Caregiver &amp; clinician portal</a>
+      </div>
+      <div class="footer-col">
+        <h5>Resources</h5>
+        <a href="docs.html">Help center</a>
+        <a href="changelog.html">Changelog</a>
+        <a href="for-developers.html">For developers</a>
+        <a href="docs.html#api">Personal API</a>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <a href="#">Contact</a>
+        <a href="security.html">Security</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+        <a href="consumer-health-data-policy.html">Consumer Health Data Policy</a>
+      </div>
+    </div>
+
+    <div class="legal-strip">
+      <p><strong>Junie is not a HIPAA covered entity</strong> and does not provide medical advice, diagnosis, or treatment. Answers generated by AI assistants using Junie data can be incomplete or wrong — always talk to a qualified healthcare provider about a medical condition. See our <a href="privacy.html">Privacy Policy</a> and <a href="consumer-health-data-policy.html">Consumer Health Data Privacy Policy</a> for how your data is collected, used, and protected, including your rights to access, delete, or stop sharing it at any time.</p>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 Junie Health, Inc. · demo concept, not affiliated with any device maker named above</span>
+      <span>Made for people who actually read their own data</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // mobile nav panel (links + sign in + get started) — only shown on narrow widths
+  const menuToggle = document.querySelector('.menu-toggle');
+  const mobilePanel = document.querySelector('.mobile-panel');
+  menuToggle?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = mobilePanel.classList.toggle('open');
+    menuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  });
+  document.addEventListener('click', (e) => {
+    if (mobilePanel?.classList.contains('open') && !mobilePanel.contains(e.target) && e.target !== menuToggle && !menuToggle.contains(e.target)){
+      mobilePanel.classList.remove('open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // email capture forms (hero + final CTA) — hands off to real signup with email prefilled
+  document.querySelectorAll('[data-email-cta]').forEach(form => {
+    const btn = form.querySelector('button');
+    const input = form.querySelector('input');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!input.checkValidity()){ input.reportValidity(); return; }
+      btn.textContent = 'Taking you there…';
+      window.location.href = 'signup.html?plan=free&email=' + encodeURIComponent(input.value);
+    });
+  });
+
+  // faq accordion
+  document.querySelectorAll('.faq-item').forEach(item => {
+    const btn = item.querySelector('.faq-q');
+    const panel = item.querySelector('.faq-a');
+    btn.addEventListener('click', () => {
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(o => {
+        o.classList.remove('open');
+        o.querySelector('.faq-a').style.maxHeight = null;
+      });
+      if (!isOpen){
+        item.classList.add('open');
+        panel.style.maxHeight = panel.scrollHeight + 'px';
+      }
+    });
+  });
+
+  // scroll reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:0.12});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // hero chat demo — carousel through four real-feeling scenarios
+  const demo = document.getElementById('demoBody');
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const SCENARIOS = [
+    {
+      label: 'A run',
+      time: 'Today · 6:15 AM',
+      chartColor: 'signal',
+      steps: [
+        {type:'user', text:"Why was that run so tough today?"},
+        {type:'tool', text:"junie ran list_metrics"},
+        {type:'answer', html:"Your pace held steady, but heart rate drifted <span class=\"up\">14bpm</span> higher than usual for that effort, and your HRV was already <span class=\"down\">22ms</span> below baseline before you even started — you went in already under-recovered from Tuesday's session."},
+        {type:'work', text:'Metrics used: heart rate (Garmin, today\'s run), HRV (Oura, this morning), training load (Hevy + Strava, last 7 days)'},
+        {type:'stats', items: [
+          {label:'HR drift', value:'+14', unit:'bpm', delta:'↑ vs usual for this pace', cls:'up'},
+          {label:'HRV pre-run', value:'31', unit:'ms', delta:'↓ 22 vs baseline', cls:'down'},
+          {label:'7-day load', value:'+41', unit:'%', delta:'vs 4-week avg', cls:'up'}
+        ]},
+        {type:'chart', label:'Training load · Last 14 days', unit:'au',
+          path:"M0 52 L46 50 L92 48 L138 46 L184 44 L230 40 L276 38 L322 34 L368 30 L414 26 L460 22 L506 18 L552 14 L598 10"}
+      ]
+    },
+    {
+      label: 'Sleep',
+      time: 'Today · 7:02 AM',
+      chartColor: 'vital',
+      steps: [
+        {type:'user', text:"What's been dragging my sleep score down lately?"},
+        {type:'tool', text:"junie ran list_metrics (Eight Sleep)"},
+        {type:'answer', html:"Eight Sleep logged <span class=\"down\">3 wake events</span> after 1am, and your bed ran <span class=\"up\">2°F</span> warmer than your usual setting. Overnight HRV was <span class=\"down\">19ms</span> below baseline — right in line with the disrupted sleep."},
+        {type:'work', text:'Metrics used: wake events + bed temp (Eight Sleep, last night), HRV (Oura, overnight)'},
+        {type:'stats', items: [
+          {label:'Wake events', value:'3', unit:'', delta:'after 1:00 AM', cls:'down'},
+          {label:'Bed temp', value:'+2', unit:'°F', delta:'vs your usual setting', cls:'up'},
+          {label:'Overnight HRV', value:'34', unit:'ms', delta:'↓ 19 vs baseline', cls:'down'}
+        ]},
+        {type:'chart', label:'Sleep score · Last 14 nights', unit:'score',
+          path:"M0 20 L46 24 L92 18 L138 28 L184 22 L230 30 L276 26 L322 34 L368 30 L414 38 L460 34 L506 42 L552 38 L598 46"}
+      ]
+    },
+    {
+      label: 'Lifting',
+      time: 'Today · 5:48 PM',
+      chartColor: 'amber',
+      steps: [
+        {type:'user', text:"Why didn't I feel as strong on my lift today?"},
+        {type:'tool', text:"junie ran list_metrics (Hevy)"},
+        {type:'answer', html:"Bench volume matched your plan, but bar speed dropped <span class=\"down\">12%</span> versus your last three sessions. This morning's HRV was <span class=\"down\">15ms</span> below baseline, and you're on day 4 of a 5-day training block with no rest day yet."},
+        {type:'work', text:'Metrics used: bar speed + session log (Hevy, last 3 sessions), HRV (Oura, this morning), training calendar (last 5 days)'},
+        {type:'stats', items: [
+          {label:'Bar speed', value:'−12', unit:'%', delta:'vs last 3 sessions', cls:'down'},
+          {label:'HRV this AM', value:'29', unit:'ms', delta:'↓ 15 vs baseline', cls:'down'},
+          {label:'Training block', value:'4', unit:'/5', delta:'days, no rest yet', cls:'up'}
+        ]},
+        {type:'chart', label:'Session RPE · Last 6 sessions', unit:'rpe',
+          path:"M0 40 L100 34 L200 38 L300 24 L400 30 L500 14 L598 10"}
+      ]
+    },
+    {
+      label: 'Mom',
+      time: 'Today · 8:30 AM',
+      chartColor: 'down',
+      steps: [
+        {type:'user', text:"How's Mom doing this week?"},
+        {type:'tool', text:"junie ran query_metrics (Linda R. · shared access)"},
+        {type:'answer', html:"Linda's sleep score is down <span class=\"down\">12%</span> over the last 3 weeks, with resting heart rate up <span class=\"up\">9bpm</span> over the same window and daily steps down <span class=\"down\">31%</span> versus her 4-week average — worth a check-in."},
+        {type:'work', text:'Metrics used: sleep score, resting HR, daily steps — all from Linda R.\'s shared Oura connection, last 21 days'},
+        {type:'stats', items: [
+          {label:'Sleep score', value:'61', unit:'', delta:'↓ 12% vs 4wk avg', cls:'down'},
+          {label:'Resting HR', value:'78', unit:'bpm', delta:'↑ 9 vs baseline', cls:'up'},
+          {label:'Daily steps', value:'2,140', unit:'', delta:'↓ 31% vs 4wk avg', cls:'down'}
+        ]},
+        {type:'chart', label:'Sleep score · Last 21 days (Linda R.)', unit:'score',
+          path:"M0 18 L60 20 L120 16 L180 24 L240 22 L300 30 L360 28 L420 36 L480 40 L540 46 L598 52"}
+      ]
+    }
+  ];
+
+  const CHART_COLORS = {
+    signal: 'var(--signal)', vital: 'var(--vital)', amber: 'var(--amber)', down: 'var(--down)'
+  };
+  const CHART_SOFT = {
+    signal: 'var(--signal-soft)', vital: 'var(--vital-soft)', amber: 'var(--amber-soft)', down: 'var(--down-soft)'
+  };
+
+  function fadeIn(el){
+    if (prefersReducedMotion){
+      demo.appendChild(el);
+      return;
+    }
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(5px)';
+    el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+    demo.appendChild(el);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      });
+    });
+  }
+
+  function addNode(step, chartColor){
+    return new Promise(resolve => {
+      if (step.type === 'user'){
+        const el = document.createElement('div');
+        el.className = 'msg user';
+        demo.appendChild(el);
+        if (prefersReducedMotion){ el.textContent = step.text; resolve(); }
+        else typeText(el, step.text, resolve);
+      } else if (step.type === 'tool'){
+        const el = document.createElement('div');
+        el.className = 'tool-call';
+        el.textContent = step.text;
+        fadeIn(el);
+        setTimeout(resolve, prefersReducedMotion ? 0 : 550);
+      } else if (step.type === 'answer'){
+        const el = document.createElement('div');
+        el.className = 'msg answer';
+        el.innerHTML = step.html;
+        setTimeout(() => { fadeIn(el); resolve(); }, prefersReducedMotion ? 0 : 150);
+      } else if (step.type === 'work'){
+        const wrap = document.createElement('div');
+        wrap.className = 'demo-work-wrap';
+        const uid = 'work-' + Math.random().toString(36).slice(2, 8);
+        wrap.innerHTML = `
+          <button class="demo-work-toggle" data-target="${uid}">Show your work ▾</button>
+          <div class="demo-work" id="${uid}"><p>${step.text}</p></div>
+        `;
+        fadeIn(wrap);
+        wrap.querySelector('.demo-work-toggle').addEventListener('click', function(){
+          const target = document.getElementById(uid);
+          const isOpen = target.classList.toggle('open');
+          this.textContent = isOpen ? 'Hide the data ▴' : 'Show your work ▾';
+        });
+        resolve();
+      } else if (step.type === 'stats'){
+        const row = document.createElement('div');
+        row.className = 'stat-row';
+        row.innerHTML = step.items.map(s => `
+          <div class="stat-card">
+            <div class="label">${s.label}</div>
+            <div class="value">${s.value}<span class="unit">${s.unit}</span></div>
+            <div class="delta ${s.cls}">${s.delta}</div>
+          </div>
+        `).join('');
+        fadeIn(row);
+        resolve();
+      } else if (step.type === 'chart'){
+        const color = CHART_COLORS[chartColor];
+        const soft = CHART_SOFT[chartColor];
+        const block = document.createElement('div');
+        block.className = 'trend-block';
+        block.innerHTML = `
+          <div class="trend-label"><span>${step.label}</span><span>${step.unit}</span></div>
+          <svg class="trend-chart" viewBox="0 0 600 64" preserveAspectRatio="none">
+            <path d="${step.path} L598 64 L0 64 Z" fill="${soft}"></path>
+            <path d="${step.path}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        `;
+        fadeIn(block);
+        resolve();
+      }
+    });
+  }
+
+  function typeText(el, text, done){
+    let i = 0;
+    el.textContent = '';
+    const cursor = document.createElement('span');
+    cursor.className = 'typing-cursor';
+    function step(){
+      if (i <= text.length){
+        el.textContent = text.slice(0, i);
+        el.appendChild(cursor);
+        i++;
+        setTimeout(step, 22);
+      } else {
+        cursor.remove();
+        done();
+      }
+    }
+    step();
+  }
+
+  let currentScenario = 0;
+  let carouselTimer = null;
+  let playToken = 0;
+
+  function renderDots(){
+    const dotsEl = document.getElementById('demoDots');
+    dotsEl.innerHTML = SCENARIOS.map((s, i) =>
+      `<button class="demo-dot ${i === currentScenario ? 'active' : ''}" data-idx="${i}" aria-label="Show: ${s.label}"></button>`
+    ).join('');
+    dotsEl.querySelectorAll('.demo-dot').forEach(btn => {
+      btn.addEventListener('click', () => playScenario(parseInt(btn.dataset.idx), true));
+    });
+  }
+
+  async function playScenario(idx, userTriggered){
+    currentScenario = idx;
+    const myToken = ++playToken;
+    if (carouselTimer) clearTimeout(carouselTimer);
+    renderDots();
+
+    demo.innerHTML = '';
+    const scenario = SCENARIOS[idx];
+
+    const metaEl = document.createElement('div');
+    metaEl.className = 'demo-meta';
+    metaEl.innerHTML = `
+      <span class="demo-time">${scenario.time}</span>
+      <span class="demo-status-pill"><span class="live-dot"></span>junie · mcp</span>
+    `;
+    demo.appendChild(metaEl);
+
+    for (const step of scenario.steps){
+      if (myToken !== playToken) return; // a newer scenario started, abandon this run
+      await addNode(step, scenario.chartColor);
+    }
+
+    if (myToken !== playToken) return;
+    if (!prefersReducedMotion){
+      carouselTimer = setTimeout(() => {
+        playScenario((idx + 1) % SCENARIOS.length);
+      }, 4200);
+    }
+  }
+
+  const demoObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting){ playScenario(0); demoObserver.disconnect(); }
+    });
+  }, {threshold:0.3});
+  demoObserver.observe(document.querySelector('.demo-card'));
+
+  // Count-up animation for the trust-strip numbers
+  const trustPrefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function animateCount(el){
+    const target = parseInt(el.dataset.count, 10);
+    const prefix = el.dataset.prefix || '';
+    const suffix = el.dataset.suffix || '';
+    if (trustPrefersReducedMotion){
+      el.textContent = prefix + target + suffix;
+      return;
+    }
+    const duration = 1100;
+    const start = performance.now();
+    function tick(now){
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      const current = Math.round(target * eased);
+      el.textContent = prefix + current + suffix;
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  const trustObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting){
+        document.querySelectorAll('.trust .num').forEach(animateCount);
+        trustObserver.disconnect();
+      }
+    });
+  }, {threshold:0.4});
+  const trustEl = document.querySelector('.trust');
+  if (trustEl) trustObserver.observe(trustEl);
+
+  // Reflect real login state in the nav instead of always showing
+  // "Sign in / Get started" even when the visitor is already authenticated.
+  (async () => {
+    if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+      document.getElementById('navCtaLoggedOut').style.display = 'none';
+      document.getElementById('navCtaLoggedIn').style.display = 'flex';
+      document.getElementById('mobileLoggedOut').style.display = 'none';
+      document.getElementById('mobileLoggedIn').style.display = 'contents';
+      document.getElementById('navLogoutLink').addEventListener('click', logOut);
+      document.getElementById('mobileLogoutLink').addEventListener('click', logOut);
+    }
+  })();
+</script>
+</body>
+</html>
