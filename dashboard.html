@@ -602,10 +602,28 @@
 
   // ---- Score card (same methodology as health-audit.html / the mcp
   // edge function's get_health_score -- kept in sync by hand) ----
+  // Every metric_type any sync job writes gets slotted into a category
+  // here and normalized to a 0-100 scale before averaging, so the score
+  // automatically factors in whatever's actually connected and syncing --
+  // nothing added by hand per-provider beyond this map. A provider that's
+  // merely "Connected" but has no sync job yet (no rows in health_metrics)
+  // contributes nothing, correctly, until it's really syncing.
   const SCORE_CATEGORIES = {
-    'Sleep': ['oura_sleep_score'],
-    'Recovery / Readiness': ['oura_readiness_score'],
-    'Activity': ['oura_activity_score'],
+    'Sleep': ['oura_sleep_score', 'fitbit_sleep_efficiency', 'whoop_sleep_performance'],
+    'Recovery / Readiness': ['oura_readiness_score', 'whoop_recovery_score'],
+    'Activity': ['oura_activity_score', 'strava_moving_time_s', 'fitbit_steps'],
+  };
+  const SCORE_NORMALIZERS = {
+    oura_sleep_score: v => v,
+    oura_readiness_score: v => v,
+    oura_activity_score: v => v,
+    fitbit_sleep_efficiency: v => v,
+    whoop_sleep_performance: v => v,
+    whoop_recovery_score: v => v,
+    // Metrics with no built-in 0-100 score get one derived from a plain
+    // daily target, capped at 100: 30+ min moving time, 10k+ steps.
+    strava_moving_time_s: v => Math.min(100, (v / 1800) * 100),
+    fitbit_steps: v => Math.min(100, (v / 10000) * 100),
   };
   async function loadScoreCard(){
     const since = new Date(Date.now() - 14 * 86400000).toISOString().slice(0,10);
@@ -622,7 +640,7 @@
     (data || []).forEach(r => { (byType[r.metric_type] = byType[r.metric_type] || []).push(Number(r.value)); });
     const categoryScores = {};
     for (const [category, types] of Object.entries(SCORE_CATEGORIES)){
-      const values = types.flatMap(t => byType[t] || []);
+      const values = types.flatMap(t => (byType[t] || []).map(SCORE_NORMALIZERS[t]));
       if (values.length) categoryScores[category] = Math.round(values.reduce((s,v) => s+v, 0) / values.length);
     }
     const n = Object.keys(categoryScores).length;
