@@ -151,6 +151,21 @@
     font-family:var(--mono); font-size:10.5px; color:var(--ink-soft); background:var(--paper);
     border:1px solid var(--rule-soft); padding:3px 9px; border-radius:20px;
   }
+
+  .empty-note{font-family:var(--mono); font-size:12.5px; color:var(--ink-faint);}
+
+  .insight-row{display:flex; flex-direction:column; gap:10px;}
+  .insight-card{
+    display:flex; gap:14px; padding:16px; border-radius:12px; background:var(--paper-alt);
+  }
+  .insight-card .icon{
+    width:34px; height:34px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center;
+    background:var(--vital-soft); color:var(--vital); font-size:16px;
+  }
+  .insight-card .body{flex:1;}
+  .insight-card .headline{font-weight:600; font-size:14px; margin-bottom:4px;}
+  .insight-card .detail{font-size:13px; color:var(--ink-soft);}
+
   .goal{margin-bottom:18px;}
   .goal:last-child{margin-bottom:0;}
   .goal-head{display:flex; justify-content:space-between; font-size:14px; margin-bottom:8px;}
@@ -422,6 +437,18 @@
   </div>
 </section>
 
+<section id="insights">
+  <div class="wrap">
+    <div class="panel">
+      <div class="section-head" style="margin-bottom:16px;">
+        <h2>Insights</h2>
+        <span class="panel-sub">Computed from your own logged data — never shown until there's enough to say something real</span>
+      </div>
+      <div id="insightsBody"><p class="empty-note">Loading…</p></div>
+    </div>
+  </div>
+</section>
+
 <section id="mood">
   <div class="wrap">
     <div class="panel">
@@ -642,7 +669,91 @@
     initMoodTracking();
     initGlp1Tracking();
     loadSourcesOverview();
+    loadInsights();
   })();
+
+  // ---- Insights (real Supabase tables: mood_logs, glp1_logs, health_metrics) ----
+  // Every card here is a computed number, not a template -- if there isn't
+  // enough overlapping data to say something true, we say that instead of
+  // showing a fake or generic insight.
+  async function loadInsights(){
+    const body = document.getElementById('insightsBody');
+
+    const [{ data: moods }, { data: glp1s }, { data: sleepMetrics }] = await Promise.all([
+      supabaseClient.from('mood_logs').select('log_date, mood, stress').eq('user_id', currentUser.id).order('log_date', { ascending: false }).limit(90),
+      supabaseClient.from('glp1_logs').select('log_date').eq('user_id', currentUser.id).order('log_date', { ascending: false }).limit(90),
+      supabaseClient.from('health_metrics').select('metric_date, value').eq('user_id', currentUser.id).eq('metric_type', 'oura_sleep_score').order('metric_date', { ascending: false }).limit(90),
+    ]);
+
+    const cards = [];
+
+    // Sleep score vs mood, split at the median sleep score seen.
+    if (sleepMetrics && sleepMetrics.length && moods && moods.length){
+      const sleepByDate = {};
+      sleepMetrics.forEach(s => sleepByDate[s.metric_date] = Number(s.value));
+      const paired = moods.filter(m => m.log_date in sleepByDate).map(m => ({ mood: m.mood, sleep: sleepByDate[m.log_date] }));
+      if (paired.length >= 3){
+        const sortedSleep = paired.map(p => p.sleep).sort((a,b) => a-b);
+        const median = sortedSleep[Math.floor(sortedSleep.length / 2)];
+        const higher = paired.filter(p => p.sleep >= median);
+        const lower = paired.filter(p => p.sleep < median);
+        if (higher.length && lower.length){
+          const avg = arr => (arr.reduce((s,p) => s + p.mood, 0) / arr.length).toFixed(1);
+          cards.push({
+            icon: '💤',
+            headline: `Mood averages ${avg(higher)}/5 on higher-sleep-score days vs ${avg(lower)}/5 on lower-sleep-score days`,
+            detail: `Based on ${paired.length} days where you had both a sleep score and a mood log, split at your median score of ${median}.`,
+          });
+        }
+      }
+    }
+
+    // GLP-1 dosing days vs non-dosing days, mood/stress.
+    if (glp1s && glp1s.length && moods && moods.length){
+      const doseDates = new Set(glp1s.map(g => g.log_date));
+      const doseDays = moods.filter(m => doseDates.has(m.log_date));
+      const nonDoseDays = moods.filter(m => !doseDates.has(m.log_date));
+      if (doseDays.length >= 3 && nonDoseDays.length >= 3){
+        const avg = (arr, key) => (arr.reduce((s,m) => s + m[key], 0) / arr.length).toFixed(1);
+        cards.push({
+          icon: '💊',
+          headline: `Stress averages ${avg(doseDays,'stress')}/5 on days you logged a dose vs ${avg(nonDoseDays,'stress')}/5 on days you didn't`,
+          detail: `From ${doseDays.length} dosing days and ${nonDoseDays.length} non-dosing days with a mood log.`,
+        });
+      }
+    }
+
+    // Simple week-over-week mood trend.
+    if (moods && moods.length >= 6){
+      const now = Date.now();
+      const thisWeek = moods.filter(m => now - new Date(m.log_date).getTime() < 7 * 86400000);
+      const lastWeek = moods.filter(m => {
+        const age = now - new Date(m.log_date).getTime();
+        return age >= 7 * 86400000 && age < 14 * 86400000;
+      });
+      if (thisWeek.length >= 2 && lastWeek.length >= 2){
+        const avg = arr => arr.reduce((s,m) => s + m.mood, 0) / arr.length;
+        const a = avg(thisWeek), b = avg(lastWeek);
+        const diff = a - b;
+        if (Math.abs(diff) >= 0.3){
+          cards.push({
+            icon: diff > 0 ? '📈' : '📉',
+            headline: `Average mood is ${diff > 0 ? 'up' : 'down'} ${Math.abs(diff).toFixed(1)} points this week vs last week`,
+            detail: `${a.toFixed(1)}/5 this week (${thisWeek.length} logs) vs ${b.toFixed(1)}/5 last week (${lastWeek.length} logs).`,
+          });
+        }
+      }
+    }
+
+    body.innerHTML = cards.length
+      ? `<div class="insight-row">${cards.map(c => `
+          <div class="insight-card">
+            <span class="icon">${c.icon}</span>
+            <div class="body"><div class="headline">${c.headline}</div><div class="detail">${c.detail}</div></div>
+          </div>
+        `).join('')}</div>`
+      : `<p class="empty-note">Not enough overlapping data yet to say anything real. Keep logging mood/stress and GLP-1 doses, and once a source is syncing sleep data, insights will appear here automatically — never a generic placeholder.</p>`;
+  }
 
   // ---- Sources overview (real Supabase tables: connected_sources, health_metrics) ----
   // The four providers with a real, working OAuth connection today -- kept
