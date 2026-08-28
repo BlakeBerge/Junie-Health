@@ -1,0 +1,17 @@
+# OAuth discovery metadata must live at this origin's root per RFC 9728 /
+# RFC 8414 -- Supabase Edge Functions can't serve outside /functions/v1/*,
+# so these proxy through to the real implementation.
+/.well-known/oauth-protected-resource      https://sakfofbohkndoeiqlndo.supabase.co/functions/v1/oauth-metadata-resource   200
+/.well-known/oauth-authorization-server    https://sakfofbohkndoeiqlndo.supabase.co/functions/v1/oauth-metadata-server     200
+
+# Dynamic client registration and token exchange.
+/oauth/register    https://sakfofbohkndoeiqlndo.supabase.co/functions/v1/oauth-register   200
+/oauth/token        https://sakfofbohkndoeiqlndo.supabase.co/functions/v1/oauth-token       200
+
+# The authorize step is a real page on this site (login + consent UI), not
+# a proxy -- this just gives it a clean path without the .html extension.
+/oauth/authorize   /oauth-authorize.html   200
+
+# The MCP endpoint itself, under this site's own domain to match how
+# freddy.coach/mcp looks rather than exposing the Supabase backend URL.
+/mcp                https://sakfofbohkndoeiqlndo.supabase.co/functions/v1/mcp               200
