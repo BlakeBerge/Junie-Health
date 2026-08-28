@@ -311,6 +311,7 @@
       <a href="#goals">Goals</a>
       <a href="#alerts">Alerts</a>
       <a href="sources.html">Sources</a>
+      <a href="ai-agents.html">AI &amp; Agents</a>
     </nav>
     <div class="account">
       <span class="avatar" id="userAvatar">··</span>
@@ -384,15 +385,16 @@
       <div class="score-ring">
         <svg width="140" height="140" viewBox="0 0 140 140">
           <circle class="bg" cx="70" cy="70" r="60"></circle>
+          <circle class="fg" id="dashScoreArc" cx="70" cy="70" r="60" stroke-dasharray="377" stroke-dashoffset="377"></circle>
         </svg>
         <div class="score-num">
-          <span class="n" style="font-size:22px; color:var(--ink-faint);">—</span>
-          <span class="g">NO SCORE YET</span>
+          <span class="n" id="dashScoreNum">—</span>
+          <span class="g" id="dashScoreGrade">NO SCORE YET</span>
         </div>
       </div>
-      <p class="desc">Health Audit is a preview today — sample scoring only, not your real data. Personalized scoring backed by your connected sources is still in progress.</p>
+      <p class="desc" id="dashScoreDesc">Computed live from your connected sources — nothing here is sample data. Loading…</p>
       <div class="score-actions">
-        <a href="health-audit.html" class="btn btn-primary">See the preview →</a>
+        <a href="health-audit.html" class="btn btn-primary">Full breakdown →</a>
       </div>
     </div>
 
@@ -595,7 +597,46 @@
     loadGoals();
     loadAlertRules();
     loadBadges();
+    loadScoreCard();
   })();
+
+  // ---- Score card (same methodology as health-audit.html / the mcp
+  // edge function's get_health_score -- kept in sync by hand) ----
+  const SCORE_CATEGORIES = {
+    'Sleep': ['oura_sleep_score'],
+    'Recovery / Readiness': ['oura_readiness_score'],
+    'Activity': ['oura_activity_score'],
+  };
+  async function loadScoreCard(){
+    const since = new Date(Date.now() - 14 * 86400000).toISOString().slice(0,10);
+    const allTypes = Object.values(SCORE_CATEGORIES).flat();
+    const { data } = await supabaseClient
+      .from('health_metrics')
+      .select('metric_type, value')
+      .eq('user_id', currentUser.id)
+      .in('metric_type', allTypes)
+      .gte('metric_date', since)
+      .limit(2000);
+
+    const byType = {};
+    (data || []).forEach(r => { (byType[r.metric_type] = byType[r.metric_type] || []).push(Number(r.value)); });
+    const categoryScores = {};
+    for (const [category, types] of Object.entries(SCORE_CATEGORIES)){
+      const values = types.flatMap(t => byType[t] || []);
+      if (values.length) categoryScores[category] = Math.round(values.reduce((s,v) => s+v, 0) / values.length);
+    }
+    const n = Object.keys(categoryScores).length;
+    const overall = n ? Math.round(Object.values(categoryScores).reduce((s,v) => s+v, 0) / n) : null;
+
+    const circumference = 377;
+    document.getElementById('dashScoreArc').style.strokeDashoffset = overall === null ? circumference : circumference - circumference * (overall / 100);
+    document.getElementById('dashScoreNum').textContent = overall === null ? '—' : overall;
+    document.getElementById('dashScoreGrade').textContent = overall === null ? 'NO SCORE YET'
+      : overall >= 80 ? 'B+ · GOOD' : overall >= 70 ? 'B · GOOD' : overall >= 60 ? 'C · FAIR' : 'D · NEEDS ATTENTION';
+    document.getElementById('dashScoreDesc').textContent = overall === null
+      ? 'No synced data in the last 14 days yet — connect a source and let it sync.'
+      : `Based on ${n} of ${Object.keys(SCORE_CATEGORIES).length} possible categories, last 14 days.`;
+  }
 
   // ---- Insights (real Supabase tables: mood_logs, glp1_logs, health_metrics) ----
   // Every card here is a computed number, not a template -- if there isn't

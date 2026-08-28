@@ -153,7 +153,7 @@
     <div id="run">
       <button class="btn btn-primary" id="runAuditBtn">Run new audit →</button>
       <button class="btn" id="downloadPdfBtn" style="margin-top:10px; width:100%;">Download for your doctor ↓</button>
-      <p class="run-note">Last run: today, 6:14 AM · auto-runs monthly</p>
+      <p class="run-note" id="runNote">Loading…</p>
     </div>
   </div>
 </div>
@@ -163,21 +163,19 @@
     <div class="score-ring">
       <svg width="200" height="200" viewBox="0 0 200 200">
         <circle class="bg" cx="100" cy="100" r="86"></circle>
-        <circle class="fg" id="scoreArc" cx="100" cy="100" r="86" stroke-dasharray="540" stroke-dashoffset="97"></circle>
+        <circle class="fg" id="scoreArc" cx="100" cy="100" r="86" stroke-dasharray="540" stroke-dashoffset="540"></circle>
       </svg>
       <div class="score-num">
-        <span class="n" id="scoreNum">82</span>
-        <span class="g">B+ · GOOD</span>
+        <span class="n" id="scoreNum">—</span>
+        <span class="g" id="scoreGrade">NO DATA YET</span>
       </div>
     </div>
     <div class="score-copy">
-      <p>Your score weighs sleep, recovery, cardiovascular, metabolic, and activity data together — not just one number from one source.</p>
-      <p>It's relative to your own 12-month baseline first, and to people who share your age range and sex second.</p>
-      <span class="cohort">Better than 64% of men, 30–39, with similar tracking history</span>
+      <p>Real, computed from your own connected sources — averaged over the last 14 days. Only categories with actual synced data count toward it; nothing here is filled in or estimated.</p>
+      <p id="scoreCoverageNote" class="run-note" style="margin-top:0;"></p>
       <div class="bio-age">
-        <span class="bio-age-label">Estimated biological age</span>
-        <span class="bio-age-value" id="bioAgeNum">34</span>
-        <span class="bio-age-delta" id="bioAgeDelta">3 years younger than your actual age</span>
+        <span class="bio-age-label">Cohort comparison &amp; biological age estimate</span>
+        <span style="font-family:var(--mono); font-size:12.5px; color:var(--ink-faint);">Coming soon — needs a benchmark dataset we haven't built yet. Not shown until it's real.</span>
       </div>
     </div>
   </div>
@@ -187,96 +185,205 @@
   <div class="wrap">
     <div class="section-head">
       <h2>By category</h2>
-      <p>Where the score is coming from.</p>
+      <p>Where the score is coming from — only categories with real synced data appear here.</p>
     </div>
-    <div class="cat-list">
-      <div class="cat-row"><span class="cat-name">Sleep</span><div class="cat-track"><div class="cat-fill" style="width:78%"></div></div><span class="cat-score">78</span></div>
-      <div class="cat-row"><span class="cat-name">Recovery / HRV</span><div class="cat-track"><div class="cat-fill warm" style="width:64%"></div></div><span class="cat-score">64</span></div>
-      <div class="cat-row"><span class="cat-name">Cardiovascular</span><div class="cat-track"><div class="cat-fill" style="width:88%"></div></div><span class="cat-score">88</span></div>
-      <div class="cat-row"><span class="cat-name">Metabolic</span><div class="cat-track"><div class="cat-fill" style="width:81%"></div></div><span class="cat-score">81</span></div>
-      <div class="cat-row"><span class="cat-name">Activity</span><div class="cat-track"><div class="cat-fill" style="width:91%"></div></div><span class="cat-score">91</span></div>
-      <div class="cat-row"><span class="cat-name">Nutrition</span><div class="cat-track"><div class="cat-fill warm" style="width:58%"></div></div><span class="cat-score">58</span></div>
-    </div>
+    <div class="cat-list" id="catList"></div>
   </div>
 </section>
 
 <section>
   <div class="wrap">
     <div class="section-head">
-      <h2>What changed this month</h2>
-      <p>Compared to your last audit, 30 days ago.</p>
+      <h2>What changed</h2>
+      <p>Compared to your previous audit run.</p>
     </div>
-    <div class="change-grid">
-      <div class="change-col improved">
-        <h3>↑ Improved</h3>
-        <div class="change-item improved">
-          <div class="metric"><span>Cardiovascular fitness</span><span class="delta">+6 pts</span></div>
-          <p>VO2max estimate rose alongside 3 additional zone-2 sessions per week since last month.</p>
-        </div>
-        <div class="change-item improved">
-          <div class="metric"><span>Resting heart rate</span><span class="delta">−4 bpm</span></div>
-          <p>Likely tracks with the added aerobic volume above, plus more consistent sleep and wake times.</p>
-        </div>
-      </div>
-      <div class="change-col declined">
-        <h3>↓ Declined</h3>
-        <div class="change-item declined">
-          <div class="metric"><span>Recovery / HRV</span><span class="delta">−9 pts</span></div>
-          <p>Training load rose 34% while sleep duration held flat — recovery isn't keeping pace with output.</p>
-        </div>
-        <div class="change-item declined">
-          <div class="metric"><span>Nutrition</span><span class="delta">−7 pts</span></div>
-          <p>Logged protein intake dropped on 40% of days — may be compounding the recovery dip above.</p>
-        </div>
-      </div>
-    </div>
+    <div id="changeBlock"></div>
   </div>
 </section>
 
 <section class="alt">
   <div class="wrap">
     <div class="section-head" style="text-align:center;">
-      <h2>Sent to your inbox, every month</h2>
-      <p>This audit re-runs automatically and lands in your email — no need to remember to check.</p>
-    </div>
-    <div class="email-preview">
-      <div class="email-head">From: Junie &lt;monthly@junie.health&gt; · Subject: Your Junie health audit — August</div>
-      <div class="email-body">
-        <h4>Your score: 82 <span style="color:var(--ink-faint); font-family:var(--mono); font-size:13px;">(+3 vs last month)</span></h4>
-        <p>Here's what moved this month, and what's likely behind it:</p>
-        <div class="line">Cardiovascular fitness <b class="up">+6 pts</b></div>
-        <div class="line">Resting heart rate <b class="up">−4 bpm</b></div>
-        <div class="line">Recovery / HRV <b class="down">−9 pts</b></div>
-        <div class="line">Nutrition <b class="down">−7 pts</b></div>
-      </div>
+      <h2>Monthly email recap</h2>
+      <p style="font-family:var(--mono); font-size:12.5px;">Coming soon — automatic monthly re-runs and email delivery aren't built yet. Run the audit manually above for now.</p>
     </div>
   </div>
 </section>
 
 <footer>
-  <p>© 2026 Junie Health, Inc. · demo report — scores and cohort comparisons shown are sample data</p>
+  <p>© 2026 Junie Health, Inc. · score is computed live from your synced data — no sample or placeholder numbers</p>
 </footer>
 
 <script>
-  requireAuth();
+  // Same category methodology as the mcp edge function's get_health_score
+  // and dashboard.html's score card -- kept in sync by hand. Only
+  // categories with at least one real datapoint in the window are scored;
+  // nothing is ever fabricated to fill a category with no data.
+  const SCORE_CATEGORIES = {
+    'Sleep': ['oura_sleep_score'],
+    'Recovery / Readiness': ['oura_readiness_score'],
+    'Activity': ['oura_activity_score'],
+  };
+  const WINDOW_DAYS = 14;
 
-  document.getElementById('runAuditBtn').addEventListener('click', function(){
-    const btn = this;
-    btn.textContent = 'Running audit…';
+  let currentUser = null;
+  let latestResult = null;
+
+  async function computeScore(){
+    const since = new Date(Date.now() - WINDOW_DAYS * 86400000).toISOString().slice(0,10);
+    const allTypes = Object.values(SCORE_CATEGORIES).flat();
+    const { data } = await supabaseClient
+      .from('health_metrics')
+      .select('metric_type, value')
+      .eq('user_id', currentUser.id)
+      .in('metric_type', allTypes)
+      .gte('metric_date', since)
+      .limit(2000);
+
+    const byType = {};
+    (data || []).forEach(r => { (byType[r.metric_type] = byType[r.metric_type] || []).push(Number(r.value)); });
+
+    const categoryScores = {};
+    for (const [category, types] of Object.entries(SCORE_CATEGORIES)){
+      const values = types.flatMap(t => byType[t] || []);
+      if (values.length) categoryScores[category] = Math.round(values.reduce((s,v) => s+v, 0) / values.length);
+    }
+
+    const categoriesWithData = Object.keys(categoryScores).length;
+    const overall = categoriesWithData
+      ? Math.round(Object.values(categoryScores).reduce((s,v) => s+v, 0) / categoriesWithData)
+      : null;
+
+    return { overall, categoryScores, categoriesWithData, totalCategories: Object.keys(SCORE_CATEGORIES).length };
+  }
+
+  function grade(score){
+    if (score === null) return 'NO DATA YET';
+    if (score >= 90) return 'A · EXCELLENT';
+    if (score >= 80) return 'B+ · GOOD';
+    if (score >= 70) return 'B · GOOD';
+    if (score >= 60) return 'C · FAIR';
+    return 'D · NEEDS ATTENTION';
+  }
+
+  function renderScore(result){
     const scoreNum = document.getElementById('scoreNum');
+    const scoreGrade = document.getElementById('scoreGrade');
     const arc = document.getElementById('scoreArc');
-    setTimeout(() => {
-      const newScore = 78 + Math.floor(Math.random() * 12);
-      scoreNum.textContent = newScore;
-      const circumference = 540;
-      const offset = circumference - (circumference * (newScore / 100));
-      arc.style.strokeDashoffset = offset;
-      btn.textContent = 'Run new audit →';
+    const coverageNote = document.getElementById('scoreCoverageNote');
+    const catList = document.getElementById('catList');
 
-      const yearsYounger = 1 + Math.floor(Math.random() * 5);
-      document.getElementById('bioAgeNum').textContent = 37 - yearsYounger;
-      document.getElementById('bioAgeDelta').textContent = yearsYounger + (yearsYounger === 1 ? ' year' : ' years') + ' younger than your actual age';
-    }, 900);
+    scoreNum.textContent = result.overall === null ? '—' : result.overall;
+    scoreGrade.textContent = grade(result.overall);
+
+    const circumference = 540;
+    const pct = result.overall === null ? 0 : result.overall / 100;
+    arc.style.strokeDashoffset = circumference - circumference * pct;
+
+    coverageNote.textContent = result.categoriesWithData
+      ? `Based on ${result.categoriesWithData} of ${result.totalCategories} possible categories, last ${WINDOW_DAYS} days.`
+      : `No synced data in the last ${WINDOW_DAYS} days yet — connect a source on the Sources page and let it sync.`;
+
+    if (!result.categoriesWithData){
+      catList.innerHTML = `<p class="run-note">Nothing to show yet — this fills in automatically as sources sync.</p>`;
+    } else {
+      catList.innerHTML = Object.entries(result.categoryScores).map(([name, score]) => `
+        <div class="cat-row"><span class="cat-name">${name}</span><div class="cat-track"><div class="cat-fill ${score < 70 ? 'warm' : ''}" style="width:${score}%"></div></div><span class="cat-score">${score}</span></div>
+      `).join('');
+    }
+  }
+
+  async function renderChanges(){
+    const block = document.getElementById('changeBlock');
+    const { data: runs } = await supabaseClient
+      .from('health_audit_runs')
+      .select('overall_score, category_scores, created_at')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(2);
+
+    if (!runs || runs.length < 2){
+      block.innerHTML = `<p class="run-note">Run this a few more times over the coming weeks to see real changes here — needs at least two runs to compare.</p>`;
+      return;
+    }
+
+    const [latest, prev] = runs;
+    const improved = [];
+    const declined = [];
+    const allCats = new Set([...Object.keys(latest.category_scores || {}), ...Object.keys(prev.category_scores || {})]);
+    allCats.forEach(cat => {
+      const a = latest.category_scores[cat];
+      const b = prev.category_scores[cat];
+      if (a == null || b == null) return;
+      const delta = a - b;
+      if (delta === 0) return;
+      (delta > 0 ? improved : declined).push({ cat, delta });
+    });
+
+    const runDate = new Date(prev.created_at).toLocaleDateString();
+    if (!improved.length && !declined.length){
+      block.innerHTML = `<p class="run-note">No category moved since your last run on ${runDate}.</p>`;
+      return;
+    }
+
+    const col = (title, cls, items) => items.length ? `
+      <div class="change-col ${cls}">
+        <h3>${title}</h3>
+        ${items.map(i => `
+          <div class="change-item ${cls}">
+            <div class="metric"><span>${i.cat}</span><span class="delta">${i.delta > 0 ? '+' : ''}${i.delta} pts</span></div>
+            <p>Since your last run on ${runDate}.</p>
+          </div>
+        `).join('')}
+      </div>
+    ` : '';
+
+    block.innerHTML = `<div class="change-grid">${col('↑ Improved', 'improved', improved)}${col('↓ Declined', 'declined', declined)}</div>`;
+  }
+
+  async function loadLatestRunNote(){
+    const { data: runs } = await supabaseClient
+      .from('health_audit_runs')
+      .select('created_at')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false })
+      .limit(1);
+    document.getElementById('runNote').textContent = (runs && runs[0])
+      ? `Last saved run: ${new Date(runs[0].created_at).toLocaleString()} · automatic monthly re-runs aren't built yet`
+      : 'No saved runs yet — click "Run new audit" to save your first one.';
+  }
+
+  (async () => {
+    const session = await requireAuth();
+    if (!session) return;
+    currentUser = session.user;
+
+    latestResult = await computeScore();
+    renderScore(latestResult);
+    await renderChanges();
+    await loadLatestRunNote();
+  })();
+
+  document.getElementById('runAuditBtn').addEventListener('click', async function(){
+    const btn = this;
+    const original = btn.textContent;
+    btn.textContent = 'Running audit…';
+    btn.disabled = true;
+
+    latestResult = await computeScore();
+    renderScore(latestResult);
+
+    await supabaseClient.from('health_audit_runs').insert([{
+      user_id: currentUser.id,
+      overall_score: latestResult.overall,
+      category_scores: latestResult.categoryScores,
+      window_days: WINDOW_DAYS,
+    }]);
+
+    await renderChanges();
+    await loadLatestRunNote();
+    btn.textContent = original;
+    btn.disabled = false;
   });
 
   document.getElementById('downloadPdfBtn').addEventListener('click', async function(){
@@ -291,7 +398,6 @@
       const marginX = 56;
       let y = 60;
 
-      // Header
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(20);
       doc.text('Junie Health Summary', marginX, y);
@@ -306,28 +412,13 @@
       doc.line(marginX, y, 556, y);
       y += 30;
 
-      // Score
       const score = document.getElementById('scoreNum').textContent;
-      const cohort = document.querySelector('.cohort') ? document.querySelector('.cohort').textContent : '';
-      const bioAge = document.getElementById('bioAgeNum').textContent;
-      const bioAgeDelta = document.getElementById('bioAgeDelta').textContent;
       doc.setTextColor(20);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(15);
-      doc.text('Overall score: ' + score + ' / 100', marginX, y);
-      y += 20;
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10.5);
-      doc.setTextColor(90);
-      const cohortLines = doc.splitTextToSize(cohort, 480);
-      doc.text(cohortLines, marginX, y);
-      y += cohortLines.length * 13 + 16;
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(20);
-      doc.text('Estimated biological age: ' + bioAge + ' (' + bioAgeDelta + ')', marginX, y);
+      doc.text('Overall score: ' + score + (score === '—' ? ' (not enough synced data yet)' : ' / 100'), marginX, y);
       y += 26;
 
-      // Categories
       doc.setTextColor(20);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(13);
@@ -335,7 +426,13 @@
       y += 18;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(11);
-      document.querySelectorAll('.cat-row').forEach(row => {
+      const catRows = document.querySelectorAll('.cat-row');
+      if (!catRows.length){
+        doc.setTextColor(90);
+        doc.text('No categories with data yet.', marginX, y);
+        y += 17;
+      }
+      catRows.forEach(row => {
         const name = row.querySelector('.cat-name').textContent;
         const catScore = row.querySelector('.cat-score').textContent;
         doc.setTextColor(60);
@@ -345,15 +442,20 @@
       });
       y += 16;
 
-      // What changed
       doc.setTextColor(20);
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(13);
-      doc.text('What changed this month', marginX, y);
+      doc.text('What changed', marginX, y);
       y += 18;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10.5);
-      document.querySelectorAll('.change-item').forEach(item => {
+      const changeItems = document.querySelectorAll('.change-item');
+      if (!changeItems.length){
+        doc.setTextColor(90);
+        doc.text('Not enough runs yet to compare.', marginX, y);
+        y += 14;
+      }
+      changeItems.forEach(item => {
         const metric = item.querySelector('.metric');
         const metricName = metric.childNodes[0].textContent.trim();
         const delta = metric.querySelector('.delta').textContent;
@@ -369,14 +471,13 @@
         y += descLines.length * 12 + 12;
       });
 
-      // Footer disclaimer
       y = 740;
       doc.setDrawColor(220);
       doc.line(marginX, y, 556, y);
       y += 16;
       doc.setFontSize(8.5);
       doc.setTextColor(140);
-      const disclaimer = 'This summary is generated from self-reported and device-connected data and is not a medical diagnosis. Junie is not a healthcare provider. Share with your clinician as context, not as a substitute for professional evaluation.';
+      const disclaimer = 'This summary is generated from your own connected-source data and is not a medical diagnosis. Junie is not a healthcare provider. Share with your clinician as context, not as a substitute for professional evaluation.';
       const discLines = doc.splitTextToSize(disclaimer, 500);
       doc.text(discLines, marginX, y);
 
