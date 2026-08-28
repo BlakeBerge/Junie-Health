@@ -105,6 +105,40 @@
   }
   .source-chip .dot{width:7px; height:7px; border-radius:50%; background:var(--vital); flex:none;}
   .source-chip-empty{font-family:var(--mono); font-size:12.5px; color:var(--ink-faint);}
+  .source-chip.nudge{border-style:dashed; color:var(--ink-soft);}
+  .source-chip.nudge:hover{border-color:var(--signal); color:var(--signal);}
+
+  .panel-sub{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint);}
+  .sync-badge{
+    font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.05em;
+    padding:3px 10px; border-radius:20px; background:var(--paper-alt); color:var(--ink-faint);
+  }
+  .sync-badge.fresh{background:var(--vital-soft); color:var(--vital);}
+  .sync-badge.stale{background:var(--amber-soft); color:var(--amber);}
+
+  .mini-label{font-family:var(--mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-faint); margin-bottom:10px;}
+
+  .spark-block{margin-top:22px; padding-top:18px; border-top:1px solid var(--rule-soft);}
+  .spark-row{display:flex; align-items:flex-end; gap:8px; height:64px;}
+  .spark-bar-wrap{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:6px;}
+  .spark-bar{width:100%; max-width:34px; background:var(--vital); border-radius:4px 4px 2px 2px; min-height:3px;}
+  .spark-bar.zero{background:var(--rule);}
+  .spark-day{font-family:var(--mono); font-size:10px; color:var(--ink-faint);}
+
+  .source-breakdown{margin-top:18px; display:flex; flex-direction:column; gap:10px;}
+  .source-breakdown-row{
+    display:flex; align-items:center; gap:14px; padding:12px 14px; border:1px solid var(--rule-soft); border-radius:8px;
+    flex-wrap:wrap;
+  }
+  .source-breakdown-row .name{font-weight:600; font-size:13.5px; flex:none; min-width:90px;}
+  .source-breakdown-row .count{font-family:var(--mono); font-size:12px; color:var(--ink-faint); flex:none;}
+  .source-breakdown-row .metric-tags{display:flex; flex-wrap:wrap; gap:6px; flex:1;}
+  .metric-tag{
+    font-family:var(--mono); font-size:10.5px; color:var(--ink-soft); background:var(--paper-alt);
+    padding:3px 9px; border-radius:20px;
+  }
+
+  .nudge-block{margin-top:18px; padding-top:16px; border-top:1px solid var(--rule-soft);}
   .goal{margin-bottom:18px;}
   .goal:last-child{margin-bottom:0;}
   .goal-head{display:flex; justify-content:space-between; font-size:14px; margin-bottom:8px;}
@@ -283,19 +317,37 @@
 <section>
   <div class="wrap">
     <div class="panel" id="sourcesOverview">
-      <div class="section-head" style="margin-bottom:16px;">
-        <h2>Sources</h2>
+      <div class="section-head" style="margin-bottom:4px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <h2>Sources</h2>
+          <span class="sync-badge" id="syncBadge">—</span>
+        </div>
         <span>
           <a href="sources.html" class="link">Manage →</a>
           <a href="sources.html" class="link" style="margin-left:14px;">+ Add source</a>
         </span>
       </div>
-      <div class="sources-stat-row" id="sourcesStatRow">
+      <p class="panel-sub">Every number below is queried live from your account — nothing here is a demo.</p>
+
+      <div class="sources-stat-row" id="sourcesStatRow" style="margin-top:16px;">
         <div class="sources-stat"><span class="n">—</span><span class="l">Connected sources</span></div>
         <div class="sources-stat"><span class="n">—</span><span class="l">Datapoints</span></div>
         <div class="sources-stat"><span class="n">—</span><span class="l">Latest data</span></div>
       </div>
+
+      <div class="spark-block" id="sparkBlock" hidden>
+        <p class="mini-label">Datapoints, last 7 days</p>
+        <div class="spark-row" id="sparkRow"></div>
+      </div>
+
+      <div class="source-breakdown" id="sourceBreakdown"></div>
+
       <div class="sources-chip-row" id="sourcesChipRow"></div>
+
+      <div class="nudge-block" id="nudgeBlock" hidden>
+        <p class="mini-label">Not connected yet</p>
+        <div class="sources-chip-row" id="nudgeChipRow"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -575,9 +627,31 @@
   })();
 
   // ---- Sources overview (real Supabase tables: connected_sources, health_metrics) ----
+  // The four providers with a real, working OAuth connection today -- kept
+  // in sync by hand with sources.html's OAUTH_PROVIDER_NAMES. Used only to
+  // nudge toward providers that are live but not yet connected; it never
+  // implies the others in the catalog are unavailable for a different reason.
+  const REAL_OAUTH_PROVIDERS = { oura: 'Oura', fitbit: 'Fitbit', whoop: 'WHOOP', strava: 'Strava' };
+
+  function timeAgo(iso){
+    const diffMs = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diffMs / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  }
+
   async function loadSourcesOverview(){
     const statRow = document.getElementById('sourcesStatRow');
     const chipRow = document.getElementById('sourcesChipRow');
+    const syncBadge = document.getElementById('syncBadge');
+    const sparkBlock = document.getElementById('sparkBlock');
+    const sparkRow = document.getElementById('sparkRow');
+    const breakdownEl = document.getElementById('sourceBreakdown');
+    const nudgeBlock = document.getElementById('nudgeBlock');
+    const nudgeChipRow = document.getElementById('nudgeChipRow');
 
     const { data: sources } = await supabaseClient
       .from('connected_sources')
@@ -585,25 +659,24 @@
       .eq('user_id', currentUser.id)
       .eq('status', 'active');
 
-    const { count: datapointCount } = await supabaseClient
+    // Pull real rows once and do all aggregation (per-source counts, metric
+    // coverage, the 7-day sparkline, last-synced time) client-side -- this
+    // table stays small enough on the free plan that one query is simpler
+    // and just as honest as several narrower ones.
+    const { data: metrics } = await supabaseClient
       .from('health_metrics')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', currentUser.id);
-
-    const { data: latestRows } = await supabaseClient
-      .from('health_metrics')
-      .select('source, metric_date')
+      .select('source, metric_type, metric_date, created_at')
       .eq('user_id', currentUser.id)
       .order('metric_date', { ascending: false })
-      .limit(1);
+      .limit(5000);
 
-    const latest = (latestRows && latestRows[0])
-      ? `${latestRows[0].metric_date} · ${latestRows[0].source}`
-      : 'No data yet';
+    const rows = metrics || [];
+    const datapointCount = rows.length;
+    const latest = rows[0] ? `${rows[0].metric_date} · ${rows[0].source}` : 'No data yet';
 
     const stats = [
       { n: (sources || []).length, l: 'Connected sources' },
-      { n: datapointCount || 0, l: 'Datapoints' },
+      { n: datapointCount, l: 'Datapoints' },
       { n: latest, l: 'Latest data' },
     ];
     statRow.innerHTML = stats.map(s => `
@@ -613,6 +686,90 @@
     chipRow.innerHTML = (sources && sources.length)
       ? sources.map(s => `<span class="source-chip"><span class="dot"></span>${s.source_name}</span>`).join('')
       : `<span class="source-chip-empty">Nothing connected yet — <a href="sources.html" class="link">connect a source →</a></span>`;
+
+    // Last-synced badge -- real, from the newest row's created_at, not a
+    // fixed "LIVE" label pretending a sync job ran when it might not have.
+    if (rows.length){
+      const newestCreated = rows.reduce((max, r) => r.created_at > max ? r.created_at : max, rows[0].created_at);
+      const ageMins = (Date.now() - new Date(newestCreated).getTime()) / 60000;
+      syncBadge.textContent = `Last synced ${timeAgo(newestCreated)}`;
+      syncBadge.className = 'sync-badge ' + (ageMins < 120 ? 'fresh' : 'stale');
+    } else {
+      syncBadge.textContent = 'Not synced yet';
+      syncBadge.className = 'sync-badge';
+    }
+
+    // 7-day sparkline of datapoint volume -- shows the shape of what's
+    // coming in, which a bare total count can't.
+    const days = [];
+    for (let i = 6; i >= 0; i--){
+      const d = new Date(Date.now() - i * 86400000);
+      days.push(d.toISOString().slice(0, 10));
+    }
+    const countsByDay = {};
+    days.forEach(d => countsByDay[d] = 0);
+    rows.forEach(r => { if (r.metric_date in countsByDay) countsByDay[r.metric_date]++; });
+    const maxCount = Math.max(1, ...Object.values(countsByDay));
+
+    if (datapointCount > 0){
+      sparkBlock.hidden = false;
+      sparkRow.innerHTML = days.map(d => {
+        const c = countsByDay[d];
+        const heightPct = Math.max(4, Math.round((c / maxCount) * 100));
+        const label = new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'narrow' });
+        return `
+          <div class="spark-bar-wrap" title="${d}: ${c} datapoint${c===1?'':'s'}">
+            <div class="spark-bar ${c===0?'zero':''}" style="height:${heightPct}%"></div>
+            <span class="spark-day">${label}</span>
+          </div>
+        `;
+      }).join('');
+    } else {
+      sparkBlock.hidden = true;
+    }
+
+    // Per-source breakdown -- count, which metric types are actually
+    // present, and the freshest date, per connected source. Freddy's
+    // overview stops at a total count; this shows what's actually in each
+    // source instead of just how much.
+    const bySource = {};
+    rows.forEach(r => {
+      if (!bySource[r.source]) bySource[r.source] = { count: 0, types: new Set(), latest: r.metric_date };
+      bySource[r.source].count++;
+      bySource[r.source].types.add(r.metric_type);
+      if (r.metric_date > bySource[r.source].latest) bySource[r.source].latest = r.metric_date;
+    });
+    const sourceNames = {};
+    (sources || []).forEach(s => sourceNames[s.source_key] = s.source_name);
+
+    const breakdownKeys = Object.keys(bySource);
+    breakdownEl.innerHTML = breakdownKeys.length
+      ? breakdownKeys.map(key => {
+          const b = bySource[key];
+          const name = sourceNames[key] || key;
+          const tags = [...b.types].slice(0, 4).map(t => `<span class="metric-tag">${t.replace(/_/g,' ')}</span>`).join('');
+          return `
+            <div class="source-breakdown-row">
+              <span class="name">${name}</span>
+              <span class="count">${b.count} pts · through ${b.latest}</span>
+              <div class="metric-tags">${tags}</div>
+            </div>
+          `;
+        }).join('')
+      : '';
+
+    // Nudge toward real, connectable providers the user hasn't linked yet --
+    // Freddy's overview doesn't surface this at all.
+    const connectedKeys = new Set((sources || []).map(s => s.source_key));
+    const unconnected = Object.entries(REAL_OAUTH_PROVIDERS).filter(([key]) => !connectedKeys.has(key));
+    if (unconnected.length){
+      nudgeBlock.hidden = false;
+      nudgeChipRow.innerHTML = unconnected.map(([key, name]) => `
+        <a href="sources.html" class="source-chip nudge">+ ${name}</a>
+      `).join('');
+    } else {
+      nudgeBlock.hidden = true;
+    }
   }
 
   // ---- GLP-1 / medication log (real Supabase table: glp1_logs) ----
