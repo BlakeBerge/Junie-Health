@@ -166,14 +166,25 @@
   .insight-card .headline{font-weight:600; font-size:14px; margin-bottom:4px;}
   .insight-card .detail{font-size:13px; color:var(--ink-soft);}
 
-  .goal{margin-bottom:18px;}
-  .goal:last-child{margin-bottom:0;}
-  .goal-head{display:flex; justify-content:space-between; font-size:14px; margin-bottom:8px;}
-  .goal-head strong{font-weight:600;}
-  .goal-head span{font-family:var(--mono); font-size:12px; color:var(--ink-faint);}
-  .goal-track{height:8px; border-radius:6px; background:var(--rule-soft); overflow:hidden;}
-  .goal-fill{height:100%; background:var(--vital); border-radius:6px;}
-  .goal-fill.warm{background:var(--signal);}
+  .goal-form{display:flex; gap:8px; margin-bottom:14px;}
+  .goal-form input{
+    flex:1; min-width:120px; border:1px solid var(--rule); border-radius:8px; padding:9px 12px;
+    font-family:var(--sans); font-size:13.5px; background:var(--paper-alt); color:var(--ink);
+  }
+  .goal-add-btn{
+    border:none; border-radius:8px; background:var(--ink); color:#fff; font-family:var(--sans);
+    font-weight:600; font-size:13px; padding:9px 16px; cursor:pointer; flex:none;
+  }
+  .goal-item{display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid var(--rule-soft);}
+  .goal-item:first-child{border-top:none;}
+  .goal-item input[type="checkbox"]{width:16px; height:16px; flex:none; accent-color:var(--vital); cursor:pointer;}
+  .goal-item .title{flex:1; font-size:14px;}
+  .goal-item.done .title{color:var(--ink-faint); text-decoration:line-through;}
+  .goal-item .remove{
+    font-family:var(--mono); font-size:11px; color:var(--ink-faint); background:none; border:none;
+    cursor:pointer; text-decoration:underline; flex:none;
+  }
+  .goal-item .remove:hover{color:var(--down);}
 
   .badge-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; padding-top:18px; border-top:1px solid var(--rule-soft);}
   .badge{
@@ -225,30 +236,6 @@
   .glp1-history .entry .date{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); flex:none;}
   .glp1-disclaimer{font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-top:14px; padding-top:14px; border-top:1px solid var(--rule-soft);}
 
-  /* predictive insights */
-  .predict-list{display:flex; flex-direction:column; gap:0;}
-  .predict-item{
-    display:flex; gap:14px; padding:16px 0; border-top:1px solid var(--rule-soft);
-  }
-  .predict-item:first-child{border-top:none; padding-top:0;}
-  .predict-icon{
-    font-size:18px; flex:none; width:34px; height:34px; border-radius:50%;
-    background:var(--amber-soft); color:var(--amber); display:flex; align-items:center; justify-content:center;
-  }
-  .predict-title{font-size:15px; font-weight:600; margin-bottom:6px;}
-  .predict-body{font-size:13.5px; color:var(--ink-soft); margin-bottom:8px;}
-  .predict-work-toggle{
-    font-family:var(--mono); font-size:11.5px; color:var(--vital); background:none; border:none;
-    cursor:pointer; padding:0; text-decoration:underline;
-  }
-  .predict-work{
-    display:none; margin-top:10px; padding:12px 14px; background:var(--paper-alt); border-radius:6px;
-    font-size:12.5px; color:var(--ink-soft);
-  }
-  .predict-work.open{display:block;}
-  .predict-work p{margin-bottom:6px;}
-  .predict-work p:last-child{margin-bottom:0;}
-  .predict-note{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint); margin-top:16px; padding-top:14px; border-top:1px solid var(--rule-soft);}
 
   /* alerts */
   .alert-list{display:flex; flex-direction:column; gap:0;}
@@ -268,6 +255,12 @@
   .toggle.on{background:var(--signal);}
   .toggle::after{content:""; position:absolute; width:16px; height:16px; border-radius:50%; background:#fff; top:2.5px; left:3px; transition:left .15s ease;}
   .toggle.on::after{left:19px;}
+  .alert-actions{display:flex; align-items:center; gap:12px; flex:none;}
+  .alert-remove{
+    font-family:var(--mono); font-size:11px; color:var(--ink-faint); background:none; border:none;
+    cursor:pointer; text-decoration:underline;
+  }
+  .alert-remove:hover{color:var(--down);}
 
   .add-alert{margin-top:18px; padding-top:18px; border-top:1px solid var(--rule-soft);}
   .add-alert-grid{display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; align-items:end;}
@@ -391,48 +384,28 @@
       <div class="score-ring">
         <svg width="140" height="140" viewBox="0 0 140 140">
           <circle class="bg" cx="70" cy="70" r="60"></circle>
-          <circle class="fg" cx="70" cy="70" r="60" stroke-dasharray="377" stroke-dashoffset="68"></circle>
         </svg>
         <div class="score-num">
-          <span class="n">82</span>
-          <span class="g">B+ · GOOD</span>
+          <span class="n" style="font-size:22px; color:var(--ink-faint);">—</span>
+          <span class="g">NO SCORE YET</span>
         </div>
       </div>
-      <p class="desc">Better than 64% of people your age and sex with similar tracking history.</p>
+      <p class="desc">Health Audit is a preview today — sample scoring only, not your real data. Personalized scoring backed by your connected sources is still in progress.</p>
       <div class="score-actions">
-        <a href="health-audit.html" class="btn">View report</a>
-        <a href="health-audit.html#run" class="btn btn-primary">Run audit</a>
+        <a href="health-audit.html" class="btn btn-primary">See the preview →</a>
       </div>
     </div>
 
     <div class="panel" id="goals">
       <div class="section-head" style="margin-bottom:16px;">
         <h2>Goals</h2>
-        <a href="#" class="link" id="addGoalLink">+ Add a goal</a>
       </div>
-      <div class="goal">
-        <div class="goal-head"><strong>Resting HR under 58bpm avg</strong><span>54.2 / 58 bpm</span></div>
-        <div class="goal-track"><div class="goal-fill" style="width:88%"></div></div>
-      </div>
-      <div class="goal">
-        <div class="goal-head"><strong>8+ sleep score, 20 nights this month</strong><span>14 / 20 nights</span></div>
-        <div class="goal-track"><div class="goal-fill" style="width:70%"></div></div>
-      </div>
-      <div class="goal">
-        <div class="goal-head"><strong>Strength train 3x/week, 4-week streak</strong><span>Week 3 of 4</span></div>
-        <div class="goal-track"><div class="goal-fill warm" style="width:75%"></div></div>
-      </div>
-      <div class="goal">
-        <div class="goal-head"><strong>150g protein, 5 days/week</strong><span>4 / 5 days</span></div>
-        <div class="goal-track"><div class="goal-fill" style="width:80%"></div></div>
-      </div>
-      <div class="badge-row">
-        <span class="badge earned"><span class="dot"></span>7-day streak</span>
-        <span class="badge earned"><span class="dot"></span>First audit</span>
-        <span class="badge earned"><span class="dot"></span>3 sources connected</span>
-        <span class="badge"><span class="dot"></span>Goal crusher</span>
-        <span class="badge"><span class="dot"></span>90-day streak</span>
-      </div>
+      <form class="goal-form" id="goalForm">
+        <input type="text" id="goalInput" placeholder="e.g. Sleep 7+ hours most nights">
+        <button type="submit" class="goal-add-btn">+ Add</button>
+      </form>
+      <div id="goalList"><p class="empty-note">Loading…</p></div>
+      <div class="badge-row" id="badgeRow"></div>
     </div>
   </div>
 </section>
@@ -513,44 +486,6 @@
   </div>
 </section>
 
-<section id="predictions">
-  <div class="wrap">
-    <div class="panel">
-      <div class="section-head" style="margin-bottom:6px;">
-        <h2>Predictive insights</h2>
-        <span class="link" style="color:var(--ink-faint); text-decoration:none;">Patterns from your history, flagged before they cost you a bad day</span>
-      </div>
-      <div class="predict-list" id="predictList">
-        <div class="predict-item">
-          <span class="predict-icon">⚠</span>
-          <div>
-            <p class="predict-title">Tomorrow matches a pattern that's hit you before</p>
-            <p class="predict-body">The last 3 times you had 2+ hard training days plus under 7 hours of sleep, your HRV dropped 15+ points the next morning. That combination just happened again.</p>
-            <button class="predict-work-toggle" data-target="predict-work-1">Show your work ▾</button>
-            <div class="predict-work" id="predict-work-1">
-              <p>Pattern matched across: <b>Oct 14–15</b>, <b>Nov 2–3</b>, <b>Nov 19–20</b> (training load + sleep duration, last 90 days)</p>
-              <p>Metrics used: Training load (Hevy, Strava), Sleep duration (Oura), HRV (Oura)</p>
-            </div>
-          </div>
-        </div>
-        <div class="predict-item">
-          <span class="predict-icon">↗</span>
-          <div>
-            <p class="predict-title">Your recovery is trending ahead of your training load</p>
-            <p class="predict-body">HRV has climbed steadily for 9 days while training volume held flat — historically your best window for adding a harder session without a setback.</p>
-            <button class="predict-work-toggle" data-target="predict-work-2">Show your work ▾</button>
-            <div class="predict-work" id="predict-work-2">
-              <p>Trend window: last 9 days, compared against your 90-day rolling baseline.</p>
-              <p>Metrics used: HRV (Oura), Training load (Hevy, Strava)</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <p class="predict-note">Demo patterns shown with sample data — real prediction needs a few weeks of your actual history to learn from.</p>
-    </div>
-  </div>
-</section>
-
 <section id="alerts">
   <div class="wrap">
     <div class="panel">
@@ -558,20 +493,7 @@
         <h2>Alerts</h2>
         <span class="link" style="color:var(--ink-faint); text-decoration:none;">Notify me when a metric crosses a line</span>
       </div>
-      <div class="alert-list" id="alertList">
-        <div class="alert-row">
-          <div class="alert-info"><b>Resting heart rate</b><span class="cond">Oura · falls below 60 bpm avg (7-day) · Email + Push</span></div>
-          <button class="toggle on" aria-label="Toggle alert"></button>
-        </div>
-        <div class="alert-row">
-          <div class="alert-info"><b>Sleep score</b><span class="cond">Oura · drops more than 8% vs 30-day baseline · Email</span></div>
-          <button class="toggle on" aria-label="Toggle alert"></button>
-        </div>
-        <div class="alert-row">
-          <div class="alert-info"><b>Weekly training load</b><span class="cond">Strava · rises more than 30% week over week · Push</span></div>
-          <button class="toggle" aria-label="Toggle alert"></button>
-        </div>
-      </div>
+      <div class="alert-list" id="alertList"><p class="empty-note">Loading…</p></div>
 
       <div class="add-alert">
         <div class="add-alert-grid">
@@ -606,7 +528,7 @@
           </div>
           <button class="add-alert-btn" id="addAlertBtn">Add alert</button>
         </div>
-        <p class="add-alert-note">Demo only — alerts shown here aren't wired to real email or push delivery yet.</p>
+        <p class="add-alert-note">Alert rules save for real to your account. What's not built yet: actually evaluating them against your data and sending email/push — that's a bigger job scheduled separately.</p>
       </div>
     </div>
   </div>
@@ -670,6 +592,9 @@
     initGlp1Tracking();
     loadSourcesOverview();
     loadInsights();
+    loadGoals();
+    loadAlertRules();
+    loadBadges();
   })();
 
   // ---- Insights (real Supabase tables: mood_logs, glp1_logs, health_metrics) ----
@@ -1052,15 +977,6 @@
     historyEl.innerHTML = html;
   }
 
-  // ---- Predictive insights: "show your work" toggles ----
-  document.querySelectorAll('.predict-work-toggle').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const target = document.getElementById(btn.dataset.target);
-      const isOpen = target.classList.toggle('open');
-      btn.textContent = isOpen ? 'Hide the data ▴' : 'Show your work ▾';
-    });
-  });
-
   // Edit name — safe update-or-insert so this works whether or not a
   // profiles row already exists for this account (e.g. if the original
   // signup insert failed for any reason).
@@ -1129,29 +1045,142 @@
     }
   });
 
-  document.querySelectorAll('.toggle').forEach(t => {
-    t.addEventListener('click', () => t.classList.toggle('on'));
-  });
+  // ---- Alert rules (real Supabase table: alert_rules) ----
+  async function loadAlertRules(){
+    const list = document.getElementById('alertList');
+    const { data: rules } = await supabaseClient
+      .from('alert_rules')
+      .select('id, source, condition_text, channel, enabled')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
 
-  const alertList = document.getElementById('alertList');
-  document.getElementById('addAlertBtn').addEventListener('click', () => {
+    if (!rules || !rules.length){
+      list.innerHTML = `<p class="empty-note">No alert rules yet — add one below.</p>`;
+      return;
+    }
+
+    list.innerHTML = rules.map(r => `
+      <div class="alert-row">
+        <div class="alert-info"><b>${r.condition_text}</b><span class="cond">${r.source} · ${r.channel}</span></div>
+        <div class="alert-actions">
+          <button class="toggle ${r.enabled ? 'on' : ''}" data-toggle-alert="${r.id}" aria-label="Toggle alert"></button>
+          <button class="alert-remove" data-remove-alert="${r.id}">Remove</button>
+        </div>
+      </div>
+    `).join('');
+
+    list.querySelectorAll('[data-toggle-alert]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const nowOn = !btn.classList.contains('on');
+        btn.classList.toggle('on', nowOn);
+        await supabaseClient.from('alert_rules').update({ enabled: nowOn }).eq('id', btn.dataset.toggleAlert);
+      });
+    });
+    list.querySelectorAll('[data-remove-alert]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        await supabaseClient.from('alert_rules').delete().eq('id', btn.dataset.removeAlert);
+        loadAlertRules();
+      });
+    });
+  }
+
+  document.getElementById('addAlertBtn').addEventListener('click', async () => {
     const source = document.getElementById('alertSource').value;
     const metric = document.getElementById('alertMetric').value;
     const condition = document.getElementById('alertCondition').value;
-    const row = document.createElement('div');
-    row.className = 'alert-row';
-    row.innerHTML = `
-      <div class="alert-info"><b>${metric}</b><span class="cond">${source} · ${condition} · Email + Push</span></div>
-      <button class="toggle on" aria-label="Toggle alert"></button>
-    `;
-    alertList.appendChild(row);
-    row.querySelector('.toggle').addEventListener('click', (e) => e.target.classList.toggle('on'));
+    const { error } = await supabaseClient.from('alert_rules').insert([{
+      user_id: currentUser.id, source, condition_text: `${metric} ${condition}`, channel: 'email', enabled: true,
+    }]);
+    if (error){ alert('Could not save this alert: ' + error.message); return; }
+    loadAlertRules();
   });
 
-  document.getElementById('addGoalLink').addEventListener('click', (e) => {
+  // ---- Goals (real Supabase table: goals) ----
+  async function loadGoals(){
+    const list = document.getElementById('goalList');
+    const { data: goals } = await supabaseClient
+      .from('goals')
+      .select('id, title, done')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+
+    if (!goals || !goals.length){
+      list.innerHTML = `<p class="empty-note">No goals yet — add one above.</p>`;
+    } else {
+      list.innerHTML = goals.map(g => `
+        <div class="goal-item ${g.done ? 'done' : ''}">
+          <input type="checkbox" data-toggle-goal="${g.id}" ${g.done ? 'checked' : ''}>
+          <span class="title">${g.title}</span>
+          <button class="remove" data-remove-goal="${g.id}">Remove</button>
+        </div>
+      `).join('');
+
+      list.querySelectorAll('[data-toggle-goal]').forEach(cb => {
+        cb.addEventListener('change', async () => {
+          const done = cb.checked;
+          await supabaseClient.from('goals').update({ done, completed_at: done ? new Date().toISOString() : null }).eq('id', cb.dataset.toggleGoal);
+          loadGoals();
+          loadBadges();
+        });
+      });
+      list.querySelectorAll('[data-remove-goal]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          await supabaseClient.from('goals').delete().eq('id', btn.dataset.removeGoal);
+          loadGoals();
+          loadBadges();
+        });
+      });
+    }
+
+    return goals || [];
+  }
+
+  document.getElementById('goalForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    alert('Demo only — goal creation isn\'t wired up yet, but this is where a "set a new goal" form would open.');
+    const input = document.getElementById('goalInput');
+    const title = input.value.trim();
+    if (!title) return;
+    const { error } = await supabaseClient.from('goals').insert([{ user_id: currentUser.id, title }]);
+    if (error){ alert('Could not save this goal: ' + error.message); return; }
+    input.value = '';
+    loadGoals();
+    loadBadges();
   });
+
+  // ---- Badges: real facts computed from the account's own data, never a
+  // claim that isn't backed by an actual row somewhere. ----
+  async function loadBadges(){
+    const badgeRow = document.getElementById('badgeRow');
+
+    const [{ count: sourceCount }, { data: moods }, { count: goalsDone }] = await Promise.all([
+      supabaseClient.from('connected_sources').select('id', { count: 'exact', head: true }).eq('user_id', currentUser.id).eq('status', 'active'),
+      supabaseClient.from('mood_logs').select('log_date').eq('user_id', currentUser.id).order('log_date', { ascending: false }).limit(120),
+      supabaseClient.from('goals').select('id', { count: 'exact', head: true }).eq('user_id', currentUser.id).eq('done', true),
+    ]);
+
+    // Consecutive-day mood-logging streak ending today or yesterday.
+    let streak = 0;
+    if (moods && moods.length){
+      const dates = new Set(moods.map(m => m.log_date));
+      let cursor = new Date();
+      // allow the streak to still count if today just hasn't been logged yet
+      if (!dates.has(cursor.toISOString().slice(0,10))) cursor.setDate(cursor.getDate() - 1);
+      while (dates.has(cursor.toISOString().slice(0,10))){
+        streak++;
+        cursor.setDate(cursor.getDate() - 1);
+      }
+    }
+
+    const badges = [
+      { label: `${sourceCount || 0} source${sourceCount === 1 ? '' : 's'} connected`, earned: (sourceCount || 0) > 0 },
+      { label: streak > 0 ? `${streak}-day mood streak` : 'No mood streak yet', earned: streak > 0 },
+      { label: `${goalsDone || 0} goal${goalsDone === 1 ? '' : 's'} completed`, earned: (goalsDone || 0) > 0 },
+    ];
+
+    badgeRow.innerHTML = badges.map(b => `
+      <span class="badge ${b.earned ? 'earned' : ''}"><span class="dot"></span>${b.label}</span>
+    `).join('');
+  }
 </script>
 
 </body>
