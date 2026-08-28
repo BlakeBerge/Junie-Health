@@ -39,7 +39,8 @@ async function requireAuth() {
   }
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session) {
-    window.location.href = 'login.html';
+    const here = window.location.pathname + window.location.search;
+    window.location.href = 'login.html?next=' + encodeURIComponent(here);
     return null;
   }
   return session;

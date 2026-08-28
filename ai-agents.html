@@ -156,15 +156,18 @@
     <div class="panel">
       <div class="section-head"><h2>Your MCP URL</h2></div>
       <div class="url-row">
-        <div class="url-box" id="mcpUrlBox">https://sakfofbohkndoeiqlndo.supabase.co/functions/v1/mcp</div>
+        <div class="url-box" id="mcpUrlBox">https://junieai.netlify.app/mcp</div>
         <button class="copy-btn" id="copyUrlBtn">Copy</button>
       </div>
 
-      <p class="panel-sub" style="margin-top:16px;">Example config for Claude Code / Claude Desktop's <code>mcpServers</code> setting — replace <code>YOUR_TOKEN</code> with a token generated below:</p>
+      <p class="panel-sub" style="margin-top:16px;">This is a real OAuth-capable MCP server. Two ways to connect:</p>
+
+      <div class="tool-item" style="margin-top:12px;"><b>One click</b><span>In Claude's Settings → Connectors → Add custom connector, paste the URL above. Claude registers itself automatically and takes you to a Junie sign-in + consent screen — no token to copy.</span></div>
+      <div class="tool-item" style="margin-top:10px;"><b>Manual token</b><span>For clients that don't support OAuth discovery (e.g. Claude Code's mcpServers config), generate a token below and use it directly:</span></div>
       <div class="config-block">{
   "mcpServers": {
     "junie-health": {
-      "url": "https://sakfofbohkndoeiqlndo.supabase.co/functions/v1/mcp",
+      "url": "https://junieai.netlify.app/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_TOKEN"
       }
