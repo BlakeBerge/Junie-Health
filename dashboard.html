@@ -16,7 +16,7 @@
 <script src="supabase-config.js"></script>
 <style>
   :root{
-    --paper: #FBFAF6; --paper-alt: #F1EFE7; --ink: #0A0A0A; --ink-soft: #55584E; --ink-faint: #8A8D80;
+    --paper: #FFFFFF; --paper-alt: #F6F5F2; --ink: #0A0A0A; --ink-soft: #55584E; --ink-faint: #8A8D80;
     --rule: rgba(10,10,10,0.14); --rule-soft: rgba(10,10,10,0.07);
     --signal: #F2664A; --signal-soft: rgba(242,102,74,0.12);
     --vital: #0F9E92; --vital-soft: rgba(15,158,146,0.12);
@@ -93,6 +93,22 @@
 
   .panel{border:1px solid var(--rule); border-radius:12px; padding:22px; background:var(--paper);}
 
+  .mcp-card{border:1px solid var(--rule); border-radius:12px; padding:20px 22px; background:var(--paper);}
+  .mcp-card-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;}
+  .mcp-url-row{
+    display:flex; align-items:center; gap:10px; border:1px solid var(--rule); border-radius:9px;
+    padding:11px 12px 11px 16px; background:var(--paper-alt); margin-bottom:14px;
+  }
+  .mcp-url-row code{flex:1; font-family:var(--mono); font-size:13.5px; color:var(--ink); overflow-x:auto; white-space:nowrap;}
+  .copy-btn{
+    font-family:var(--mono); font-size:12px; font-weight:600; padding:8px 14px; border-radius:6px;
+    border:1px solid var(--ink); background:var(--ink); color:#fff; cursor:pointer; flex:none;
+  }
+  .copy-btn:hover{background:#000;}
+  .copy-btn.copied{background:var(--vital); border-color:var(--vital);}
+  .mcp-actions{display:flex; gap:10px; flex-wrap:wrap;}
+  .mcp-actions .btn{flex:none; padding:10px 18px;}
+
   #sourcesOverview{
     border-radius:16px; box-shadow:0 1px 2px rgba(10,10,10,0.04), 0 8px 24px -12px rgba(10,10,10,0.08);
   }
@@ -100,8 +116,8 @@
   .sources-stat-row{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
   @media (max-width:640px){ .sources-stat-row{grid-template-columns:1fr;} }
   .sources-stat{
-    display:flex; flex-direction:column; gap:6px; padding:16px 18px; border-radius:12px;
-    background:var(--paper-alt); border:1px solid var(--rule-soft);
+    display:flex; flex-direction:column; gap:6px; padding:16px 18px; border-radius:10px;
+    background:var(--paper); border:1px solid var(--rule);
   }
   .sources-stat .n{font-family:var(--sans); font-size:28px; font-weight:700; letter-spacing:-0.01em; line-height:1.1;}
   .sources-stat .l{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-faint);}
@@ -335,6 +351,25 @@
   <p>Here's where things stand across everything you've connected.</p>
 </div>
 
+<section style="padding-top:20px;">
+  <div class="wrap">
+    <div class="mcp-card">
+      <div class="mcp-card-head">
+        <span class="mini-label" style="margin:0;">Your MCP URL</span>
+        <a href="ai-agents.html" class="link">Setup guide →</a>
+      </div>
+      <div class="mcp-url-row">
+        <code id="mcpUrlText">https://junieai.netlify.app/mcp</code>
+        <button class="copy-btn" id="mcpCopyBtn" type="button">Copy</button>
+      </div>
+      <div class="mcp-actions">
+        <a href="ai-agents.html" class="btn btn-primary">Set up in Claude →</a>
+        <a href="ai-agents.html" class="btn">Generate a token</a>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section>
   <div class="wrap">
     <div class="panel" id="sourcesOverview">
@@ -561,7 +596,7 @@
 </section>
 
 <footer>
-  <p>© 2026 Junie Health, Inc. · demo dashboard — data shown is sample data, not live</p>
+  <p>© 2026 Junie Health, Inc.</p>
 </footer>
 
 <script>
@@ -592,6 +627,7 @@
     renderGreeting(currentFullName, currentUser.email);
     initMoodTracking();
     initGlp1Tracking();
+    initMcpCopy();
     loadSourcesOverview();
     loadInsights();
     loadGoals();
@@ -885,6 +921,23 @@
     } else {
       nudgeBlock.hidden = true;
     }
+  }
+
+  // ---- MCP URL copy button ----
+  function initMcpCopy(){
+    const btn = document.getElementById('mcpCopyBtn');
+    btn.addEventListener('click', async () => {
+      const url = document.getElementById('mcpUrlText').textContent;
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch {
+        return;
+      }
+      const original = btn.textContent;
+      btn.textContent = 'Copied';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1800);
+    });
   }
 
   // ---- GLP-1 / medication log (real Supabase table: glp1_logs) ----
