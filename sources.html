@@ -583,11 +583,13 @@
     if (!session) return;
     currentUser = session.user;
 
-    const { data: profile } = await supabaseClient
-      .from('profiles')
-      .select('name, plan')
-      .eq('user_id', currentUser.id)
-      .maybeSingle();
+    // Profile lookup and connection loading don't depend on each other --
+    // run them concurrently instead of paying both queries' latency in
+    // sequence.
+    const [{ data: profile }] = await Promise.all([
+      supabaseClient.from('profiles').select('name, plan').eq('user_id', currentUser.id).maybeSingle(),
+      loadConnections(),
+    ]);
 
     userPlan = (profile && profile.plan) ? profile.plan : 'free';
     const fullName = (profile && profile.name) ? profile.name : '';
@@ -595,8 +597,6 @@
       ? fullName.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase()
       : currentUser.email.slice(0,2).toUpperCase();
     document.getElementById('sidebarEmail').textContent = currentUser.email;
-
-    await loadConnections();
     render();
     initCsvImport();
     initPdfImport();
