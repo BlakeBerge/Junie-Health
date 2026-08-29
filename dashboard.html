@@ -16,17 +16,17 @@
 <script src="supabase-config.js"></script>
 <style>
   :root{
-    --paper: #FFFFFF; --paper-alt: #F6F5F2; --ink: #0A0A0A; --ink-soft: #55584E; --ink-faint: #8A8D80;
+    --page-bg: #F4F3F0; --paper: #FFFFFF; --paper-alt: #F6F5F2; --ink: #0A0A0A; --ink-soft: #55584E; --ink-faint: #8A8D80;
     --rule: rgba(10,10,10,0.14); --rule-soft: rgba(10,10,10,0.07);
     --signal: #F2664A; --signal-soft: rgba(242,102,74,0.12);
     --vital: #0F9E92; --vital-soft: rgba(15,158,146,0.12);
     --amber: #C98A2C; --amber-soft: rgba(201,138,44,0.12);
     --down: #9C2B44; --down-soft: rgba(156,43,68,0.1);
     --serif: 'Fraunces', Georgia, serif; --mono: 'IBM Plex Mono', ui-monospace, monospace; --sans: 'Inter', -apple-system, sans-serif;
-    --max: 1180px;
+    --max: 1040px; --sidebar-w: 240px;
   }
   *{box-sizing:border-box;}
-  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased;}
+  body{margin:0; background:var(--page-bg); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased;}
   a{color:inherit;}
   .wrap{max-width:var(--max); margin:0 auto; padding:0 32px;}
   @media (max-width:640px){ .wrap{padding:0 18px;} }
@@ -34,36 +34,61 @@
   p{margin:0;}
   button{font-family:inherit;}
 
-  /* app header */
-  header.appnav{border-bottom:1px solid var(--rule); background:var(--paper);}
-  .appnav-inner{max-width:var(--max); margin:0 auto; padding:16px 32px; display:flex; align-items:center; justify-content:space-between; gap:24px;}
-  @media (max-width:640px){ .appnav-inner{padding:14px 18px;} }
-  .logo{display:flex; align-items:center; gap:10px; font-family:var(--serif); font-weight:700; font-size:19px; text-decoration:none; color:var(--signal); flex:none;}
-  .logo-mark{width:30px; height:30px; border-radius:8px; background:var(--ink); display:flex; align-items:center; justify-content:center; flex:none;}
-  .logo-mark svg{width:17px; height:17px;}
+  /* app shell: fixed left sidebar + scrolling main column */
+  .app-shell{display:flex; min-height:100vh; align-items:stretch;}
+  .sidebar{
+    width:var(--sidebar-w); flex:none; background:var(--paper); border-right:1px solid var(--rule);
+    display:flex; flex-direction:column; padding:22px 16px; position:sticky; top:0; height:100vh;
+  }
+  @media (max-width:860px){ .sidebar{display:none;} }
+  .main-col{flex:1; min-width:0;}
+
+  .logo{display:flex; align-items:center; gap:10px; font-family:var(--serif); font-weight:700; font-size:19px; text-decoration:none; color:var(--signal); flex:none; padding:4px 10px 22px;}
+  .logo-mark{width:28px; height:28px; border-radius:8px; background:var(--ink); display:flex; align-items:center; justify-content:center; flex:none;}
+  .logo-mark svg{width:16px; height:16px;}
   .logo-mark{animation: heartbeat 1.7s ease-in-out infinite;}
   @keyframes heartbeat{0%,100%{transform:scale(1);} 12%{transform:scale(1.16);} 24%{transform:scale(1);} 36%{transform:scale(1.1);} 48%{transform:scale(1);}}
   @media (prefers-reduced-motion: reduce){ .logo-mark{animation:none;} }
 
-  .applinks{display:flex; align-items:center; gap:26px; flex:1; padding-left:20px;}
-  .applinks a{font-family:var(--sans); font-size:14.5px; color:var(--ink-soft); text-decoration:none;}
-  .applinks a.active{color:var(--ink); font-weight:600;}
-  .applinks a:hover{color:var(--ink);}
-  @media (max-width:860px){ .applinks{display:none;} }
+  .sidebar-menu-label{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-faint); padding:0 10px 10px;}
+  .applinks{display:flex; flex-direction:column; gap:2px; flex:1;}
+  .applinks a{
+    display:flex; align-items:center; gap:11px; font-family:var(--sans); font-size:14px; font-weight:500;
+    color:var(--ink-soft); text-decoration:none; padding:9px 10px; border-radius:8px;
+  }
+  .applinks a svg{width:17px; height:17px; flex:none; opacity:0.75;}
+  .applinks a.active{color:var(--ink); font-weight:600; background:var(--signal-soft);}
+  .applinks a.active svg{opacity:1;}
+  .applinks a:hover{background:var(--paper-alt);}
 
-  .account{display:flex; align-items:center; gap:14px; flex:none;}
-  .avatar{width:34px; height:34px; border-radius:50%; background:var(--signal-soft); color:var(--signal); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:700; font-size:13px;}
-  .logout{font-family:var(--mono); font-size:12.5px; color:var(--ink-faint); text-decoration:none;}
+  .account{display:flex; align-items:center; gap:11px; flex:none; padding:14px 10px 4px; border-top:1px solid var(--rule-soft); margin-top:10px;}
+  .avatar{width:32px; height:32px; border-radius:50%; background:var(--signal-soft); color:var(--signal); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:700; font-size:12.5px; flex:none;}
+  .account-info{flex:1; min-width:0;}
+  .account-email{font-size:12.5px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .logout{font-family:var(--mono); font-size:11px; color:var(--ink-faint); text-decoration:none;}
   .logout:hover{color:var(--ink);}
 
-  section{padding:36px 0;}
+  section{padding:0 0 32px;}
   .section-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:10px;}
   .section-head h2{font-size:20px;}
   .section-head .link{font-family:var(--mono); font-size:12.5px; color:var(--signal); text-decoration:underline;}
   .eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:6px;}
 
-  .greeting h1{font-size:28px; margin-bottom:6px;}
-  .greeting p{color:var(--ink-soft); font-size:15px;}
+  .greeting h1{font-family:var(--sans); font-weight:700; font-size:32px; margin-bottom:4px; letter-spacing:-0.02em;}
+  .greeting p{color:var(--ink-soft); font-size:14.5px;}
+
+  .status-banner{
+    display:flex; align-items:center; gap:10px; border:1px solid var(--vital); background:var(--vital-soft);
+    border-radius:10px; padding:13px 18px; font-size:13.5px; margin-bottom:22px;
+  }
+  .status-banner b{font-weight:700;}
+  .status-banner .dismiss{margin-left:auto; background:none; border:none; color:var(--ink-faint); cursor:pointer; font-size:15px; line-height:1; padding:2px;}
+
+  .live-line{display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12px; color:var(--ink-faint); margin:14px 2px 0;}
+  .live-dot{width:7px; height:7px; border-radius:50%; background:var(--vital); flex:none;}
+  .live-line.stale .live-dot{background:var(--amber);}
+  .live-line b{color:var(--vital); font-weight:600; letter-spacing:0.04em;}
+  .live-line.stale b{color:var(--amber);}
 
   /* score + goals + alerts grid */
   .top-grid{display:grid; grid-template-columns:1fr 1.4fr; gap:20px;}
@@ -147,11 +172,11 @@
   .overview-block{margin-top:20px; padding-top:20px; border-top:1px solid var(--rule-soft);}
 
   .spark-row{
-    display:flex; align-items:flex-end; gap:10px; height:64px; background:var(--paper-alt);
-    border-radius:12px; padding:14px 16px 10px;
+    display:flex; align-items:flex-end; gap:12px; height:120px; background:none;
+    border:1px solid var(--rule); border-radius:10px; padding:16px 18px 12px;
   }
-  .spark-bar-wrap{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:6px;}
-  .spark-bar{width:100%; max-width:28px; background:var(--vital); border-radius:4px 4px 2px 2px; min-height:3px;}
+  .spark-bar-wrap{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:8px;}
+  .spark-bar{width:100%; max-width:34px; background:var(--ink); border-radius:3px 3px 1px 1px; min-height:3px;}
   .spark-bar.zero{background:var(--rule);}
   .spark-day{font-family:var(--mono); font-size:10px; color:var(--ink-faint);}
 
@@ -315,43 +340,48 @@
 </head>
 <body>
 
-<header class="appnav">
-  <div class="appnav-inner">
+<div class="app-shell">
+  <aside class="sidebar">
     <a href="index.html" class="logo">
       <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M2 12h4l2-7 4 14 3-9 2 5h5" stroke="var(--signal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       Junie
     </a>
+    <p class="sidebar-menu-label">Menu</p>
     <nav class="applinks">
-      <a href="dashboard.html" class="active">Dashboard</a>
-      <a href="health-audit.html">Health Audit</a>
-      <a href="#goals">Goals</a>
-      <a href="#alerts">Alerts</a>
-      <a href="sources.html">Sources</a>
-      <a href="ai-agents.html">AI &amp; Agents</a>
+      <a href="dashboard.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Overview</a>
+      <a href="sources.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.07 0l2.83-2.83a5 5 0 00-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 00-7.07 0L4.1 13.83a5 5 0 007.07 7.07L12.5 19.5"/></svg>Sources</a>
+      <a href="ai-agents.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h8l-1 8 10-12h-8l1-8z"/></svg>AI &amp; Agents</a>
+      <a href="health-audit.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Health Audit</a>
+      <a href="#goals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.7" fill="currentColor"/></svg>Goals</a>
+      <a href="#alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Alerts</a>
+      <a href="caregiver-portal.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Caregiver Portal</a>
     </nav>
     <div class="account">
       <span class="avatar" id="userAvatar">··</span>
-      <a href="index.html" class="logout" onclick="logOut(event)">Log out</a>
+      <div class="account-info">
+        <div class="account-email" id="sidebarEmail">—</div>
+        <a href="index.html" class="logout" onclick="logOut(event)">Log out</a>
+      </div>
     </div>
-  </div>
-</header>
+  </aside>
 
-<div class="wrap greeting" style="padding-top:36px;">
-  <p class="eyebrow">Welcome back</p>
-  <div style="display:flex; align-items:baseline; gap:16px; flex-wrap:wrap;">
-    <h1 id="userGreeting">Hi there.</h1>
-    <button id="editNameBtn" style="font-family:var(--mono); font-size:12.5px; color:var(--ink-faint); background:none; border:none; text-decoration:underline; cursor:pointer; padding:0;">Edit name</button>
-  </div>
-  <form id="editNameForm" style="display:none; align-items:center; gap:10px; margin-top:14px; max-width:400px;">
-    <input type="text" id="editNameInput" placeholder="Your name" style="flex:1; border:1px solid var(--rule); border-radius:8px; padding:10px 14px; font-family:var(--sans); font-size:15px; color:var(--ink); background:var(--paper-alt);">
-    <button type="submit" class="btn btn-primary" style="flex:none;">Save</button>
-    <button type="button" id="cancelNameBtn" class="btn" style="flex:none;">Cancel</button>
-  </form>
-  <p id="nameSaveNote" style="display:none; font-family:var(--mono); font-size:12px; color:var(--signal); margin-top:10px;"></p>
-  <p>Here's where things stand across everything you've connected.</p>
-</div>
+  <main class="main-col">
+    <div class="wrap" style="padding-top:36px;">
+      <p class="eyebrow" id="dashDateLine">—</p>
+      <h1>Overview</h1>
+      <div style="display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-top:6px;">
+        <p id="userGreeting" style="color:var(--ink-soft); font-size:14.5px;">Hi there.</p>
+        <button id="editNameBtn" style="font-family:var(--mono); font-size:12px; color:var(--ink-faint); background:none; border:none; text-decoration:underline; cursor:pointer; padding:0;">Edit name</button>
+      </div>
+      <form id="editNameForm" style="display:none; align-items:center; gap:10px; margin-top:14px; max-width:400px;">
+        <input type="text" id="editNameInput" placeholder="Your name" style="flex:1; border:1px solid var(--rule); border-radius:8px; padding:10px 14px; font-family:var(--sans); font-size:15px; color:var(--ink); background:var(--paper-alt);">
+        <button type="submit" class="btn btn-primary" style="flex:none;">Save</button>
+        <button type="button" id="cancelNameBtn" class="btn" style="flex:none;">Cancel</button>
+      </form>
+      <p id="nameSaveNote" style="display:none; font-family:var(--mono); font-size:12px; color:var(--signal); margin-top:10px;"></p>
+    </div>
 
-<section style="padding-top:20px;">
+<section style="padding-top:22px;">
   <div class="wrap">
     <div class="mcp-card">
       <div class="mcp-card-head">
@@ -367,6 +397,7 @@
         <a href="ai-agents.html" class="btn">Generate a token</a>
       </div>
     </div>
+    <div class="live-line" id="liveLine"><span class="live-dot"></span><b>—</b></div>
   </div>
 </section>
 
@@ -374,9 +405,9 @@
   <div class="wrap">
     <div class="panel" id="sourcesOverview">
       <div class="section-head" style="margin-bottom:4px;">
-        <div style="display:flex; align-items:center; gap:12px;">
+        <div>
+          <p class="mini-label" style="margin-bottom:2px;">Your data</p>
           <h2>Sources</h2>
-          <span class="sync-badge" id="syncBadge">—</span>
         </div>
         <span>
           <a href="sources.html" class="link">Manage →</a>
@@ -573,18 +604,6 @@
 
 <section>
   <div class="wrap">
-    <div class="section-head"><h2>Connected sources</h2><a href="sources.html" class="link">Manage sources →</a></div>
-    <div class="source-grid">
-      <div class="source-card"><span class="source-status"></span><div><div class="name">Oura</div><div class="synced">Synced 4 min ago</div></div></div>
-      <div class="source-card"><span class="source-status"></span><div><div class="name">Strava</div><div class="synced">Synced 1 hr ago</div></div></div>
-      <div class="source-card"><span class="source-status"></span><div><div class="name">Withings</div><div class="synced">Synced today</div></div></div>
-      <div class="source-card"><span class="source-status" style="background:var(--amber);"></span><div><div class="name">LabCorp</div><div class="synced">Awaiting next result</div></div></div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
     <div class="portal-banner">
       <div>
         <h3>Monitoring someone else?</h3>
@@ -598,6 +617,8 @@
 <footer>
   <p>© 2026 Junie Health, Inc.</p>
 </footer>
+  </main>
+</div>
 
 <script>
   let currentUser = null;
@@ -625,6 +646,14 @@
 
     currentFullName = (profile && profile.name) ? profile.name : '';
     renderGreeting(currentFullName, currentUser.email);
+    document.getElementById('sidebarEmail').textContent = currentUser.email;
+    (() => {
+      const d = new Date();
+      const weekday = d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = d.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+      document.getElementById('dashDateLine').textContent = `${weekday} · ${day} ${month} ${d.getFullYear()}`;
+    })();
     initMoodTracking();
     initGlp1Tracking();
     initMcpCopy();
@@ -795,7 +824,7 @@
   async function loadSourcesOverview(){
     const statRow = document.getElementById('sourcesStatRow');
     const chipRow = document.getElementById('sourcesChipRow');
-    const syncBadge = document.getElementById('syncBadge');
+    const liveLine = document.getElementById('liveLine');
     const sparkBlock = document.getElementById('sparkBlock');
     const sparkRow = document.getElementById('sparkRow');
     const breakdownEl = document.getElementById('sourceBreakdown');
@@ -837,16 +866,19 @@
       ? sources.map(s => `<span class="source-chip"><span class="dot"></span>${s.source_name}</span>`).join('')
       : `<span class="source-chip-empty">Nothing connected yet — <a href="sources.html" class="link">connect a source →</a></span>`;
 
-    // Last-synced badge -- real, from the newest row's created_at, not a
-    // fixed "LIVE" label pretending a sync job ran when it might not have.
+    // "LIVE · last sync Xm ago" status line -- real, from the newest row's
+    // created_at, not a fixed "LIVE" label pretending a sync job ran when
+    // it might not have. Freddy always says "LIVE"; this says "STALE" past
+    // 2 hours because that's the honest state, not the reassuring one.
     if (rows.length){
       const newestCreated = rows.reduce((max, r) => r.created_at > max ? r.created_at : max, rows[0].created_at);
       const ageMins = (Date.now() - new Date(newestCreated).getTime()) / 60000;
-      syncBadge.textContent = `Last synced ${timeAgo(newestCreated)}`;
-      syncBadge.className = 'sync-badge ' + (ageMins < 120 ? 'fresh' : 'stale');
+      const fresh = ageMins < 120;
+      liveLine.className = 'live-line' + (fresh ? '' : ' stale');
+      liveLine.innerHTML = `<span class="live-dot"></span><b>${fresh ? 'LIVE' : 'STALE'}</b> · last sync ${timeAgo(newestCreated)}`;
     } else {
-      syncBadge.textContent = 'Not synced yet';
-      syncBadge.className = 'sync-badge';
+      liveLine.className = 'live-line stale';
+      liveLine.innerHTML = `<span class="live-dot"></span><b>NOT SYNCED</b> · connect a source to get started`;
     }
 
     // 7-day sparkline of datapoint volume -- shows the shape of what's
