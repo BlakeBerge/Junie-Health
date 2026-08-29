@@ -420,40 +420,6 @@
     font-family:var(--mono); font-size:12px; color:var(--ink-faint); margin-top:14px;
   }
 
-  .problem-body{display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:start;}
-  @media (max-width:860px){ .problem-body{grid-template-columns:1fr;} }
-  .problem-text p{font-size:17px; color:var(--ink-soft); margin-bottom:16px;}
-
-  /* solution */
-  .solution-quote{
-    background:var(--ink); color:var(--paper);
-    border-radius:6px; padding:32px 36px; margin-top:40px;
-  }
-  .solution-quote .q{font-family:var(--serif); font-style:italic; font-size:22px; line-height:1.4;}
-  .solution-quote .a{margin-top:16px; font-size:15.5px; color:#C7D2C9; line-height:1.6;}
-  .solution-quote .a strong{color:var(--paper);}
-  .solution-quote .meta{margin-top:16px; font-family:var(--mono); font-size:11px; color:#8FA396;}
-
-  /* personas */
-  .persona-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
-  @media (max-width:900px){ .persona-grid{grid-template-columns:repeat(2,1fr);} }
-  @media (max-width:600px){ .persona-grid{grid-template-columns:1fr;} }
-  .persona-card{
-    border:1px solid var(--rule); border-radius:4px; padding:22px; background:var(--paper);
-    display:flex; flex-direction:column; height:100%;
-  }
-  .persona-card h3{font-size:19px; margin-bottom:10px;}
-  .persona-card p{color:var(--ink-soft); font-size:14.5px; margin-bottom:14px; flex-grow:1;}
-  .persona-tags{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;}
-  .persona-tags span{
-    font-family:var(--mono); font-size:10.5px; border:1px solid var(--rule); border-radius:12px;
-    padding:4px 9px; color:var(--ink-faint);
-  }
-  .persona-q{
-    font-family:var(--mono); font-size:12.5px; color:var(--signal);
-    border-top:1px solid var(--rule); padding-top:12px;
-  }
-
   /* how it works */
   .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:0; position:relative;}
   @media (max-width:860px){ .steps{grid-template-columns:1fr; gap:32px;} }
@@ -512,16 +478,6 @@
   .bento-score{font-family:var(--serif); font-size:56px; color:#fff; line-height:1;}
   .bento-score-label{font-family:var(--mono); font-size:11px; color:#A9AC9E; line-height:1.5;}
 
-  .guide-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
-  @media (max-width:900px){ .guide-grid{grid-template-columns:1fr;} }
-  .guide-card{
-    border:1px solid var(--rule); border-radius:6px; padding:22px; background:var(--paper-alt);
-  }
-  .guide-tag{
-    font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em;
-    color:var(--vital); margin-bottom:12px;
-  }
-  .guide-q{font-family:var(--serif); font-style:italic; font-size:16.5px; color:var(--ink); line-height:1.4;}
   .surface-card{border:1px solid var(--rule); border-radius:4px; padding:20px; background:var(--paper);}
   .surface-card .tag{font-family:var(--mono); font-size:11px; color:var(--vital); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:10px;}
   .surface-card h3{font-size:19px; margin-bottom:10px;}
@@ -738,7 +694,7 @@
         <p class="eyebrow">Built for individuals, not developers</p>
         <h1>Your data,<br><em>finally speaks.</em></h1>
         <p class="tagline">One private feed. Every AI you use.</p>
-        <p class="hero-sub">Junie links your ring, watch, CGM, gym log, bloodwork, and food log into one private feed any AI can read from. Stop toggling six apps for six scores — just ask.</p>
+        <p class="hero-sub">One private feed, every AI can read it. Stop toggling six apps for six scores — just ask.</p>
 
         <div class="email-cta-wrap">
           <span class="bracket tl"></span><span class="bracket tr"></span><span class="bracket bl"></span><span class="bracket br"></span>
@@ -850,67 +806,6 @@
     </div>
   </section>
 
-  <!-- PROBLEM + FIX -->
-  <section class="problem">
-    <div class="wrap">
-      <div class="problem-body">
-        <div class="reveal">
-          <p class="eyebrow">The problem</p>
-          <h2>Every app gives you a number.<br>None of them give you the reason.</h2>
-        </div>
-        <div class="problem-text reveal">
-          <p>Your ring, watch, CGM, and gym log have never seen each other's data — so none of them can explain last night's HRV dip. Connect them to Junie once, and any AI you use can reason across all of them at once.</p>
-        </div>
-      </div>
-
-      <div class="solution-quote reveal">
-        <p class="q">"Your training load rose 31% this week while sleep held flat — that's the gap that's been dragging your HRV down."</p>
-        <p class="meta">sources: ring · watch · gym log — one answer, not four apps</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- PERSONAS -->
-  <section class="alt">
-    <div class="wrap">
-      <div class="section-head reveal">
-        <p class="eyebrow">Who it's for</p>
-        <h2>Different people, different questions.</h2>
-      </div>
-
-      <div class="persona-grid">
-        <div class="persona-card reveal">
-          <h3>Athletes</h3>
-          <p>Training load and recovery, across every session you've logged.</p>
-          <p class="persona-q">"Am I tapered enough for Saturday?"</p>
-        </div>
-        <div class="persona-card reveal">
-          <h3>Biohackers</h3>
-          <p>Cross-reference sleep, glucose, and environment for what's really moving your numbers.</p>
-          <p class="persona-q">"Is my afternoon workout why I can't fall asleep before midnight?"</p>
-        </div>
-        <div class="persona-card reveal">
-          <h3>Longevity trackers</h3>
-          <p>RHR, HRV, and weight, followed over years instead of seven days.</p>
-          <p class="persona-q">"How has my RHR changed since I started lifting?"</p>
-        </div>
-        <div class="persona-card reveal">
-          <h3>Families &amp; caregivers</h3>
-          <p>Permissioned access to a loved one's numbers, with alerts if something needs attention.</p>
-          <p class="persona-q">"Is Mom's blood pressure trending okay?"</p>
-          <a href="caregiver-portal.html" style="display:block; margin-top:12px; font-family:var(--mono); font-size:12px; color:var(--vital); text-decoration:underline;">See the caregiver portal →</a>
-        </div>
-        <div class="persona-card reveal">
-          <h3>Hormone &amp; cycle health</h3>
-          <p>Track cycle phase, perimenopause, or menopause symptoms against sleep, HRV, and temperature — not siloed from the rest of your data.</p>
-          <p class="persona-q">"Does my sleep get worse the week before my period?"</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <div class="pulse-rule" aria-hidden="true"><svg viewBox="0 0 1200 22" preserveAspectRatio="none"><path d="M0 11 H520 L535 11 L543 3 L551 19 L559 11 H1200"/></svg></div>
-
   <!-- HOW IT WORKS -->
   <section id="how" class="alt">
     <div class="wrap">
@@ -943,38 +838,13 @@
     </div>
   </section>
 
-  <!-- GUIDES / PROMPT STRIP -->
-  <section>
-    <div class="wrap">
-      <div class="section-head reveal">
-        <p class="eyebrow">Guides</p>
-        <h2>Copy one of these to start.</h2>
-        <p class="lede">Copy one into Claude or ChatGPT once you're connected — swap in your own numbers.</p>
-      </div>
-      <div class="guide-grid">
-        <div class="guide-card reveal">
-          <p class="guide-tag">longevity</p>
-          <p class="guide-q">"Is my cardio fitness actually improving, or is my perceived effort just dropping?"</p>
-        </div>
-        <div class="guide-card reveal">
-          <p class="guide-tag">biohacking</p>
-          <p class="guide-q">"Which days I took magnesium had the best next-morning HRV?"</p>
-        </div>
-        <div class="guide-card reveal">
-          <p class="guide-tag">labs</p>
-          <p class="guide-q">"What's actually driving my blood pressure trend this month?"</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- SOURCES -->
   <section id="sources">
     <div class="wrap">
       <div class="section-head reveal">
         <p class="eyebrow">Sources</p>
         <h2>Connect what you've already got.</h2>
-        <p class="lede">Rings, watches, CGMs, labs, food logs, and strength logs — new connectors ship most months. <a href="roadmap.html" style="color:var(--signal); text-decoration:underline;">Don't see yours? Request it →</a></p>
+        <p class="lede">Oura, Fitbit, WHOOP, and Strava connect for real today. <a href="roadmap.html" style="color:var(--signal); text-decoration:underline;">Don't see yours? Request it →</a></p>
       </div>
 
       <div class="reveal">
@@ -995,7 +865,7 @@
           <span class="callout-strip-mark">✓</span>
           <span>Pulls your <strong>full history on day one</strong> — not just data going forward.</span>
         </p>
-        <p class="sources-note" style="margin-top:14px;">Demo page — names describe integrations shown, not existing partnerships. <a href="signup.html" style="color:var(--signal); text-decoration:underline;">Sign up to manage real connections →</a></p>
+        <p class="sources-note" style="margin-top:14px;">Oura, Fitbit, WHOOP, and Strava connect for real today — everything else above is catalog, marked "coming soon" once you're signed in, not pretending to work yet. <a href="signup.html" style="color:var(--signal); text-decoration:underline;">Sign up to connect →</a></p>
       </div>
     </div>
   </section>
@@ -1104,16 +974,8 @@
           <div class="faq-a"><div class="faq-a-inner">Anything that speaks MCP, including Claude, Claude Code, and ChatGPT's app directory. If your agent supports custom MCP connectors, it'll work with your Junie link too.</div></div>
         </div>
         <div class="faq-item">
-          <button class="faq-q">Do I need to keep anything running for this to work?<span class="plus">+</span></button>
-          <div class="faq-a"><div class="faq-a-inner">No. Junie is cloud infrastructure, not an app you open — it syncs your connected sources in the background whether you're at your computer or not, so the answer is current whenever you actually ask.</div></div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q">Where does my data actually live?<span class="plus">+</span></button>
-          <div class="faq-a"><div class="faq-a-inner">On encrypted infrastructure in the US, isolated per account with row-level security — your data is never in a shared pool other accounts can query. You can request full deletion at any time; see the Privacy Policy for specifics.</div></div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q">What happens to my data if I cancel?<span class="plus">+</span></button>
-          <div class="faq-a"><div class="faq-a-inner">Export your full history as CSV any time before you go. Canceling removes your account and every connected source completely — nothing lingers on our end afterward.</div></div>
+          <button class="faq-q">Where does my data actually live, and what happens if I cancel?<span class="plus">+</span></button>
+          <div class="faq-a"><div class="faq-a-inner">On encrypted infrastructure in the US, isolated per account with row-level security — never in a shared pool other accounts can query. Cancel any time: export your history as CSV first, then your account and every connected source is removed completely, nothing lingers.</div></div>
         </div>
       </div>
     </div>
