@@ -141,10 +141,17 @@
   .sources-stat-row{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
   @media (max-width:640px){ .sources-stat-row{grid-template-columns:1fr;} }
   .sources-stat{
-    display:flex; flex-direction:column; gap:6px; padding:16px 18px; border-radius:10px;
-    background:var(--paper); border:1px solid var(--rule);
+    display:flex; flex-direction:column; gap:8px; padding:16px 18px; border-radius:10px;
+    background:var(--paper); border:1px solid var(--rule); border-top:3px solid var(--stat-color, var(--rule));
   }
-  .sources-stat .n{font-family:var(--sans); font-size:28px; font-weight:700; letter-spacing:-0.01em; line-height:1.1;}
+  .sources-stat .icon{
+    width:26px; height:26px; border-radius:7px; display:flex; align-items:center; justify-content:center;
+    background:var(--stat-color-soft, var(--paper-alt)); color:var(--stat-color, var(--ink-faint)); flex:none;
+  }
+  .sources-stat .icon svg{width:14px; height:14px;}
+  .sources-stat .n{font-family:var(--sans); font-size:28px; font-weight:700; letter-spacing:-0.01em; line-height:1.15;}
+  .sources-stat .n.small{font-size:19px;}
+  .sources-stat .sub{font-family:var(--mono); font-size:11.5px; color:var(--ink-faint);}
   .sources-stat .l{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-faint);}
 
   .sources-chip-row{display:flex; flex-wrap:wrap; gap:8px;}
@@ -176,7 +183,8 @@
     border:1px solid var(--rule); border-radius:10px; padding:16px 18px 12px;
   }
   .spark-bar-wrap{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:8px;}
-  .spark-bar{width:100%; max-width:34px; background:var(--ink); border-radius:3px 3px 1px 1px; min-height:3px;}
+  .spark-bar{width:100%; max-width:34px; background:var(--vital); border-radius:5px 5px 2px 2px; min-height:3px;}
+  .spark-bar.peak{background:var(--signal);}
   .spark-bar.zero{background:var(--rule);}
   .spark-day{font-family:var(--mono); font-size:10px; color:var(--ink-faint);}
 
@@ -417,9 +425,18 @@
       <p class="panel-sub">Every number below is queried live from your account — nothing here is a demo.</p>
 
       <div class="sources-stat-row" id="sourcesStatRow" style="margin-top:16px;">
-        <div class="sources-stat"><span class="n">—</span><span class="l">Connected sources</span></div>
-        <div class="sources-stat"><span class="n">—</span><span class="l">Datapoints</span></div>
-        <div class="sources-stat"><span class="n">—</span><span class="l">Latest data</span></div>
+        <div class="sources-stat" style="--stat-color:var(--signal); --stat-color-soft:var(--signal-soft);">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.07 0l2.83-2.83a5 5 0 00-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 00-7.07 0L4.1 13.83a5 5 0 007.07 7.07L12.5 19.5"/></svg></span>
+          <span class="n">—</span><span class="l">Connected sources</span>
+        </div>
+        <div class="sources-stat" style="--stat-color:var(--vital); --stat-color-soft:var(--vital-soft);">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></span>
+          <span class="n">—</span><span class="l">Datapoints</span>
+        </div>
+        <div class="sources-stat" style="--stat-color:var(--amber); --stat-color-soft:var(--amber-soft);">
+          <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span>
+          <span class="n">—</span><span class="sub"></span><span class="l">Latest data</span>
+        </div>
       </div>
 
       <div class="overview-block" id="sparkBlock" hidden>
@@ -851,16 +868,25 @@
 
     const rows = metrics || [];
     const datapointCount = rows.length;
-    const latest = rows[0] ? `${rows[0].metric_date} · ${rows[0].source}` : 'No data yet';
 
-    const stats = [
-      { n: (sources || []).length, l: 'Connected sources' },
-      { n: datapointCount, l: 'Datapoints' },
-      { n: latest, l: 'Latest data' },
-    ];
-    statRow.innerHTML = stats.map(s => `
-      <div class="sources-stat"><span class="n">${s.n}</span><span class="l">${s.l}</span></div>
-    `).join('');
+    // Fill the three stat cards in place (each already has its own colored
+    // icon baked into the markup) rather than rebuilding generic divs --
+    // lets "Latest data" show a clean relative time as the headline number
+    // with the source name as a small mono subline, instead of cramming a
+    // raw ISO date and provider key onto one line.
+    const statCards = statRow.querySelectorAll('.sources-stat');
+    statCards[0].querySelector('.n').textContent = (sources || []).length;
+    statCards[1].querySelector('.n').textContent = datapointCount;
+    if (rows[0]){
+      const prettyName = REAL_OAUTH_PROVIDERS[rows[0].source] || rows[0].source;
+      const nEl = statCards[2].querySelector('.n');
+      nEl.textContent = timeAgo(rows[0].created_at);
+      nEl.classList.add('small');
+      statCards[2].querySelector('.sub').textContent = `from ${prettyName}`;
+    } else {
+      statCards[2].querySelector('.n').textContent = 'No data yet';
+      statCards[2].querySelector('.n').classList.add('small');
+    }
 
     chipRow.innerHTML = (sources && sources.length)
       ? sources.map(s => `<span class="source-chip"><span class="dot"></span>${s.source_name}</span>`).join('')
@@ -899,9 +925,10 @@
         const c = countsByDay[d];
         const heightPct = Math.max(4, Math.round((c / maxCount) * 100));
         const label = new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'narrow' });
+        const barClass = c === 0 ? 'zero' : c === maxCount ? 'peak' : '';
         return `
           <div class="spark-bar-wrap" title="${d}: ${c} datapoint${c===1?'':'s'}">
-            <div class="spark-bar ${c===0?'zero':''}" style="height:${heightPct}%"></div>
+            <div class="spark-bar ${barClass}" style="height:${heightPct}%"></div>
             <span class="spark-day">${label}</span>
           </div>
         `;
