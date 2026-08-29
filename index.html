@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <style>
@@ -36,7 +36,7 @@
     --negative-paper: #F5F6F0;
     --radius: 3px;
     --max: 1180px;
-    --serif: 'Fraunces', Georgia, serif;
+    --serif: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Helvetica Neue', sans-serif;
     --mono: 'IBM Plex Mono', ui-monospace, monospace;
     --sans: 'Inter', -apple-system, sans-serif;
   }
@@ -399,7 +399,7 @@
   .trust-item .label{font-size:12px; color:var(--ink-soft); margin-top:2px;}
 
   /* ---------- generic section ---------- */
-  section{padding:64px 0;}
+  section{padding:88px 0;}
   @media (max-width:760px){ section{padding:64px 0;} }
   .section-head{max-width:640px; margin-bottom:36px;}
   .section-head h2{font-size:clamp(28px,3.4vw,42px); line-height:1.12;}
@@ -754,7 +754,6 @@
     </div>
   </section>
 
-  <div class="pulse-rule" aria-hidden="true"><svg viewBox="0 0 1200 22" preserveAspectRatio="none"><path d="M0 11 H520 L535 11 L543 3 L551 19 L559 11 H1200"/></svg></div>
 
   <!-- HEALTH AUDIT / GOALS / ALERTS / CAREGIVER SHOWCASE (bento) -->
   <section class="alt">
@@ -794,7 +793,6 @@
     </div>
   </section>
 
-  <div class="pulse-rule" aria-hidden="true"><svg viewBox="0 0 1200 22" preserveAspectRatio="none"><path d="M0 11 H520 L535 11 L543 3 L551 19 L559 11 H1200"/></svg></div>
 
   <!-- TRUST STRIP -->
   <section class="trust" style="padding:0;">
@@ -870,7 +868,6 @@
     </div>
   </section>
 
-  <div class="pulse-rule" aria-hidden="true"><svg viewBox="0 0 1200 22" preserveAspectRatio="none"><path d="M0 11 H520 L535 11 L543 3 L551 19 L559 11 H1200"/></svg></div>
 
   <!-- PRIVACY -->
   <section class="privacy">
@@ -981,7 +978,6 @@
     </div>
   </section>
 
-  <div class="pulse-rule" aria-hidden="true"><svg viewBox="0 0 1200 22" preserveAspectRatio="none"><path d="M0 11 H520 L535 11 L543 3 L551 19 L559 11 H1200"/></svg></div>
 
   <!-- FINAL CTA -->
   <section class="final-cta">
