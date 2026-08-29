@@ -23,10 +23,10 @@
     --amber: #C98A2C; --amber-soft: rgba(201,138,44,0.12);
     --down: #9C2B44; --down-soft: rgba(156,43,68,0.1);
     --serif: 'Fraunces', Georgia, serif; --mono: 'IBM Plex Mono', ui-monospace, monospace; --sans: 'Inter', -apple-system, sans-serif;
-    --max: 1180px;
+    --max: 1180px; --page-bg: #F4F3F0; --sidebar-w: 240px;
   }
   *{box-sizing:border-box;}
-  body{margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased;}
+  body{margin:0; background:var(--page-bg); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased;}
   a{color:inherit;}
   .wrap{max-width:var(--max); margin:0 auto; padding:0 32px;}
   @media (max-width:640px){ .wrap{padding:0 18px;} }
@@ -35,23 +35,39 @@
   button{font-family:inherit;}
   code{font-family:var(--mono); background:var(--paper-alt); padding:2px 6px; border-radius:4px; font-size:0.92em;}
 
-  header.appnav{border-bottom:1px solid var(--rule); background:var(--paper);}
-  .appnav-inner{max-width:var(--max); margin:0 auto; padding:16px 32px; display:flex; align-items:center; justify-content:space-between; gap:24px;}
-  @media (max-width:640px){ .appnav-inner{padding:14px 18px;} }
-  .logo{display:flex; align-items:center; gap:10px; font-family:var(--serif); font-weight:700; font-size:19px; text-decoration:none; color:var(--signal); flex:none;}
-  .logo-mark{width:30px; height:30px; border-radius:8px; background:var(--ink); display:flex; align-items:center; justify-content:center; flex:none;}
-  .logo-mark svg{width:17px; height:17px;}
+  /* app shell: fixed left sidebar + scrolling main column -- shared across
+     every logged-in page so navigating between them doesn't jar the layout */
+  .app-shell{display:flex; min-height:100vh; align-items:stretch;}
+  .sidebar{
+    width:var(--sidebar-w); flex:none; background:var(--paper); border-right:1px solid var(--rule);
+    display:flex; flex-direction:column; padding:22px 16px; position:sticky; top:0; height:100vh;
+  }
+  @media (max-width:860px){ .sidebar{display:none;} }
+  .main-col{flex:1; min-width:0;}
+
+  .logo{display:flex; align-items:center; gap:10px; font-family:var(--serif); font-weight:700; font-size:19px; text-decoration:none; color:var(--signal); flex:none; padding:4px 10px 22px;}
+  .logo-mark{width:28px; height:28px; border-radius:8px; background:var(--ink); display:flex; align-items:center; justify-content:center; flex:none;}
+  .logo-mark svg{width:16px; height:16px;}
   .logo-mark{animation: heartbeat 1.7s ease-in-out infinite;}
   @keyframes heartbeat{0%,100%{transform:scale(1);} 12%{transform:scale(1.16);} 24%{transform:scale(1);} 36%{transform:scale(1.1);} 48%{transform:scale(1);}}
   @media (prefers-reduced-motion: reduce){ .logo-mark{animation:none;} }
-  .applinks{display:flex; align-items:center; gap:26px; flex:1; padding-left:20px;}
-  .applinks a{font-family:var(--sans); font-size:14.5px; color:var(--ink-soft); text-decoration:none;}
-  .applinks a.active{color:var(--ink); font-weight:600;}
-  .applinks a:hover{color:var(--ink);}
-  @media (max-width:900px){ .applinks{display:none;} }
-  .account{display:flex; align-items:center; gap:14px; flex:none;}
-  .avatar{width:34px; height:34px; border-radius:50%; background:var(--signal-soft); color:var(--signal); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:700; font-size:13px;}
-  .logout{font-family:var(--mono); font-size:12.5px; color:var(--ink-faint); text-decoration:none;}
+
+  .sidebar-menu-label{font-family:var(--mono); font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-faint); padding:0 10px 10px;}
+  .applinks{display:flex; flex-direction:column; gap:2px; flex:1;}
+  .applinks a{
+    display:flex; align-items:center; gap:11px; font-family:var(--sans); font-size:14px; font-weight:500;
+    color:var(--ink-soft); text-decoration:none; padding:9px 10px; border-radius:8px;
+  }
+  .applinks a svg{width:17px; height:17px; flex:none; opacity:0.75;}
+  .applinks a.active{color:var(--ink); font-weight:600; background:var(--signal-soft);}
+  .applinks a.active svg{opacity:1;}
+  .applinks a:hover{background:var(--paper-alt);}
+
+  .account{display:flex; align-items:center; gap:11px; flex:none; padding:14px 10px 4px; border-top:1px solid var(--rule-soft); margin-top:10px;}
+  .avatar{width:32px; height:32px; border-radius:50%; background:var(--signal-soft); color:var(--signal); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-weight:700; font-size:12.5px; flex:none;}
+  .account-info{flex:1; min-width:0;}
+  .account-email{font-size:12.5px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .logout{font-family:var(--mono); font-size:11px; color:var(--ink-faint); text-decoration:none;}
   .logout:hover{color:var(--ink);}
 
   .eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--signal); display:flex; align-items:center; gap:8px; margin-bottom:14px;}
@@ -124,26 +140,32 @@
 </head>
 <body>
 
-<header class="appnav">
-  <div class="appnav-inner">
-    <a href="dashboard.html" class="logo">
+<div class="app-shell">
+  <aside class="sidebar">
+    <a href="index.html" class="logo">
       <span class="logo-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M2 12h4l2-7 4 14 3-9 2 5h5" stroke="var(--signal)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       Junie
     </a>
+    <p class="sidebar-menu-label">Menu</p>
     <nav class="applinks">
-      <a href="dashboard.html">Dashboard</a>
-      <a href="health-audit.html">Health Audit</a>
-      <a href="dashboard.html#goals">Goals</a>
-      <a href="dashboard.html#alerts">Alerts</a>
-      <a href="sources.html">Sources</a>
-      <a href="ai-agents.html" class="active">AI &amp; Agents</a>
+      <a href="dashboard.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Overview</a>
+      <a href="sources.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.07 0l2.83-2.83a5 5 0 00-7.07-7.07L11.5 4.5"/><path d="M14 11a5 5 0 00-7.07 0L4.1 13.83a5 5 0 007.07 7.07L12.5 19.5"/></svg>Sources</a>
+      <a href="ai-agents.html" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h8l-1 8 10-12h-8l1-8z"/></svg>AI &amp; Agents</a>
+      <a href="health-audit.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Health Audit</a>
+      <a href="dashboard.html#goals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="0.7" fill="currentColor"/></svg>Goals</a>
+      <a href="dashboard.html#alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>Alerts</a>
+      <a href="caregiver-portal.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Caregiver Portal</a>
     </nav>
     <div class="account">
       <span class="avatar" id="userAvatar">··</span>
-      <a href="index.html" class="logout" onclick="logOut(event)">Log out</a>
+      <div class="account-info">
+        <div class="account-email" id="sidebarEmail">—</div>
+        <a href="index.html" class="logout" onclick="logOut(event)">Log out</a>
+      </div>
     </div>
-  </div>
-</header>
+  </aside>
+
+  <main class="main-col">
 
 <div class="wrap hero">
   <p class="eyebrow">AI &amp; agents</p>
@@ -198,6 +220,8 @@
 <footer>
   <p>© 2026 Junie Health, Inc. · the MCP server above is real and live — tokens are hashed at rest, never stored in plain text</p>
 </footer>
+  </main>
+</div>
 
 <script>
   let currentUser = null;
@@ -222,6 +246,7 @@
     document.getElementById('userAvatar').textContent = fullName
       ? fullName.split(' ').map(p=>p[0]).slice(0,2).join('').toUpperCase()
       : currentUser.email.slice(0,2).toUpperCase();
+    document.getElementById('sidebarEmail').textContent = currentUser.email;
 
     await loadTokens();
   })();
