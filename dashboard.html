@@ -40,7 +40,8 @@
     width:var(--sidebar-w); flex:none; background:var(--paper); border-right:1px solid var(--rule);
     display:flex; flex-direction:column; padding:22px 16px; position:sticky; top:0; height:100vh;
   }
-  @media (max-width:860px){ .sidebar{display:none;} }
+  @media (max-width:860px) and (min-width:641px){ .sidebar{width:200px;} }
+  @media (max-width:640px){ .sidebar{display:none;} }
   .main-col{flex:1; min-width:0;}
 
   .logo{display:flex; align-items:center; gap:10px; font-family:var(--serif); font-weight:700; font-size:19px; text-decoration:none; color:var(--signal); flex:none; padding:4px 10px 22px;}
